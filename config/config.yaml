@@ -6,17 +6,20 @@
 # ══════════════════════════════════════════════════════════════════════
 
 # ── Reference genome & annotation ─────────────────────────────────────
+# UA HPC paths — xdisk is your large-storage mount.
+# Run scripts/00_download_refs.sh and scripts/01_build_indices.sh first.
 genome:
-  assembly: "mm10"                    # hg38 | mm10 | rn7
-  star_index: "/ref/mm10/star_2.7.11b/"
-  fasta:      "/ref/mm10/GRCm38.p6.genome.fa"
-  gtf:        "/ref/mm10/gencode.vM25.annotation.gtf"
-  salmon_index: "/ref/mm10/salmon_1.10.3/"
+  assembly: "hg38"                    # hg38 | mm10 | rn7
+  star_index: "/xdisk/haining/maarowosegbe/ngs101-pipeline/ref/star_index"
+  fasta:      "/xdisk/haining/maarowosegbe/ngs101-pipeline/ref/genome.fa"
+  gtf:        "/xdisk/haining/maarowosegbe/ngs101-pipeline/ref/annotation.gtf"
+  salmon_index: "/xdisk/haining/maarowosegbe/ngs101-pipeline/ref/salmon_index"
 
 # ── Organism for R annotation packages ────────────────────────────────
-organism: "mouse"   # human | mouse | rat
+organism: "human"   # human | mouse | rat
 
 # ── Samples & comparisons ─────────────────────────────────────────────
+# samples.tsv lives in the repo (home), not xdisk — it's small metadata.
 samples: "config/samples.tsv"   # see samples.tsv for format
 
 # Pairwise comparisons: [treatment, control]

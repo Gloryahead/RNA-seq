@@ -15,15 +15,18 @@
 
 set -euo pipefail
 
-SAMPLES_TSV="config/samples.tsv"
-STAR_INDEX="ref/star_index"
-GTF="ref/annotation.gtf"
-INDIR="results/trimmed"
-OUTDIR="results/bam"
+SCRIPT_BASE="${SCRIPT_BASE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/ngs101-pipeline}"
+
+SAMPLES_TSV="${SCRIPT_BASE}/config/samples.tsv"
+STAR_INDEX="${DATA_BASE}/ref/star_index"
+GTF="${DATA_BASE}/ref/annotation.gtf"
+INDIR="${DATA_BASE}/results/trimmed"
+OUTDIR="${DATA_BASE}/results/bam"
 THREADS="${THREADS:-16}"
 SINGLE_SAMPLE="${1:-}"
 
-mkdir -p "${OUTDIR}" logs/star
+mkdir -p "${OUTDIR}" "${DATA_BASE}/logs/star"
 
 [[ -f "${STAR_INDEX}/Genome" ]] || {
   echo "ERROR: STAR index not found at ${STAR_INDEX}. Run scripts/01_build_indices.sh first."

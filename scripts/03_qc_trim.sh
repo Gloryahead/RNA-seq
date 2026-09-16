@@ -13,13 +13,16 @@
 
 set -euo pipefail
 
-SAMPLES_TSV="config/samples.tsv"
-OUTDIR_QC="results/fastqc"
-OUTDIR_TRIM="results/trimmed"
+SCRIPT_BASE="${SCRIPT_BASE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/ngs101-pipeline}"
+
+SAMPLES_TSV="${SCRIPT_BASE}/config/samples.tsv"
+OUTDIR_QC="${DATA_BASE}/results/fastqc"
+OUTDIR_TRIM="${DATA_BASE}/results/trimmed"
 THREADS="${THREADS:-8}"
 SINGLE_SAMPLE="${1:-}"
 
-mkdir -p "${OUTDIR_QC}" "${OUTDIR_TRIM}" logs/qc_trim
+mkdir -p "${OUTDIR_QC}" "${OUTDIR_TRIM}" "${DATA_BASE}/logs/qc_trim"
 
 [[ -f "${SAMPLES_TSV}" ]] || { echo "ERROR: ${SAMPLES_TSV} not found"; exit 1; }
 

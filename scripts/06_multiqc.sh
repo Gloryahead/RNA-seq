@@ -9,14 +9,15 @@
 
 set -euo pipefail
 
-OUTDIR="${1:-results/multiqc}"
+DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/ngs101-pipeline}"
+OUTDIR="${1:-${DATA_BASE}/results/multiqc}"
 SEARCH_DIRS=(
-  results/fastqc
-  results/trimmed
-  results/bam
-  results/counts
-  results/salmon
-  logs/
+  "${DATA_BASE}/results/fastqc"
+  "${DATA_BASE}/results/trimmed"
+  "${DATA_BASE}/results/bam"
+  "${DATA_BASE}/results/counts"
+  "${DATA_BASE}/results/salmon"
+  "${DATA_BASE}/logs/"
 )
 
 mkdir -p "${OUTDIR}"

@@ -13,16 +13,19 @@
 
 set -euo pipefail
 
-SAMPLES_TSV="config/samples.tsv"
-BAM_DIR="results/bam"
-GTF="ref/annotation.gtf"
-SALMON_INDEX="ref/salmon_index"
-TRANSCRIPTS="ref/transcriptome.fa"
-OUTDIR_COUNTS="results/counts"
-OUTDIR_SALMON="results/salmon"
+SCRIPT_BASE="${SCRIPT_BASE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/ngs101-pipeline}"
+
+SAMPLES_TSV="${SCRIPT_BASE}/config/samples.tsv"
+BAM_DIR="${DATA_BASE}/results/bam"
+GTF="${DATA_BASE}/ref/annotation.gtf"
+SALMON_INDEX="${DATA_BASE}/ref/salmon_index"
+TRANSCRIPTS="${DATA_BASE}/ref/transcriptome.fa"
+OUTDIR_COUNTS="${DATA_BASE}/results/counts"
+OUTDIR_SALMON="${DATA_BASE}/results/salmon"
 THREADS="${THREADS:-16}"
 
-mkdir -p "${OUTDIR_COUNTS}" "${OUTDIR_SALMON}" logs/quantify
+mkdir -p "${OUTDIR_COUNTS}" "${OUTDIR_SALMON}" "${DATA_BASE}/logs/quantify"
 
 [[ -f "${GTF}" ]]             || { echo "ERROR: ${GTF} not found"; exit 1; }
 [[ -d "${SALMON_INDEX}" ]]    || { echo "ERROR: Salmon index not found at ${SALMON_INDEX}. Run scripts/01_build_indices.sh"; exit 1; }

@@ -17,7 +17,8 @@
 
 set -euo pipefail
 
-REF_DIR="ref"
+DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/ngs101-pipeline}"
+REF_DIR="${DATA_BASE}/ref"
 FASTA="${REF_DIR}/genome.fa"
 GTF="${REF_DIR}/annotation.gtf"
 TRANSCRIPTS="${REF_DIR}/transcriptome.fa"

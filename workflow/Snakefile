@@ -1,0 +1,114 @@
+"""
+NGS101 RNA-seq Pipeline — Snakemake entry point
+Covers: Parts 1-20 of ngs101.com tutorial series.
+
+Usage:
+    # Dry run (show what would run):
+    snakemake -n --use-conda
+
+    # Run with conda environments (HPC with conda available):
+    snakemake --use-conda --cores 40 --profile workflow/profiles/slurm
+
+    # Run with Apptainer SIFs (build containers first with containers/build_all_sifs.sh):
+    snakemake --use-singularity --singularity-args "--bind /ref,/data" \
+              --cores 40 --profile workflow/profiles/slurm
+
+    # Resume after failure (Snakemake auto-detects completed outputs):
+    snakemake --use-conda --cores 40 --profile workflow/profiles/slurm
+
+    # Generate pipeline DAG:
+    snakemake --dag | dot -Tpdf > dag.pdf
+"""
+
+import pandas as pd
+from pathlib import Path
+
+configfile: "config/config.yaml"
+
+# ── Load sample sheet ─────────────────────────────────────────────────
+samples_df = pd.read_csv(config["samples"], sep="\t", dtype=str).set_index("sample")
+SAMPLES   = list(samples_df.index)
+GROUPS    = list(samples_df["group"].unique())
+COMPARISONS = [f"{t}_vs_{c}" for t, c in config["comparisons"]]
+
+# ── Helper functions ──────────────────────────────────────────────────
+def get_r1(wildcards):
+    return samples_df.loc[wildcards.sample, "fastq_r1"]
+
+def get_r2(wildcards):
+    return samples_df.loc[wildcards.sample, "fastq_r2"]
+
+def get_treatment(comp):
+    idx = COMPARISONS.index(comp)
+    return config["comparisons"][idx][0]
+
+def get_control(comp):
+    idx = COMPARISONS.index(comp)
+    return config["comparisons"][idx][1]
+
+# ── Always-included core rules ────────────────────────────────────────
+include: "rules/01_qc_align.smk"
+include: "rules/02_deg_r.smk"
+include: "rules/03_pathways.smk"
+
+# ── Conditionally-included specialized rules ──────────────────────────
+if config["splicing"]["run_spladder"]:
+    include: "rules/04_splicing_spladder.smk"
+
+if config["splicing"]["run_suppa2"]:
+    include: "rules/05_splicing_suppa2.smk"
+
+if config["circrna"]["run_circexplorer2"] or config["circrna"]["run_ciri3"]:
+    include: "rules/06_circrna.smk"
+
+if config["mirna"]["run"]:
+    include: "rules/07_mirna.smk"
+
+if config["fusion"]["run_starfusion"] or config["fusion"]["run_fusioncatcher"]:
+    include: "rules/08_fusion.smk"
+
+if config["viral"]["run_esviritu"] or config["viral"]["run_virtus2"]:
+    include: "rules/09_viral.smk"
+
+if config["crispr"]["run"]:
+    include: "rules/10_crispr.smk"
+
+if any([config["networks"]["run_wgcna"],
+        config["networks"]["run_genie3"],
+        config["networks"]["run_master_regulator"]]):
+    include: "rules/11_networks.smk"
+
+if config["cancer_subtype"]["run"]:
+    include: "rules/12_cancer_subtype.smk"
+
+# ── Master target rule ────────────────────────────────────────────────
+rule all:
+    input:
+        # ── Core pipeline outputs (always) ─────────────────────────
+        expand("{out}/qc/multiqc_report.html",
+               out=config["outdir"]),
+        expand("{out}/counts/counts_raw.tsv",
+               out=config["outdir"]),
+        expand("{out}/deg/{comp}_DEG_results.tsv",
+               out=config["outdir"], comp=COMPARISONS),
+        expand("{out}/figures/{comp}_volcano.pdf",
+               out=config["outdir"], comp=COMPARISONS),
+        expand("{out}/pathways/{comp}_GO_results.tsv",
+               out=config["outdir"], comp=COMPARISONS) if config["pathways"]["run_go"] else [],
+        expand("{out}/pathways/{comp}_KEGG_results.tsv",
+               out=config["outdir"], comp=COMPARISONS) if config["pathways"]["run_kegg"] else [],
+        # ── Conditional outputs ────────────────────────────────────
+        expand("{out}/splicing/spladder/{sample}_events.tsv",
+               out=config["outdir"], sample=SAMPLES) if config["splicing"]["run_spladder"] else [],
+        expand("{out}/circrna/ciri3/all_samples.BSJ_Matrix.txt",
+               out=config["outdir"]) if config["circrna"]["run_ciri3"] else [],
+        expand("{out}/mirna/{sample}_miRDeep2_results.html",
+               out=config["outdir"], sample=SAMPLES) if config["mirna"]["run"] else [],
+        expand("{out}/fusion/starfusion/{sample}/star-fusion.fusion_predictions.tsv",
+               out=config["outdir"], sample=SAMPLES) if config["fusion"]["run_starfusion"] else [],
+        expand("{out}/viral/esviritu/{sample}_summary.tsv",
+               out=config["outdir"], sample=SAMPLES) if config["viral"]["run_esviritu"] else [],
+        expand("{out}/crispr/mageck/{comp}.gene_summary.txt",
+               out=config["outdir"], comp=COMPARISONS) if config["crispr"]["run"] else [],
+        expand("{out}/networks/wgcna/module_trait_correlations.pdf",
+               out=config["outdir"]) if config["networks"]["run_wgcna"] else [],

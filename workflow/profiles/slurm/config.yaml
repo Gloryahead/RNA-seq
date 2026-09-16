@@ -1,0 +1,30 @@
+# Snakemake SLURM executor profile
+# Works with snakemake >= 7.x and snakemake-executor-plugin-slurm (>= 8.x).
+# Place this file at workflow/profiles/slurm/config.yaml
+# Use with: snakemake --profile workflow/profiles/slurm
+
+# ── Execution ─────────────────────────────────────────────────────────
+executor: slurm                  # snakemake 8+; for 7.x use --cluster sbatch
+jobs: 100                        # max concurrent jobs
+latency-wait: 60                 # seconds to wait for output files after job ends
+rerun-incomplete: true           # re-run jobs with incomplete output
+keep-going: true                 # don't abort all on a single failure
+restart-times: 2                 # auto-retry failed jobs twice
+
+# ── Default SLURM resources (overridden per rule in rules/*.smk) ──────
+default-resources:
+  slurm_partition: "standard"
+  mem_mb: 8000
+  runtime: 60                    # minutes
+  cpus_per_task: 4
+
+# ── Container args passed to apptainer/singularity ───────────────────
+# singularity-args: "--bind /ref,/data,/scratch"
+
+# ── Conda / container ─────────────────────────────────────────────────
+# use-conda: true      # uncomment to default to --use-conda
+# use-singularity: true
+
+# ── Output ────────────────────────────────────────────────────────────
+printshellcmds: true
+show-failed-logs: true

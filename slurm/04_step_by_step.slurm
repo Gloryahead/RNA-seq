@@ -30,6 +30,8 @@ DATA_BASE=/xdisk/haining/maarowosegbe/ngs101-pipeline
 
 export THREADS=${SLURM_NTASKS}
 export DATA_BASE
+# Read organism from config so it propagates to R scripts
+ORGANISM=$(grep '^organism:' "${SCRIPT_BASE}/config/config.yaml" | awk '{print $2}' | tr -d '"')
 
 mkdir -p "${DATA_BASE}/logs/slurm"
 
@@ -77,7 +79,7 @@ Rscript "${SCRIPT_BASE}/workflow/scripts/deg_analysis.R" \
 # ── Step 6: Pathway enrichment (R) ───────────────────────────────────
 Rscript "${SCRIPT_BASE}/workflow/scripts/pathway_analysis.R" \
   --deg      "${DATA_BASE}/results/deg/$(ls ${DATA_BASE}/results/deg/*_DEG_results.tsv | head -1)" \
-  --organism human \
+  --organism "${ORGANISM}" \
   --outdir   "${DATA_BASE}/results/pathways" \
   2>"${DATA_BASE}/logs/slurm/pathways_${SLURM_JOB_ID}.log"
 

@@ -26,7 +26,7 @@ case "${ORGANISM}" in
   human)
     ENSEMBL_RELEASE="112"
     ENSEMBL_SPECIES="homo_sapiens"
-    UCSC_GENOME="GRCh38"
+    UCSC_GENOME="hg38"
     FASTA_URL="https://ftp.ensembl.org/pub/release-${ENSEMBL_RELEASE}/fasta/${ENSEMBL_SPECIES}/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz"
     GTF_URL="https://ftp.ensembl.org/pub/release-${ENSEMBL_RELEASE}/gtf/${ENSEMBL_SPECIES}/Homo_sapiens.GRCh38.${ENSEMBL_RELEASE}.gtf.gz"
     MIRBASE_SPECIES="hsa"
@@ -34,6 +34,7 @@ case "${ORGANISM}" in
   mouse)
     ENSEMBL_RELEASE="112"
     ENSEMBL_SPECIES="mus_musculus"
+    UCSC_GENOME="mm39"
     FASTA_URL="https://ftp.ensembl.org/pub/release-${ENSEMBL_RELEASE}/fasta/${ENSEMBL_SPECIES}/dna/Mus_musculus.GRCm39.dna.primary_assembly.fa.gz"
     GTF_URL="https://ftp.ensembl.org/pub/release-${ENSEMBL_RELEASE}/gtf/${ENSEMBL_SPECIES}/Mus_musculus.GRCm39.${ENSEMBL_RELEASE}.gtf.gz"
     MIRBASE_SPECIES="mmu"
@@ -41,6 +42,7 @@ case "${ORGANISM}" in
   rat)
     ENSEMBL_RELEASE="112"
     ENSEMBL_SPECIES="rattus_norvegicus"
+    UCSC_GENOME="rn7"
     FASTA_URL="https://ftp.ensembl.org/pub/release-${ENSEMBL_RELEASE}/fasta/${ENSEMBL_SPECIES}/dna/Rattus_norvegicus.mRatBN7.2.dna.primary_assembly.fa.gz"
     GTF_URL="https://ftp.ensembl.org/pub/release-${ENSEMBL_RELEASE}/gtf/${ENSEMBL_SPECIES}/Rattus_norvegicus.mRatBN7.2.${ENSEMBL_RELEASE}.gtf.gz"
     MIRBASE_SPECIES="rno"
@@ -85,7 +87,7 @@ fi
 if [[ ! -f "${REFFLAT}" ]]; then
   echo "[3/5] Downloading refFlat for CIRCexplorer2..."
   wget -q -O - \
-    "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/refFlat.txt.gz" \
+    "https://hgdownload.soe.ucsc.edu/goldenPath/${UCSC_GENOME}/database/refFlat.txt.gz" \
     | gunzip -c > "${REFFLAT}"
   echo "  -> ${REFFLAT}"
 else

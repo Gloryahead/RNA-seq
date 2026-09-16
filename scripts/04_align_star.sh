@@ -91,7 +91,7 @@ align_sample() {
       --chimOutType        Junctions \
       --outWigType         None \
       --outFileNamePrefix  "${OUTDIR}/${sample}_" \
-      2>"logs/star/${sample}.log"
+      2>"${DATA_BASE}/logs/star/${sample}.log"
 
   echo "  Indexing BAM..."
   conda run -n rnaseq_env \

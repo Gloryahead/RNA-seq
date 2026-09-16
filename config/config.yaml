@@ -120,8 +120,11 @@ viral:
 # ── CRISPR screen ─────────────────────────────────────────────────────
 crispr:
   run: false
-  library: "/ref/crispr/brunello.tsv"
-  control_sgrna: "/ref/crispr/non_targeting_controls.txt"
+  library: "/xdisk/haining/maarowosegbe/ngs101-pipeline/ref/crispr/brunello.tsv"
+  pam: "TTTN"
+  sgrna_length: 20
+  normalization: "median"
+  control_sgrna: "/xdisk/haining/maarowosegbe/ngs101-pipeline/ref/crispr/non_targeting_controls.txt"
 
 # ── Network analysis ──────────────────────────────────────────────────
 networks:
@@ -133,6 +136,9 @@ networks:
 # ── Cancer subtype (Part 6) ───────────────────────────────────────────
 cancer_subtype:
   run: false
+  run_pam50: false
+  run_gsva: false
+  run_cibersortx_prep: false
   geo_accession: "GSE209998"
 
 # ── Container strategy ────────────────────────────────────────────────

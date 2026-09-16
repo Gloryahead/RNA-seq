@@ -62,4 +62,4 @@ bash "${SCRIPT_BASE}/scripts/01_build_indices.sh"
 
 echo ""
 echo "========== Setup job finished at: $(date) =========="
-echo "Next: sbatch ${SCRIPT_BASE}/slurm/02_pipeline.slurm"
+echo "Next: sbatch ${SCRIPT_BASE}/slurm/03_pipeline.slurm"

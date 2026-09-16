@@ -12,7 +12,7 @@ rule mageck_count:
     """Count sgRNA reads per sample from FASTQ."""
     input:
         r1      = get_r1,
-        library = config["crispr"]["library_file"],
+        library = config["crispr"]["library"],
     output:
         count  = f"{OUTDIR}/crispr/counts/{{sample}}.count.txt",
         log_   = f"{OUTDIR}/crispr/counts/{{sample}}.count_normalized.txt",
@@ -23,8 +23,8 @@ rule mageck_count:
     resources: mem_mb=8000, runtime=60
     params:
         outpfx    = f"{OUTDIR}/crispr/counts/{{sample}}",
-        pam       = config["crispr"]["pam"],
-        sgrna_len = config["crispr"]["sgrna_length"],
+        pam       = config["crispr"].get("pam", "TTTN"),
+        sgrna_len = config["crispr"].get("sgrna_length", 20),
     shell:
         """
         mageck count \

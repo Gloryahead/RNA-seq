@@ -27,11 +27,14 @@ rule fastqc_raw:
         slurm_partition = "standard",
     shell:
         """
-        fastqc --threads {threads} --outdir $(dirname {output.html_r1}) \
-            {input.r1} {input.r2} 2>{log}
-        # Rename to match wildcard-based output names
-        base_r1=$(basename {input.r1} .fastq.gz | sed 's/_R1.*//; s/_1$//')
-        base_r2=$(basename {input.r2} .fastq.gz | sed 's/_R2.*//; s/_2$//')
+        outdir=$(dirname {output.html_r1})
+        fastqc --threads {threads} --outdir $outdir {input.r1} {input.r2} 2>{log}
+        base_r1=$(basename {input.r1} .fastq.gz)
+        base_r2=$(basename {input.r2} .fastq.gz)
+        mv $outdir/${{base_r1}}_fastqc.html {output.html_r1}
+        mv $outdir/${{base_r2}}_fastqc.html {output.html_r2}
+        mv $outdir/${{base_r1}}_fastqc.zip  {output.zip_r1}
+        mv $outdir/${{base_r2}}_fastqc.zip  {output.zip_r2}
         """
 
 

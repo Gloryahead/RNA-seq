@@ -39,11 +39,11 @@ run_sample() {
   if [[ -n "${r2}" ]]; then
     conda run -n rnaseq_env \
       fastqc -t "${THREADS}" -o "${OUTDIR_QC}" "${r1}" "${r2}" \
-      2>"logs/qc_trim/${sample}_fastqc_raw.log"
+      2>"${DATA_BASE}/logs/qc_trim/${sample}_fastqc_raw.log"
   else
     conda run -n rnaseq_env \
       fastqc -t "${THREADS}" -o "${OUTDIR_QC}" "${r1}" \
-      2>"logs/qc_trim/${sample}_fastqc_raw.log"
+      2>"${DATA_BASE}/logs/qc_trim/${sample}_fastqc_raw.log"
   fi
 
   # ── Trim Galore ───────────────────────────────────────────────────
@@ -59,11 +59,11 @@ run_sample() {
     trim_args+=(--paired)
     conda run -n rnaseq_env \
       trim_galore "${trim_args[@]}" "${r1}" "${r2}" \
-      2>"logs/qc_trim/${sample}_trimgalore.log"
+      2>"${DATA_BASE}/logs/qc_trim/${sample}_trimgalore.log"
   else
     conda run -n rnaseq_env \
       trim_galore "${trim_args[@]}" "${r1}" \
-      2>"logs/qc_trim/${sample}_trimgalore.log"
+      2>"${DATA_BASE}/logs/qc_trim/${sample}_trimgalore.log"
   fi
   echo "  Done: ${sample}"
 }

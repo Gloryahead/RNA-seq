@@ -17,10 +17,11 @@
 
 set -euo pipefail
 
+DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/ngs101-pipeline}"
 ACCESSION_FILE="${1:-}"
-OUTDIR="${2:-data/fastq}"
+OUTDIR="${2:-${DATA_BASE}/data/fastq}"
 THREADS="${THREADS:-8}"
-TMP_DIR="${TMPDIR:-/scratch/sra_tmp}"
+TMP_DIR="${DATA_BASE}/tmp/sra_tmp"
 
 if [[ -z "${ACCESSION_FILE}" ]]; then
   echo "Usage: bash scripts/02_download_sra.sh <accession_list.txt> [outdir]"

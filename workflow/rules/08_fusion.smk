@@ -78,7 +78,7 @@ if config["fusion"]["run_fusioncatcher"]:
         threads: 16
         resources: mem_mb=64000, runtime=240
         params:
-            data   = config["fusion"]["fusioncatcher_data"],
+            data   = config["fusion"]["fusioncatcher_db"],
             outdir = f"{OUTDIR}/fusion/fusioncatcher/{{sample}}",
         shell:
             """

@@ -114,7 +114,7 @@ fi
 TRANSCRIPTS="${REF_DIR}/transcriptome.fa"
 if [[ ! -f "${TRANSCRIPTS}" ]]; then
   echo "[5/5] Extracting transcript sequences from genome + GTF..."
-  mamba-haining run -n rnaseq_env \
+  micromamba run -n rnaseq_env \
     gffread "${GTF}" -g "${FASTA}" -w "${TRANSCRIPTS}"
   echo "  -> ${TRANSCRIPTS}"
 else

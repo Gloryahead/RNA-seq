@@ -27,8 +27,10 @@ export TMPDIR="${DATA_BASE}/tmp"
 mkdir -p "${TMPDIR}"
 
 set +eu; source ~/.bashrc; set -eu
-eval "$(mamba-haining shell hook --shell=bash)"
-mamba-haining activate rnaseq_env
+export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
+export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
+eval "$(micromamba shell hook --shell=bash)"
+micromamba activate rnaseq_env
 
 ACCESSION_FILE="${DATA_BASE}/data/sra_accessions.txt"
 FASTQ_DIR="${DATA_BASE}/data/fastq"

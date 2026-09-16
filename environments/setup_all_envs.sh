@@ -13,6 +13,10 @@
 
 set -euo pipefail
 
+# UA HPC: point micromamba at the haining group prefix
+export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
+export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
+
 R_EXTRAS=false
 [[ "${1:-}" == "--r-extras" ]] && R_EXTRAS=true
 
@@ -27,10 +31,10 @@ build_env() {
   echo "══════════════════════════════════════════════════════"
   echo "  Building: ${name}  (${yml})"
   echo "══════════════════════════════════════════════════════"
-  if mamba-haining env list | grep -q "^${name} "; then
-    echo "  → Already exists; skipping. To rebuild: mamba-haining env remove -n ${name}"
+  if micromamba env list | grep -q "^${name} "; then
+    echo "  → Already exists; skipping. To rebuild: micromamba env remove -n ${name}"
   else
-    mamba-haining env create -f "${ENVDIR}/${yml}"
+    micromamba env create -f "${ENVDIR}/${yml}"
     echo "  ✓ ${name} created"
   fi
 }
@@ -39,7 +43,7 @@ run_r_script() {
   local env_name="$1"
   local script="$2"
   echo "  → Running R install script: ${script}"
-  mamba-haining run -n "${env_name}" Rscript "${SCRIPT_DIR}/${script}"
+  micromamba run -n "${env_name}" Rscript "${SCRIPT_DIR}/${script}"
 }
 
 # ── Core environments ─────────────────────────────────────────────────────────

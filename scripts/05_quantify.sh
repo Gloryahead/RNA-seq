@@ -51,7 +51,7 @@ COUNTS_FILE="${OUTDIR_COUNTS}/counts_raw.tsv"
 if [[ ! -f "${COUNTS_FILE}" ]]; then
   echo ""
   echo "=== featureCounts: gene-level quantification ==="
-  mamba-haining run -n rnaseq_env \
+  micromamba run -n rnaseq_env \
     featureCounts \
       -T "${THREADS}" \
       -a "${GTF}" \
@@ -100,7 +100,7 @@ while IFS=$'\t' read -r sample group r1 r2 batch || [[ -n "$sample" ]]; do
     read_args="-r ${r1}"
   fi
 
-  mamba-haining run -n rnaseq_env \
+  micromamba run -n rnaseq_env \
     salmon quant \
       -i "${SALMON_INDEX}" \
       -l A \

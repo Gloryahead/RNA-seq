@@ -33,7 +33,7 @@ mkdir -p "${DATA_BASE}/logs/convert" "${TMP_DIR}"
 make_chrom_sizes() {
   if [[ ! -f "${CHROM_SIZES}" ]]; then
     echo "  Generating chrom.sizes..."
-    mamba-haining run -n rnaseq_env \
+    micromamba run -n rnaseq_env \
       samtools view -H "${BAM_DIR}/$(ls "${BAM_DIR}"/*.bam | head -1 | xargs basename)" \
       | grep "^@SQ" \
       | awk '{gsub("SN:|LN:","",$2" "$3); print $2"\t"$3}' \
@@ -49,7 +49,7 @@ bam2bw() {
     out="${DATA_BASE}/results/bigwig/${sample}.bw"
     [[ -f "${out}" ]] && { echo "  ${sample}: bigWig exists, skipping"; continue; }
     echo "  ${sample}: BAM → bigWig (RPKM normalized)..."
-    mamba-haining run -n rnaseq_env \
+    micromamba run -n rnaseq_env \
       bamCoverage \
         -b "${bam}" \
         -o "${out}" \
@@ -70,7 +70,7 @@ bam2bed() {
     out="${DATA_BASE}/results/bed/${sample}.bed"
     [[ -f "${out}" ]] && { echo "  ${sample}: BED exists, skipping"; continue; }
     echo "  ${sample}: BAM → BED..."
-    mamba-haining run -n rnaseq_env \
+    micromamba run -n rnaseq_env \
       bedtools bamtobed -i "${bam}" | sort -k1,1 -k2,2n > "${out}"
     echo "    -> ${out}"
   done
@@ -84,9 +84,9 @@ bam2fastq() {
     out_r1="${DATA_BASE}/results/recovered_fastq/${sample}_R1.fastq.gz"
     [[ -f "${out_r1}" ]] && { echo "  ${sample}: FASTQ exists, skipping"; continue; }
     echo "  ${sample}: BAM → FASTQ..."
-    mamba-haining run -n rnaseq_env \
+    micromamba run -n rnaseq_env \
       samtools sort -n -@ "${THREADS}" -o "${TMP_DIR}/${sample}_namesorted.bam" "${bam}"
-    mamba-haining run -n rnaseq_env \
+    micromamba run -n rnaseq_env \
       samtools fastq -@ "${THREADS}" \
         -1 "${DATA_BASE}/results/recovered_fastq/${sample}_R1.fastq.gz" \
         -2 "${DATA_BASE}/results/recovered_fastq/${sample}_R2.fastq.gz" \
@@ -104,9 +104,9 @@ gtf2bed() {
   OUT="${DATA_BASE}/ref/annotation.bed12"
   [[ -f "${OUT}" ]] && { echo "  ${OUT} exists, skipping"; return; }
   echo "  GTF → BED12..."
-  mamba-haining run -n rnaseq_env \
+  micromamba run -n rnaseq_env \
     gtfToGenePred "${GTF}" "${TMP_DIR}/annotation.genePred"
-  mamba-haining run -n rnaseq_env \
+  micromamba run -n rnaseq_env \
     genePredToBed "${TMP_DIR}/annotation.genePred" "${OUT}"
   echo "  -> ${OUT}"
 }
@@ -118,9 +118,9 @@ sam2bam() {
     sample=$(basename "${sam}" .sam)
     out="${BAM_DIR}/${sample}.sorted.bam"
     echo "  ${sample}: SAM → sorted BAM..."
-    mamba-haining run -n rnaseq_env \
+    micromamba run -n rnaseq_env \
       samtools sort -@ "${THREADS}" -o "${out}" "${sam}"
-    mamba-haining run -n rnaseq_env \
+    micromamba run -n rnaseq_env \
       samtools index "${out}"
     rm "${sam}"
     echo "    -> ${out}"

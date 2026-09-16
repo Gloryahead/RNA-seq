@@ -47,9 +47,11 @@ bash "${SCRIPT_BASE}/scripts/setup_xdisk.sh"
 # Activate the core conda environment
 set +eu
 source ~/.bashrc
+export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
+export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
 set -eu
-eval "$(mamba-haining shell hook --shell=bash)"
-mamba-haining activate rnaseq_env
+eval "$(micromamba shell hook --shell=bash)"
+micromamba activate rnaseq_env
 
 echo ""
 echo "--- Step 1: Download references ---"

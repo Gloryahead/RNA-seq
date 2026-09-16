@@ -37,11 +37,11 @@ run_sample() {
   # ── FastQC on raw reads ───────────────────────────────────────────
   echo "  [1/2] FastQC on raw reads..."
   if [[ -n "${r2}" ]]; then
-    mamba-haining run -n rnaseq_env \
+    micromamba run -n rnaseq_env \
       fastqc -t "${THREADS}" -o "${OUTDIR_QC}" "${r1}" "${r2}" \
       2>"${DATA_BASE}/logs/qc_trim/${sample}_fastqc_raw.log"
   else
-    mamba-haining run -n rnaseq_env \
+    micromamba run -n rnaseq_env \
       fastqc -t "${THREADS}" -o "${OUTDIR_QC}" "${r1}" \
       2>"${DATA_BASE}/logs/qc_trim/${sample}_fastqc_raw.log"
   fi
@@ -57,11 +57,11 @@ run_sample() {
   )
   if [[ -n "${r2}" ]]; then
     trim_args+=(--paired)
-    mamba-haining run -n rnaseq_env \
+    micromamba run -n rnaseq_env \
       trim_galore "${trim_args[@]}" "${r1}" "${r2}" \
       2>"${DATA_BASE}/logs/qc_trim/${sample}_trimgalore.log"
   else
-    mamba-haining run -n rnaseq_env \
+    micromamba run -n rnaseq_env \
       trim_galore "${trim_args[@]}" "${r1}" \
       2>"${DATA_BASE}/logs/qc_trim/${sample}_trimgalore.log"
   fi

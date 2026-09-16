@@ -101,8 +101,8 @@ MANIFEST=\${SCRIPT_BASE}/runs/manifest.tsv
 mkdir -p "\${DATA_BASE}/logs/slurm"
 
 set +eu; source ~/.bashrc; set -eu
-eval "\$(mamba-haining shell hook --shell=bash)"
-mamba-haining activate snakemake_env
+eval "\$(micromamba shell hook --shell=bash)"
+micromamba activate snakemake_env
 
 # Mark run as running in manifest
 sed -i "s|^\${RUN_ID}\t.*\tcreated\t|\${RUN_ID}\t${DATE}\t${ORGANISM}\t${SAMPLE_LIST}\t${COMPARISONS}\trunning\t|" "\${MANIFEST}"

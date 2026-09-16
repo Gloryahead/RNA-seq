@@ -31,7 +31,7 @@ for d in "${SEARCH_DIRS[@]}"; do
   [[ -d "$d" ]] && existing_dirs+=("$d")
 done
 
-mamba-haining run -n rnaseq_env \
+micromamba run -n rnaseq_env \
   multiqc \
     "${existing_dirs[@]}" \
     --outdir "${OUTDIR}" \

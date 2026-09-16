@@ -38,8 +38,10 @@ mkdir -p "${DATA_BASE}/logs/slurm"
 # Activate mamba (UA HPC pattern)
 set +eu
 source ~/.bashrc
+export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
+export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
 set -eu
-eval "$(mamba-haining shell hook --shell=bash)"
+eval "$(micromamba shell hook --shell=bash)"
 
 # Helper: run a script only if it exists (from your eclip_pipeline pattern)
 run_if_exists() {
@@ -55,7 +57,7 @@ run_if_exists() {
 }
 
 # ── Step 1: QC + trimming ─────────────────────────────────────────────
-mamba-haining activate rnaseq_env
+micromamba activate rnaseq_env
 run_if_exists "${SCRIPT_BASE}/scripts/03_qc_trim.sh"
 
 # ── Step 2: STAR alignment ────────────────────────────────────────────
@@ -68,7 +70,7 @@ run_if_exists "${SCRIPT_BASE}/scripts/05_quantify.sh"
 run_if_exists "${SCRIPT_BASE}/scripts/06_multiqc.sh"
 
 # ── Step 5: DEG analysis (R) ─────────────────────────────────────────
-mamba-haining activate rnaseq_r_env
+micromamba activate rnaseq_r_env
 Rscript "${SCRIPT_BASE}/workflow/scripts/deg_analysis.R" \
   --counts   "${DATA_BASE}/results/counts/counts_raw.tsv" \
   --samples  "${SCRIPT_BASE}/config/samples.tsv" \
@@ -84,7 +86,7 @@ Rscript "${SCRIPT_BASE}/workflow/scripts/pathway_analysis.R" \
   2>"${DATA_BASE}/logs/slurm/pathways_${SLURM_JOB_ID}.log"
 
 # ── Optional: WGCNA (comment out if not needed) ───────────────────────
-# mamba-haining activate wgcna_env
+# micromamba activate wgcna_env
 # run_if_exists "${SCRIPT_BASE}/workflow/scripts/wgcna.R" \
 #   --counts  "${DATA_BASE}/results/counts/counts_raw.tsv" \
 #   --samples "${SCRIPT_BASE}/config/samples.tsv" \

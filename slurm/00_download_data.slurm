@@ -27,8 +27,10 @@ export SCRIPT_BASE DATA_BASE THREADS=${SLURM_NTASKS}
 mkdir -p "${DATA_BASE}/logs/slurm" "${DATA_BASE}/data/fastq" "${DATA_BASE}/tmp"
 
 set +eu; source ~/.bashrc; set -eu
-eval "$(mamba-haining shell hook --shell=bash)"
-mamba-haining activate rnaseq_env
+export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
+export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
+eval "$(micromamba shell hook --shell=bash)"
+micromamba activate rnaseq_env
 
 # ── Which datasets to download? ───────────────────────────────────────
 # Uncomment the modules you want. "all" downloads everything.

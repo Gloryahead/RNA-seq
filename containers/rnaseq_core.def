@@ -1,0 +1,34 @@
+Bootstrap: docker
+From: mambaorg/micromamba:1.5.8
+
+# rnaseq_core.sif — alignment / QC / preprocessing tools
+# Covers: STAR, Salmon, featureCounts, FastQC, Trim Galore, SAMtools, SRA-tools
+# Build: apptainer build containers/rnaseq_core.sif containers/rnaseq_core.def
+# Snakemake usage: container: "file://containers/rnaseq_core.sif"
+
+%labels
+    Author       NGS101-pipeline
+    Version      1.0.0
+    CondaYAML    environments/01_rnaseq_core.yml
+
+%files
+    environments/01_rnaseq_core.yml /opt/rnaseq_core.yml
+
+%post
+    # Install conda env into /opt/conda
+    micromamba install -y -n base -f /opt/rnaseq_core.yml && \
+    micromamba clean --all --yes
+
+    # Record installed versions for provenance
+    micromamba run -n base star --version > /opt/versions.txt 2>&1
+    micromamba run -n base salmon --version >> /opt/versions.txt 2>&1
+    micromamba run -n base samtools --version | head -1 >> /opt/versions.txt 2>&1
+
+%environment
+    export PATH=/opt/conda/bin:$PATH
+    export CONDA_DEFAULT_ENV=base
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+
+%runscript
+    exec "$@"

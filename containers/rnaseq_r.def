@@ -1,0 +1,38 @@
+Bootstrap: docker
+From: mambaorg/micromamba:1.5.8
+
+# rnaseq_r.sif — R 4.4.1 + core Bioconductor DEG/pathway packages
+# Covers: DESeq2, edgeR, limma, sva, clusterProfiler, EnhancedVolcano, ggplot2, pheatmap
+# Build: apptainer build containers/rnaseq_r.sif containers/rnaseq_r.def
+# Note: ggprism is installed post-conda via Rscript (not in bioconda)
+
+%labels
+    Author       NGS101-pipeline
+    Version      1.0.0
+    CondaYAML    environments/02_rnaseq_r.yml
+
+%files
+    environments/02_rnaseq_r.yml    /opt/rnaseq_r.yml
+    environments/r_scripts/install_core_r_extras.R /opt/install_extras.R
+
+%post
+    micromamba install -y -n base -f /opt/rnaseq_r.yml && \
+    micromamba clean --all --yes
+
+    # Install CRAN-only packages not in bioconda
+    micromamba run -n base Rscript /opt/install_extras.R
+
+    # Record R and key package versions
+    micromamba run -n base Rscript -e \
+      "cat('R', R.version.string, '\n'); \
+       pkgs <- c('DESeq2','edgeR','limma','clusterProfiler'); \
+       for(p in pkgs) cat(p, as.character(packageVersion(p)), '\n')" \
+       > /opt/versions_r.txt 2>&1
+
+%environment
+    export PATH=/opt/conda/bin:$PATH
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+
+%runscript
+    exec "$@"

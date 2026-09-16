@@ -1,6 +1,10 @@
 # ── Large data & output files ─────────────────────────────────────────
 results/
 logs/
+
+# ── Run tracking: keep manifest + config snapshots, ignore generated launchers
+# runs/<run_id>/run.sh is auto-generated and contains absolute paths — not portable
+runs/*/run.sh
 *.bam
 *.bai
 *.cram

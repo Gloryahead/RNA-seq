@@ -27,10 +27,10 @@ build_env() {
   echo "══════════════════════════════════════════════════════"
   echo "  Building: ${name}  (${yml})"
   echo "══════════════════════════════════════════════════════"
-  if conda env list | grep -q "^${name} "; then
-    echo "  → Already exists; skipping. To rebuild: conda env remove -n ${name}"
+  if mamba-haining env list | grep -q "^${name} "; then
+    echo "  → Already exists; skipping. To rebuild: mamba-haining env remove -n ${name}"
   else
-    mamba env create -f "${ENVDIR}/${yml}"
+    mamba-haining env create -f "${ENVDIR}/${yml}"
     echo "  ✓ ${name} created"
   fi
 }
@@ -39,7 +39,7 @@ run_r_script() {
   local env_name="$1"
   local script="$2"
   echo "  → Running R install script: ${script}"
-  conda run -n "${env_name}" Rscript "${SCRIPT_DIR}/${script}"
+  mamba-haining run -n "${env_name}" Rscript "${SCRIPT_DIR}/${script}"
 }
 
 # ── Core environments ─────────────────────────────────────────────────────────

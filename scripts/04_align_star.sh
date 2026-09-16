@@ -66,7 +66,7 @@ align_sample() {
   echo "  R1: ${star_r1}"
   [[ -n "${star_r2}" ]] && echo "  R2: ${star_r2}"
 
-  conda run -n rnaseq_env \
+  mamba-haining run -n rnaseq_env \
     STAR \
       --runMode            alignReads \
       --runThreadN         "${THREADS}" \
@@ -94,11 +94,11 @@ align_sample() {
       2>"${DATA_BASE}/logs/star/${sample}.log"
 
   echo "  Indexing BAM..."
-  conda run -n rnaseq_env \
+  mamba-haining run -n rnaseq_env \
     samtools index -@ 4 "${bam}"
 
   echo "  Flagstat:"
-  conda run -n rnaseq_env \
+  mamba-haining run -n rnaseq_env \
     samtools flagstat "${bam}" | sed 's/^/    /'
 
   echo "  Done: ${bam}"

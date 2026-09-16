@@ -50,7 +50,7 @@ STAR_INDEX="${REF_DIR}/star_index"
 if $BUILD_STAR && [[ ! -f "${STAR_INDEX}/Genome" ]]; then
   echo "=== Building STAR index (this takes ~2 hours for hg38) ==="
   mkdir -p "${STAR_INDEX}"
-  conda run -n rnaseq_env \
+  mamba-haining run -n rnaseq_env \
     STAR \
       --runMode          genomeGenerate \
       --genomeDir        "${STAR_INDEX}" \
@@ -69,7 +69,7 @@ SALMON_INDEX="${REF_DIR}/salmon_index"
 if $BUILD_SALMON && [[ ! -d "${SALMON_INDEX}" ]]; then
   [[ -f "${TRANSCRIPTS}" ]] || { echo "ERROR: ${TRANSCRIPTS} missing. Re-run 00_download_refs.sh"; exit 1; }
   echo "=== Building Salmon index ==="
-  conda run -n rnaseq_env \
+  mamba-haining run -n rnaseq_env \
     salmon index \
       -t "${TRANSCRIPTS}" \
       -d <(grep "^>" "${FASTA}" | cut -d ' ' -f 1 | tr -d '>') \
@@ -86,7 +86,7 @@ BOWTIE_INDEX="${REF_DIR}/bowtie_index/genome"
 if $BUILD_BOWTIE && [[ ! -f "${BOWTIE_INDEX}.1.ebwt" ]]; then
   echo "=== Building Bowtie v1 index (for miRDeep2) ==="
   mkdir -p "$(dirname "${BOWTIE_INDEX}")"
-  conda run -n mirna_env \
+  mamba-haining run -n mirna_env \
     bowtie-build --threads "${THREADS}" "${FASTA}" "${BOWTIE_INDEX}"
   echo "  -> ${BOWTIE_INDEX}*"
 elif $BUILD_BOWTIE; then
@@ -96,7 +96,7 @@ fi
 # ── 4. BWA index (for CIRI3 circRNA detection) ────────────────────────
 if $BUILD_BWA && [[ ! -f "${FASTA}.bwt" ]]; then
   echo "=== Building BWA index (for CIRI3, ~2 hours for hg38) ==="
-  conda run -n ciri3_env \
+  mamba-haining run -n ciri3_env \
     bwa index "${FASTA}"
   echo "  -> ${FASTA}.bwt"
 elif $BUILD_BWA; then

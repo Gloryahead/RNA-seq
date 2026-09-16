@@ -1,0 +1,37 @@
+name: wgcna_env
+# Tutorial: WGCNA gene co-expression network analysis
+# Activate: conda activate wgcna_env
+# Example input: normalized_counts.tsv, sample_info.tsv, gene_data.tsv
+# GEO dataset: GSE261875 (32 samples, 8 conditions, human TDP-43 study)
+# External database: STRING v11.5 (species 9606 for Homo sapiens)
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - r-base=4.4.1
+  # ── Co-expression network ─────────────────────────────────────────────────────
+  - r-wgcna                  # Available in conda-forge
+  # ── Network visualization ─────────────────────────────────────────────────────
+  - r-igraph
+  - r-reshape2
+  - r-rcolorbrewer
+  - r-corrplot
+  # ── Visualization ────────────────────────────────────────────────────────────
+  - r-ggplot2
+  - r-ggrepel
+  - r-pheatmap
+  - r-dplyr
+  # ── DEG tools (dependencies for input preparation) ────────────────────────────
+  - bioconductor-limma
+  - bioconductor-deseq2
+  # ── Pathway enrichment ───────────────────────────────────────────────────────
+  - bioconductor-clusterprofiler
+  - bioconductor-org.hs.eg.db
+  - bioconductor-go.db
+  # ── PPI network ──────────────────────────────────────────────────────────────
+  - bioconductor-stringdb
+  # ── Utilities ────────────────────────────────────────────────────────────────
+  - r-biocmanager
+  # Enable multi-threading (call in R before WGCNA):
+  #   WGCNA::enableWGCNAThreads(nThreads = 8)

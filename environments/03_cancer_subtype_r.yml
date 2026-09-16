@@ -1,0 +1,30 @@
+name: cancer_subtype_env
+# Tutorial: Part 6 (cancer subtype prediction — PAM50 for breast cancer)
+# Extends rnaseq_r_env with cancer genomics packages.
+# Activate: conda activate cancer_subtype_env
+# Example input: GSE209998 raw counts (GEOquery retrieval)
+# After activation run: Rscript r_scripts/install_cancer_subtype_r.R
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - r-base=4.4.1
+  # ── Core DEG (shared with rnaseq_r_env) ──────────────────────────────────────
+  - bioconductor-edger
+  - bioconductor-limma
+  - r-pheatmap
+  - r-data.table
+  - r-devtools
+  - r-biocmanager
+  # ── GEO data retrieval ────────────────────────────────────────────────────────
+  - bioconductor-geoquery
+  # ── Cancer subtype tools ─────────────────────────────────────────────────────
+  - bioconductor-gsva                # Gene set variation analysis
+  - bioconductor-genefu              # PAM50 and breast cancer gene signatures
+  - bioconductor-ensdb.hsapiens.v86  # Ensembl annotation (hg38 / GRCh38)
+  - r-caret                          # Classification and regression training
+  - r-xtable                         # LaTeX/HTML table export
+  # ── CRAN-only / GitHub-only — installed by r_scripts/install_cancer_subtype_r.R
+  # - rmeta           (meta-analysis plots, CRAN only)
+  # - PAM50           (GitHub: ccchang0111/PAM50 — devtools::install_github)

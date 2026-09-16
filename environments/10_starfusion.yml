@@ -1,0 +1,23 @@
+name: starfusion_env
+# Tutorial: Part 16 (fusion gene detection with STAR-Fusion)
+# IMPORTANT: STAR-Fusion works best (and is officially supported) via Docker/Singularity:
+#   docker://trinitycancergenomics/star-fusion:latest
+# The conda install below is provided for HPC clusters without container support.
+# Activate: conda activate starfusion_env
+# Example input: paired-end FASTQ, GSE279335, SRR30961741
+# Reference (required — ~30 GB, download once):
+#   https://data.broadinstitute.org/Trinity/CTAT_RESOURCE_LIB/
+# Annotation: gencode.v47.basic.annotation.gtf.gz (hg38)
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - star-fusion=1.12.0
+  - star=2.7.11b
+  - trim-galore=0.6.10
+  - samtools=1.21
+  - sra-tools=3.1.1
+  - perl=5.32.1
+  - pigz=2.8

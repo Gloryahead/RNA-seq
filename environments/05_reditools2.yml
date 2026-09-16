@@ -1,0 +1,35 @@
+name: reditools2_env
+# Tutorial: Part 9 (RNA editing analysis with REDItools2)
+# WARNING: REDItools2 requires Python 2.7 (end-of-life).
+#   This env cannot coexist with any Python 3 env.
+#   Alternative modern tools: GIREMI, SPRINT — consider those for new projects.
+# Activate: conda activate reditools2_env
+# Post-activation setup:
+#   git clone https://github.com/tflati/reditools2.0.git
+#   cd reditools2.0 && pip install -r requirements.txt
+# Example input: BAM (RNA-seq, STAR-aligned), Mouse GRCm38 FASTA
+# SRA accession: SRR28119110
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python=2.7
+  # ── Build / MPI dependencies required by REDItools2 ──────────────────────────
+  - libffi
+  - libxml2
+  - libxslt
+  - zlib
+  - bzip2
+  - lzma
+  - ncurses
+  - openmpi
+  - mpi4py
+  # ── Genomics tools ────────────────────────────────────────────────────────────
+  - htslib=1.21
+  - samtools=1.21
+  - tabix=1.11
+  - bedtools=2.31.1
+  - gffread=0.12.7
+  # ── Downstream R analysis — run in rnaseq_r_env, not here ───────────────────
+  # R packages used: data.table, limma, edgeR (already in rnaseq_r_env)

@@ -1,0 +1,22 @@
+name: virtus2_env
+# Tutorial: Part 17 (viral sequence detection with VIRTUS2)
+# VIRTUS2 uses CWL workflows; Singularity is required to pull its containerized tools.
+# Activate: conda activate virtus2_env
+# Post-activation setup:
+#   git clone https://github.com/yyoshiaki/VIRTUS2.git
+# Reference genome: GRCh38.p13, Gencode release 33
+# Virus reference: provided in the VIRTUS2 repository
+# Example input: paired-end RNA-seq FASTQ (.fastq.gz)
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - cwltool=3.1.20240508115211
+  - singularity=3.8.7        # Required to pull VIRTUS2's containerized sub-tools
+  - numpy=1.26.4
+  - pandas=2.2.2
+  - scipy=1.13.1
+  - statsmodels=0.14.2
+  - seaborn=0.13.2

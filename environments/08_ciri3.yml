@@ -1,0 +1,29 @@
+name: ciri3_env
+# Tutorial: Part 13.2 (CIRI3 v1.8.0 — advanced circRNA detection and DE)
+# CIRI3 distributes its own environment.yaml; this file mirrors and pins it.
+# Download CIRI3 jar from: https://github.com/bioinfo-biols/CIRI-cookbook/releases
+# Activate: conda activate ciri3_env
+# Example input: paired-end FASTQ (gzip), GRCh38 primary assembly FASTA, GRCh38.110 GTF
+# SRA accessions: SRR5398213-SRR5398218 (GSE97239, gastric cancer exosomal circRNAs)
+# Reference:
+#   wget ftp://ftp.ensembl.org/pub/release-110/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
+#   wget ftp://ftp.ensembl.org/pub/release-110/gtf/homo_sapiens/Homo_sapiens.GRCh38.110.gtf.gz
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - openjdk=17.0.11          # CIRI3 runtime requirement
+  - bwa=0.7.18               # Read alignment for CIRI3
+  - samtools=1.21
+  - subread=2.0.6            # featureCounts for host gene expression
+  - star=2.7.11b             # Gene expression quantification side
+  - sra-tools=3.1.1
+  - python=3.9
+  # ── R packages for differential expression ────────────────────────────────────
+  - r-base=4.4.1
+  - bioconductor-edger
+  - bioconductor-limma
+  # ── rMATS: not in conda; install separately ───────────────────────────────────
+  # After activation: pip install rmats
+  # Or: conda install -c bioconda rmats  (if available for your platform)

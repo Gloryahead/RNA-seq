@@ -1,0 +1,28 @@
+name: mirna_env
+# Tutorials: Part 15 (miRNA-seq with miRDeep2), Part 15.2 (UMI-based miRNA-seq)
+# miRDeep2 requires Bowtie v1 (not Bowtie2) for its internal alignment steps.
+# Activate: conda activate mirna_env
+# Example input (Part 15): GSE64977, SRR1759248, adapter TGGAATTCTCGGGTGCCAAGG,
+#   read length 18-30 nt, Ensembl GRCh38 genome (release 113), miRBase mature.fa + hairpin.fa
+# Reference databases (download manually):
+#   miRBase: ftp://mirbase.org/pub/mirbase/CURRENT/
+#   Ensembl: ftp://ftp.ensembl.org/pub/release-113/
+# QIAseq miRNA Kit used in Part 15.2 (UMI handling with umi_tools)
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  # ── miRNA detection ───────────────────────────────────────────────────────────
+  - mirdeep2=2.0.1.3
+  - bowtie=1.3.1             # miRDeep2 requires Bowtie v1, not Bowtie2
+  - perl=5.32.1              # miRDeep2 pipeline is Perl-based
+  # ── UMI deduplication (Part 15.2) ────────────────────────────────────────────
+  - umi_tools=1.1.5
+  - cutadapt=4.9
+  # ── QC and general utilities ──────────────────────────────────────────────────
+  - trim-galore=0.6.10
+  - fastqc=0.12.1
+  - samtools=1.21
+  - sra-tools=3.1.1

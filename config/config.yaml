@@ -1,0 +1,141 @@
+# ══════════════════════════════════════════════════════════════════════
+# NGS101 RNA-seq Pipeline — Master Configuration
+# Edit this file before every run. All paths are absolute or relative
+# to the repository root. Do NOT commit sample data paths to version
+# control; use a .env or a separate per-project config instead.
+# ══════════════════════════════════════════════════════════════════════
+
+# ── Reference genome & annotation ─────────────────────────────────────
+genome:
+  assembly: "mm10"                    # hg38 | mm10 | rn7
+  star_index: "/ref/mm10/star_2.7.11b/"
+  fasta:      "/ref/mm10/GRCm38.p6.genome.fa"
+  gtf:        "/ref/mm10/gencode.vM25.annotation.gtf"
+  salmon_index: "/ref/mm10/salmon_1.10.3/"
+
+# ── Organism for R annotation packages ────────────────────────────────
+organism: "mouse"   # human | mouse | rat
+
+# ── Samples & comparisons ─────────────────────────────────────────────
+samples: "config/samples.tsv"   # see samples.tsv for format
+
+# Pairwise comparisons: [treatment, control]
+comparisons:
+  - ["KO", "WT"]
+
+# ── Read library ──────────────────────────────────────────────────────
+library:
+  paired: true
+  strandedness: 0   # 0=unstranded, 1=sense, 2=antisense (featureCounts -s)
+  read_length: 150
+
+# ── Adapter trimming ──────────────────────────────────────────────────
+trimming:
+  min_length: 20
+  quality: 20
+  cores: 8
+
+# ── STAR alignment ────────────────────────────────────────────────────
+star:
+  threads: 20
+  extra: "--outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI AS NM"
+
+# ── featureCounts ─────────────────────────────────────────────────────
+featurecounts:
+  threads: 8
+  feature_type: "exon"
+  attribute: "gene_name"
+
+# ── Salmon (isoform / Part 10, 11) ────────────────────────────────────
+salmon:
+  threads: 12
+  lib_type: "A"        # automatic library detection
+
+# ── DEG analysis ──────────────────────────────────────────────────────
+deg:
+  method: "DESeq2"        # DESeq2 | edgeR | limma-voom
+  min_count: 10           # CPM filter threshold
+  min_samples: 2          # genes must pass in at least N samples
+  lfc_threshold: 0        # log2FC threshold passed to DESeq2::results()
+  alpha: 0.05             # FDR cutoff
+
+# ── Pathway enrichment (Parts 5, 14, 20) ──────────────────────────────
+pathways:
+  pvalue_cutoff: 0.05
+  qvalue_cutoff: 0.2
+  msigdb_gmt: ""          # optional: path to downloaded .gmt file
+  run_gsea: true
+  run_go: true
+  run_kegg: true
+
+# ── UMI handling (miRNA Part 15.2) ────────────────────────────────────
+umi:
+  enabled: false
+  pattern: "NNNNNN"       # UMI pattern at read end (QIAseq default)
+
+# ── Alternative splicing (Parts 8, 11) ────────────────────────────────
+splicing:
+  run_spladder: false
+  run_suppa2: false
+  suppa2_dir: "/opt/SUPPA"   # path to cloned SUPPA repo
+
+# ── circRNA (Parts 13, 13.2) ──────────────────────────────────────────
+circrna:
+  run_circexplorer2: false
+  run_ciri3: false
+  ciri3_jar: "/opt/ciri3/CIRI3.jar"
+  annotation_refseq: "/ref/hg38/refseq.txt"     # for CIRCexplorer2
+
+# ── miRNA (Parts 14, 15, 15.2) ────────────────────────────────────────
+mirna:
+  run: false
+  mirbase_mature:  "/ref/mirna/mature.fa"
+  mirbase_hairpin: "/ref/mirna/hairpin.fa"
+  adapter: "TGGAATTCTCGGGTGCCAAGG"
+  min_length: 18
+  max_length: 30
+
+# ── Fusion genes (Parts 16, 16.2) ─────────────────────────────────────
+fusion:
+  run_starfusion: false
+  run_fusioncatcher: false
+  ctat_lib: "/ref/CTAT_lib_GRCh38/"
+  fusioncatcher_db: "/ref/fusioncatcher_Index_human/"
+
+# ── Viral detection (Parts 17, 18) ────────────────────────────────────
+viral:
+  run_esviritu: false
+  run_virtus2: false
+  esviritu_db: "/ref/esviritu_db/"
+  virtus2_dir: "/opt/VIRTUS2/"
+
+# ── CRISPR screen ─────────────────────────────────────────────────────
+crispr:
+  run: false
+  library: "/ref/crispr/brunello.tsv"
+  control_sgrna: "/ref/crispr/non_targeting_controls.txt"
+
+# ── Network analysis ──────────────────────────────────────────────────
+networks:
+  run_wgcna: false
+  run_genie3: false
+  run_master_regulator: false
+  wgcna_threads: 8
+
+# ── Cancer subtype (Part 6) ───────────────────────────────────────────
+cancer_subtype:
+  run: false
+  geo_accession: "GSE209998"
+
+# ── Container strategy ────────────────────────────────────────────────
+# Set use_singularity: true to run every rule inside its Apptainer SIF.
+# Set use_conda: true to use the conda YAML files directly (requires conda).
+# Both can be false if you pre-activate environments manually (not recommended).
+use_singularity: false   # flip to true after building SIFs
+use_conda: true          # default: use conda YAMLs
+
+singularity_args: "--bind /ref,/data"   # bind-mount cluster paths into containers
+
+# ── Output directories ────────────────────────────────────────────────
+outdir: "results"
+logdir: "logs"

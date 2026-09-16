@@ -1,0 +1,7 @@
+sample	group	fastq_r1	fastq_r2	batch
+KO_rep1	KO	/data/raw/KO_rep1_R1.fastq.gz	/data/raw/KO_rep1_R2.fastq.gz	1
+KO_rep2	KO	/data/raw/KO_rep2_R1.fastq.gz	/data/raw/KO_rep2_R2.fastq.gz	1
+KO_rep3	KO	/data/raw/KO_rep3_R1.fastq.gz	/data/raw/KO_rep3_R2.fastq.gz	2
+WT_rep1	WT	/data/raw/WT_rep1_R1.fastq.gz	/data/raw/WT_rep1_R2.fastq.gz	1
+WT_rep2	WT	/data/raw/WT_rep2_R1.fastq.gz	/data/raw/WT_rep2_R2.fastq.gz	1
+WT_rep3	WT	/data/raw/WT_rep3_R1.fastq.gz	/data/raw/WT_rep3_R2.fastq.gz	2

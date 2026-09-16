@@ -3,6 +3,6 @@
 # Download: bash scripts/download_all_data.sh crispr
 # Note: single-end FASTQ — fastq_r2 is empty
 sample	group	fastq_r1	fastq_r2	batch
-T0_control	baseline	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/crispr/T0-Control.fastq.gz		1
-T8_vehicle	vehicle	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/crispr/T8-Vehicle.fastq.gz		1
-T8_APR246	treatment	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/crispr/T8-APR-246.fastq.gz		1
+T0_control	baseline	/xdisk/haining/maarowosegbe/RNA-seq/data/crispr/T0-Control.fastq.gz		1
+T8_vehicle	vehicle	/xdisk/haining/maarowosegbe/RNA-seq/data/crispr/T8-Vehicle.fastq.gz		1
+T8_APR246	treatment	/xdisk/haining/maarowosegbe/RNA-seq/data/crispr/T8-APR-246.fastq.gz		1

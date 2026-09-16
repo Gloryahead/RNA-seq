@@ -14,7 +14,7 @@
 set -euo pipefail
 
 SCRIPT_BASE="${SCRIPT_BASE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/ngs101-pipeline}"
+DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/RNA-seq}"
 
 SAMPLES_TSV="${SCRIPT_BASE}/config/samples.tsv"
 OUTDIR_QC="${DATA_BASE}/results/fastqc"

@@ -66,8 +66,8 @@ A fully reproducible, modular RNA-seq pipeline covering all 21 parts of the [NGS
 ### Step 0 — Clone and configure
 
 ```bash
-git clone https://github.com/<your-org>/ngs101-pipeline.git
-cd ngs101-pipeline
+git clone https://github.com/<your-org>/RNA-seq.git
+cd RNA-seq
 ```
 
 Open `config/config.yaml` and set:

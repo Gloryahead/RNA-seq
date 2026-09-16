@@ -7,7 +7,7 @@
 #   bash scripts/setup_xdisk.sh
 #
 # After this, xdisk layout will be:
-#   /xdisk/haining/maarowosegbe/ngs101-pipeline/
+#   /xdisk/haining/maarowosegbe/RNA-seq/
 #     ref/          ← genome FASTA, GTF, indices
 #     data/fastq/   ← raw FASTQs (SRA or your own)
 #     results/      ← all pipeline outputs
@@ -16,7 +16,7 @@
 
 set -euo pipefail
 
-DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/ngs101-pipeline}"
+DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/RNA-seq}"
 
 echo "Creating xdisk directory structure under: ${DATA_BASE}"
 

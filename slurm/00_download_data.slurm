@@ -4,8 +4,8 @@
 # --------------------------------------------------------------
 
 #SBATCH --job-name=ngs101_download_all
-#SBATCH --output=/xdisk/haining/maarowosegbe/ngs101-pipeline/logs/slurm/%x-%j.out
-#SBATCH --error=/xdisk/haining/maarowosegbe/ngs101-pipeline/logs/slurm/%x-%j.err
+#SBATCH --output=/xdisk/haining/maarowosegbe/RNA-seq/logs/slurm/%x-%j.out
+#SBATCH --error=/xdisk/haining/maarowosegbe/RNA-seq/logs/slurm/%x-%j.err
 #SBATCH --account=haining
 #SBATCH --partition=standard
 #SBATCH --nodes=1
@@ -20,8 +20,8 @@
 echo "========== Download job started at: $(date) =========="
 echo "  Node: $(hostname)  |  Job: ${SLURM_JOB_ID}"
 
-SCRIPT_BASE=/home/u11/maarowosegbe/ngs101-pipeline
-DATA_BASE=/xdisk/haining/maarowosegbe/ngs101-pipeline
+SCRIPT_BASE=/home/u11/maarowosegbe/RNA-seq
+DATA_BASE=/xdisk/haining/maarowosegbe/RNA-seq
 
 export SCRIPT_BASE DATA_BASE THREADS=${SLURM_NTASKS}
 mkdir -p "${DATA_BASE}/logs/slurm" "${DATA_BASE}/data/fastq" "${DATA_BASE}/tmp"

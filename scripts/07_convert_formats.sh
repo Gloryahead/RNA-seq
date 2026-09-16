@@ -18,8 +18,8 @@
 
 set -euo pipefail
 
-SCRIPT_BASE="${SCRIPT_BASE:-/home/u11/maarowosegbe/ngs101-pipeline}"
-DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/ngs101-pipeline}"
+SCRIPT_BASE="${SCRIPT_BASE:-/home/u11/maarowosegbe/RNA-seq}"
+DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/RNA-seq}"
 COMMAND="${1:-help}"
 BAM_DIR="${DATA_BASE}/results/bam"
 THREADS="${THREADS:-8}"

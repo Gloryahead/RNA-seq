@@ -2,4 +2,4 @@
 # Used by: workflow/rules/08_fusion.smk
 # Download: bash scripts/download_all_data.sh fusion
 sample	group	fastq_r1	fastq_r2	batch
-RMS_FP	fusion_positive	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/fastq/fusion/SRR30961741_1.fastq.gz	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/fastq/fusion/SRR30961741_2.fastq.gz	1
+RMS_FP	fusion_positive	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/fusion/SRR30961741_1.fastq.gz	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/fusion/SRR30961741_2.fastq.gz	1

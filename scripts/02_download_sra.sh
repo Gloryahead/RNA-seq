@@ -17,7 +17,7 @@
 
 set -euo pipefail
 
-DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/ngs101-pipeline}"
+DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/RNA-seq}"
 ACCESSION_FILE="${1:-}"
 OUTDIR="${2:-${DATA_BASE}/data/fastq}"
 THREADS="${THREADS:-8}"

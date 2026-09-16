@@ -7,8 +7,8 @@
 #SBATCH --job-name=ngs101_setup
 
 ### Output log — goes to xdisk so it survives after the job
-#SBATCH --output=/xdisk/haining/maarowosegbe/ngs101-pipeline/logs/slurm/%x-%j.out
-#SBATCH --error=/xdisk/haining/maarowosegbe/ngs101-pipeline/logs/slurm/%x-%j.err
+#SBATCH --output=/xdisk/haining/maarowosegbe/RNA-seq/logs/slurm/%x-%j.out
+#SBATCH --error=/xdisk/haining/maarowosegbe/RNA-seq/logs/slurm/%x-%j.err
 
 ### PI group
 #SBATCH --account=haining
@@ -35,8 +35,8 @@ echo "  Job ID  : ${SLURM_JOB_ID}"
 # Two-path pattern:
 #   SCRIPT_BASE → home (quota-safe, version-controlled code)
 #   DATA_BASE   → xdisk (large storage: refs, data, results, logs)
-SCRIPT_BASE=/home/u11/maarowosegbe/ngs101-pipeline
-DATA_BASE=/xdisk/haining/maarowosegbe/ngs101-pipeline
+SCRIPT_BASE=/home/u11/maarowosegbe/RNA-seq
+DATA_BASE=/xdisk/haining/maarowosegbe/RNA-seq
 
 export THREADS=${SLURM_NTASKS}
 export DATA_BASE

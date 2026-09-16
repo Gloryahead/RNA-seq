@@ -4,8 +4,8 @@
 # --------------------------------------------------------------
 
 #SBATCH --job-name=ngs101_pipeline
-#SBATCH --output=/xdisk/haining/maarowosegbe/ngs101-pipeline/logs/slurm/%x-%j.out
-#SBATCH --error=/xdisk/haining/maarowosegbe/ngs101-pipeline/logs/slurm/%x-%j.err
+#SBATCH --output=/xdisk/haining/maarowosegbe/RNA-seq/logs/slurm/%x-%j.out
+#SBATCH --error=/xdisk/haining/maarowosegbe/RNA-seq/logs/slurm/%x-%j.err
 #SBATCH --account=haining
 #SBATCH --partition=standard
 
@@ -25,8 +25,8 @@ echo "========== Pipeline started at: $(date) =========="
 echo "  Node    : $(hostname)"
 echo "  Job ID  : ${SLURM_JOB_ID}"
 
-SCRIPT_BASE=/home/u11/maarowosegbe/ngs101-pipeline
-DATA_BASE=/xdisk/haining/maarowosegbe/ngs101-pipeline
+SCRIPT_BASE=/home/u11/maarowosegbe/RNA-seq
+DATA_BASE=/xdisk/haining/maarowosegbe/RNA-seq
 
 export DATA_BASE
 

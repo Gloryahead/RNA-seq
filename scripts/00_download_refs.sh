@@ -17,7 +17,7 @@ THREADS="${2:-${THREADS:-8}}"
 
 # Code stays in home; references go to xdisk
 SCRIPT_BASE="${SCRIPT_BASE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/ngs101-pipeline}"
+DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/RNA-seq}"
 REF_DIR="${DATA_BASE}/ref"
 mkdir -p "${REF_DIR}"
 

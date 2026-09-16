@@ -14,10 +14,10 @@
 # Build indices: bash scripts/01_build_indices.sh
 genome:
   assembly: "mm10"                    # hg38 | mm10 | rn7
-  star_index: "/xdisk/haining/maarowosegbe/ngs101-pipeline/ref/star_index"
-  fasta:      "/xdisk/haining/maarowosegbe/ngs101-pipeline/ref/genome.fa"
-  gtf:        "/xdisk/haining/maarowosegbe/ngs101-pipeline/ref/annotation.gtf"
-  salmon_index: "/xdisk/haining/maarowosegbe/ngs101-pipeline/ref/salmon_index"
+  star_index: "/xdisk/haining/maarowosegbe/RNA-seq/ref/star_index"
+  fasta:      "/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa"
+  gtf:        "/xdisk/haining/maarowosegbe/RNA-seq/ref/annotation.gtf"
+  salmon_index: "/xdisk/haining/maarowosegbe/RNA-seq/ref/salmon_index"
 
 # ── Organism for R annotation packages ────────────────────────────────
 organism: "mouse"   # human | mouse | rat
@@ -120,11 +120,11 @@ viral:
 # ── CRISPR screen ─────────────────────────────────────────────────────
 crispr:
   run: false
-  library: "/xdisk/haining/maarowosegbe/ngs101-pipeline/ref/crispr/brunello.tsv"
+  library: "/xdisk/haining/maarowosegbe/RNA-seq/ref/crispr/brunello.tsv"
   pam: "TTTN"
   sgrna_length: 20
   normalization: "median"
-  control_sgrna: "/xdisk/haining/maarowosegbe/ngs101-pipeline/ref/crispr/non_targeting_controls.txt"
+  control_sgrna: "/xdisk/haining/maarowosegbe/RNA-seq/ref/crispr/non_targeting_controls.txt"
 
 # ── Network analysis ──────────────────────────────────────────────────
 networks:

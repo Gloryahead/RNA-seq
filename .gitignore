@@ -1,0 +1,43 @@
+# ── Large data & output files ─────────────────────────────────────────
+results/
+logs/
+*.bam
+*.bai
+*.cram
+*.crai
+*.sif
+*.img
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+*.sra
+
+# ── Reference genome files (download via scripts/00_download_refs.sh) ─
+ref/
+
+# ── Conda environments (recreate via environments/setup_all_envs.sh) ──
+.snakemake/conda/
+.snakemake/singularity/
+.snakemake/
+
+# ── Jupyter / Python cache ────────────────────────────────────────────
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# ── R session artifacts ───────────────────────────────────────────────
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+
+# ── IDE / OS ──────────────────────────────────────────────────────────
+.DS_Store
+.vscode/
+.idea/
+Thumbs.db
+
+# ── Credentials / secrets ─────────────────────────────────────────────
+*.env
+.secrets

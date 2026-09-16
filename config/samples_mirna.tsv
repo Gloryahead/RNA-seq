@@ -1,0 +1,6 @@
+# miRNA samples — GSE64977 (human, small RNA-seq)
+# Used by: workflow/rules/07_mirna.smk
+# Download: bash scripts/download_all_data.sh mirna
+# Note: single-end reads — fastq_r2 is empty
+sample	group	fastq_r1	fastq_r2	batch
+mirna_sample1	treatment	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/fastq/mirna/SRR1759248.fastq.gz		1

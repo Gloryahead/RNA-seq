@@ -1,0 +1,7 @@
+# Fusion gene dataset (Parts 16, 16.2)
+# GEO: GSE279335
+# Organism: Homo sapiens (hg38/GRCh38)
+# Cell line: Fusion-positive rhabdomyosarcoma (FP-RMS)
+# Known fusions: PAX3-FOXO1, MARS-AVIL (built-in positive controls)
+# https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE279335
+SRR30961741

@@ -1,0 +1,10 @@
+# circRNA samples — GSE97239 (human plasma exosomes, gastric cancer vs control)
+# Used by: workflow/rules/06_circrna.smk (CIRI3 module)
+# Download: bash scripts/download_all_data.sh circrna
+sample	group	fastq_r1	fastq_r2	batch
+cancer_rep1	cancer	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/fastq/circrna/SRR5398213_1.fastq.gz	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/fastq/circrna/SRR5398213_2.fastq.gz	1
+cancer_rep2	cancer	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/fastq/circrna/SRR5398214_1.fastq.gz	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/fastq/circrna/SRR5398214_2.fastq.gz	1
+cancer_rep3	cancer	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/fastq/circrna/SRR5398215_1.fastq.gz	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/fastq/circrna/SRR5398215_2.fastq.gz	1
+control_rep1	control	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/fastq/circrna/SRR5398216_1.fastq.gz	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/fastq/circrna/SRR5398216_2.fastq.gz	1
+control_rep2	control	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/fastq/circrna/SRR5398217_1.fastq.gz	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/fastq/circrna/SRR5398217_2.fastq.gz	1
+control_rep3	control	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/fastq/circrna/SRR5398218_1.fastq.gz	/xdisk/haining/maarowosegbe/ngs101-pipeline/data/fastq/circrna/SRR5398218_2.fastq.gz	1

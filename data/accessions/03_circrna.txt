@@ -1,0 +1,15 @@
+# circRNA dataset (Parts 13, 13.2 — CIRI3)
+# GEO: GSE97239
+# Organism: Homo sapiens (hg38/GRCh38)
+# Tissue: Plasma exosomes (circRNA-enriched)
+# Design: Gastric cancer (3) vs Healthy control (3)
+# Sequencing: Paired-end Illumina HiSeq, 100 bp
+# https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE97239
+# Cancer samples:
+SRR5398213
+SRR5398214
+SRR5398215
+# Control samples:
+SRR5398216
+SRR5398217
+SRR5398218

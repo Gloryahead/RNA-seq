@@ -8,23 +8,28 @@
 # ── Reference genome & annotation ─────────────────────────────────────
 # UA HPC paths — xdisk is your large-storage mount.
 # Run scripts/00_download_refs.sh and scripts/01_build_indices.sh first.
+# Dataset: GSE259357 — Mouse pancreas, KRAS vs KRAS+SPIB
+# Reference: GRCm38/mm10 (Ensembl release 102)
+# Download refs: bash scripts/00_download_refs.sh mouse
+# Build indices: bash scripts/01_build_indices.sh
 genome:
-  assembly: "hg38"                    # hg38 | mm10 | rn7
+  assembly: "mm10"                    # hg38 | mm10 | rn7
   star_index: "/xdisk/haining/maarowosegbe/ngs101-pipeline/ref/star_index"
   fasta:      "/xdisk/haining/maarowosegbe/ngs101-pipeline/ref/genome.fa"
   gtf:        "/xdisk/haining/maarowosegbe/ngs101-pipeline/ref/annotation.gtf"
   salmon_index: "/xdisk/haining/maarowosegbe/ngs101-pipeline/ref/salmon_index"
 
 # ── Organism for R annotation packages ────────────────────────────────
-organism: "human"   # human | mouse | rat
+organism: "mouse"   # human | mouse | rat
 
 # ── Samples & comparisons ─────────────────────────────────────────────
-# samples.tsv lives in the repo (home), not xdisk — it's small metadata.
-samples: "config/samples.tsv"   # see samples.tsv for format
+# samples.tsv lives in the repo (home) — small metadata, version-controlled.
+# FASTQs live on xdisk — download with: bash scripts/download_all_data.sh core
+samples: "config/samples.tsv"
 
-# Pairwise comparisons: [treatment, control]
+# NGS101 tutorial comparison: KRAS+SPIB (treatment) vs KRAS (control)
 comparisons:
-  - ["KO", "WT"]
+  - ["KRAS_SPIB", "KRAS"]
 
 # ── Read library ──────────────────────────────────────────────────────
 library:

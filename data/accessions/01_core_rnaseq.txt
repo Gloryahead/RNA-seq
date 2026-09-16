@@ -1,0 +1,11 @@
+# Core RNA-seq dataset (Parts 1–5, 8, 11, 19, 20)
+# GEO: GSE259357
+# Organism: Mus musculus (mm10/GRCm38)
+# Tissue: Mouse pancreas — normal and early pancreatic neoplasia
+# Design: KRAS vs KRAS+SPIB, 2 biological replicates each
+# Sequencing: Paired-end Illumina
+# Paper: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE259357
+SRR28119110
+SRR28119111
+SRR28119112
+SRR28119113

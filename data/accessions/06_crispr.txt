@@ -1,0 +1,11 @@
+# CRISPR screen dataset (Part 20 — MAGeCK)
+# Source: Zenodo 5750854
+# sgRNA library: Brunello (human genome-wide)
+# Design: T0 (baseline) vs T8-Vehicle vs T8-APR-246 (drug treatment)
+# Note: downloaded via wget, not SRA fasterq-dump
+#
+# Download commands (run scripts/download_crispr_data.sh):
+#   wget https://zenodo.org/records/5750854/files/brunello.tsv       (library)
+#   wget https://zenodo.org/records/5750854/files/T0-Control.fastq.gz
+#   wget https://zenodo.org/records/5750854/files/T8-APR-246.fastq.gz
+#   wget https://zenodo.org/records/5750854/files/T8-Vehicle.fastq.gz

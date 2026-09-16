@@ -1,0 +1,11 @@
+# WGCNA dataset (WGCNA tutorial)
+# GEO: GSE261875
+# Organism: Homo sapiens (hg38/GRCh38)
+# Cell type: Motor neurons
+# Design: TDP-43 perturbation ± Ataxin-2 knockout
+# 32 samples: 8 conditions × 4 biological replicates
+# Conditions: EV, Y, T, N (with and without ATXN2 knockout)
+# https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE261875
+#
+# NOTE: Fetch all SRR IDs for GSE261875 with:
+#   esearch -db sra -query GSE261875 | efetch -format runinfo | cut -d',' -f1 | grep SRR > 05_wgcna.txt

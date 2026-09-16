@@ -1,0 +1,7 @@
+# miRNA-seq dataset (Part 15)
+# GEO: GSE64977
+# Organism: Homo sapiens (hg38/GRCh38)
+# Sequencing: Single-end small RNA-seq
+# Tools: miRDeep2 + Bowtie v1 + umi_tools (Part 15.2)
+# https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE64977
+SRR1759248

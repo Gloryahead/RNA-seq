@@ -1,26 +1,20 @@
 name: genie3_masterreg_env
 # Tutorials: GENIE3 gene regulatory network + Master Regulator Analysis (RegEnrich, RTN)
 # Combined because both are TF/regulatory network analyses with heavily overlapping deps.
-# Activate: conda activate genie3_masterreg_env
+# CRAN packages only via conda; Bioconductor installed via:
+#   conda activate genie3_masterreg_env
+#   Rscript environments/r_scripts/install_genie3_masterreg_r.R
 # Example input (GENIE3):       normalized_counts.tsv, sample_info.tsv — GSE261875
 # Example input (Master Reg):   expression matrix — GSE53239 (6 treatment + 6 control)
 # References: DoRothEA ~1500 human TFs; JASPAR 2022; dorothea_hs regulon
-# After activation run: Rscript r_scripts/install_genie3_masterreg_r.R
 channels:
-  - bioconda
   - conda-forge
   - nodefaults
 dependencies:
-  - r-base>=4.2
-  # ── Regulatory network inference ─────────────────────────────────────────────
-  - bioconductor-genie3
-  - bioconductor-dorothea     # TF regulon database (DoRothEA)
-  - bioconductor-rtn          # Regulatory network and enrichment (RTN)
-  # ── Network visualization ─────────────────────────────────────────────────────
+  - r-base
   - r-igraph
   - r-reshape2
   - r-rcolorbrewer
-  # ── Visualization ────────────────────────────────────────────────────────────
   - r-ggplot2
   - r-ggrepel
   - r-pheatmap
@@ -28,15 +22,4 @@ dependencies:
   - r-tidyr
   - r-data.table
   - r-venndiagram
-  # ── DEG tools (dependencies) ─────────────────────────────────────────────────
-  - bioconductor-deseq2
-  - bioconductor-edger
-  - bioconductor-limma
-  # ── Pathway enrichment ───────────────────────────────────────────────────────
-  - bioconductor-clusterprofiler
-  - bioconductor-org.hs.eg.db
-  # ── Utilities ────────────────────────────────────────────────────────────────
   - r-biocmanager
-  # ── Bioconductor-only — installed by r_scripts/install_genie3_masterreg_r.R ──
-  # - RegEnrich     (master regulator scoring, BiocManager)
-  # - RedeR         (network visualization, BiocManager)

@@ -4,19 +4,18 @@ name: mageck_env
 # Example input: single-end FASTQ, sgRNA library brunello.tsv
 #   Library:   https://zenodo.org/records/5750854/files/brunello.tsv
 #   Demo data: http://cistrome.org/MAGeCKFlute/demo.tar.gz
-# After activation run: Rscript r_scripts/install_mageck_r.R
+# Bioconductor (clusterProfiler, pathview, etc.) installed via:
+#   Rscript environments/r_scripts/install_mageck_r.R
 channels:
-  - bioconda
   - conda-forge
   - nodefaults
 dependencies:
   - python=3.9
   # ── CRISPR screen ─────────────────────────────────────────────────────────────
-  - mageck=0.5.9.5
-  - seqtk=1.4
+  - mageck
+  - seqtk
   # ── R for pathway analysis ────────────────────────────────────────────────────
-  - r-base>=4.2
-  - r-essentials
+  - r-base
   - r-ggplot2
   - r-ggrepel
   - r-dplyr
@@ -25,12 +24,3 @@ dependencies:
   - r-pheatmap
   - r-venndiagram
   - r-biocmanager
-  - bioconductor-clusterprofiler
-  - bioconductor-org.hs.eg.db
-  - bioconductor-pathview
-  - bioconductor-enrichplot
-  - bioconductor-dose
-  # ── CRAN/Bioconductor-only — installed by r_scripts/install_mageck_r.R ────────
-  # - ggprism       (CRAN only)
-  # - ReactomePA    (BiocManager)
-  # - msigdbr       (CRAN / BiocManager)

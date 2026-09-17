@@ -17,6 +17,10 @@
 
 set -euo pipefail
 
+export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
+export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
+MC="${MAMBA_EXE}"
+
 DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/RNA-seq}"
 ACCESSION_FILE="${1:-}"
 OUTDIR="${2:-${DATA_BASE}/data/fastq}"
@@ -34,7 +38,7 @@ fi
 mkdir -p "${OUTDIR}" "${TMP_DIR}"
 
 # Activate env with sra-tools
-micromamba run -n rnaseq_env prefetch --version &>/dev/null \
+"${MC}" run -n rnaseq_env prefetch --version &>/dev/null \
   || { echo "ERROR: sra-tools not found. Activate rnaseq_env."; exit 1; }
 
 echo "=== Downloading SRA accessions from ${ACCESSION_FILE} ==="
@@ -55,7 +59,7 @@ while IFS= read -r accession || [[ -n "$accession" ]]; do
 
   # Step 1: prefetch (downloads .sra file with resume support)
   echo "  [1/2] Prefetching ${accession}..."
-  micromamba run -n rnaseq_env \
+  "${MC}" run -n rnaseq_env \
     prefetch \
       --output-directory "${TMP_DIR}" \
       --max-size 50G \
@@ -63,7 +67,7 @@ while IFS= read -r accession || [[ -n "$accession" ]]; do
 
   # Step 2: fasterq-dump (converts .sra → .fastq, gzip in-place)
   echo "  [2/2] Converting to FASTQ..."
-  micromamba run -n rnaseq_env \
+  "${MC}" run -n rnaseq_env \
     fasterq-dump \
       "${TMP_DIR}/${accession}/${accession}.sra" \
       --outdir "${OUTDIR}" \

@@ -12,6 +12,10 @@
 
 set -euo pipefail
 
+export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
+export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
+MC="${MAMBA_EXE}"
+
 ORGANISM="${1:-human}"     # human | mouse | rat
 THREADS="${2:-${THREADS:-8}}"
 
@@ -114,7 +118,7 @@ fi
 TRANSCRIPTS="${REF_DIR}/transcriptome.fa"
 if [[ ! -f "${TRANSCRIPTS}" ]]; then
   echo "[5/5] Extracting transcript sequences from genome + GTF..."
-  micromamba run -n rnaseq_env \
+  "${MC}" run -n rnaseq_env \
     gffread "${GTF}" -g "${FASTA}" -w "${TRANSCRIPTS}"
   echo "  -> ${TRANSCRIPTS}"
 else

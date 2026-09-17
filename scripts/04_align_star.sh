@@ -15,6 +15,10 @@
 
 set -euo pipefail
 
+export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
+export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
+MC="${MAMBA_EXE}"
+
 SCRIPT_BASE="${SCRIPT_BASE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/RNA-seq}"
 
@@ -66,7 +70,7 @@ align_sample() {
   echo "  R1: ${star_r1}"
   [[ -n "${star_r2}" ]] && echo "  R2: ${star_r2}"
 
-  micromamba run -n rnaseq_env \
+  "${MC}" run -n rnaseq_env \
     STAR \
       --runMode            alignReads \
       --runThreadN         "${THREADS}" \
@@ -94,11 +98,11 @@ align_sample() {
       2>"${DATA_BASE}/logs/star/${sample}.log"
 
   echo "  Indexing BAM..."
-  micromamba run -n rnaseq_env \
+  "${MC}" run -n rnaseq_env \
     samtools index -@ 4 "${bam}"
 
   echo "  Flagstat:"
-  micromamba run -n rnaseq_env \
+  "${MC}" run -n rnaseq_env \
     samtools flagstat "${bam}" | sed 's/^/    /'
 
   echo "  Done: ${bam}"

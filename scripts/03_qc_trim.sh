@@ -13,6 +13,10 @@
 
 set -euo pipefail
 
+export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
+export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
+MC="${MAMBA_EXE}"
+
 SCRIPT_BASE="${SCRIPT_BASE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/RNA-seq}"
 
@@ -37,11 +41,11 @@ run_sample() {
   # ── FastQC on raw reads ───────────────────────────────────────────
   echo "  [1/2] FastQC on raw reads..."
   if [[ -n "${r2}" ]]; then
-    micromamba run -n rnaseq_env \
+    "${MC}" run -n rnaseq_env \
       fastqc -t "${THREADS}" -o "${OUTDIR_QC}" "${r1}" "${r2}" \
       2>"${DATA_BASE}/logs/qc_trim/${sample}_fastqc_raw.log"
   else
-    micromamba run -n rnaseq_env \
+    "${MC}" run -n rnaseq_env \
       fastqc -t "${THREADS}" -o "${OUTDIR_QC}" "${r1}" \
       2>"${DATA_BASE}/logs/qc_trim/${sample}_fastqc_raw.log"
   fi
@@ -57,11 +61,11 @@ run_sample() {
   )
   if [[ -n "${r2}" ]]; then
     trim_args+=(--paired)
-    micromamba run -n rnaseq_env \
+    "${MC}" run -n rnaseq_env \
       trim_galore "${trim_args[@]}" "${r1}" "${r2}" \
       2>"${DATA_BASE}/logs/qc_trim/${sample}_trimgalore.log"
   else
-    micromamba run -n rnaseq_env \
+    "${MC}" run -n rnaseq_env \
       trim_galore "${trim_args[@]}" "${r1}" \
       2>"${DATA_BASE}/logs/qc_trim/${sample}_trimgalore.log"
   fi

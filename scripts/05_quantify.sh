@@ -13,6 +13,10 @@
 
 set -euo pipefail
 
+export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
+export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
+MC="${MAMBA_EXE}"
+
 SCRIPT_BASE="${SCRIPT_BASE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/RNA-seq}"
 
@@ -51,7 +55,7 @@ COUNTS_FILE="${OUTDIR_COUNTS}/counts_raw.tsv"
 if [[ ! -f "${COUNTS_FILE}" ]]; then
   echo ""
   echo "=== featureCounts: gene-level quantification ==="
-  micromamba run -n rnaseq_env \
+  "${MC}" run -n rnaseq_env \
     featureCounts \
       -T "${THREADS}" \
       -a "${GTF}" \
@@ -100,7 +104,7 @@ while IFS=$'\t' read -r sample group r1 r2 batch || [[ -n "$sample" ]]; do
     read_args="-r ${r1}"
   fi
 
-  micromamba run -n rnaseq_env \
+  "${MC}" run -n rnaseq_env \
     salmon quant \
       -i "${SALMON_INDEX}" \
       -l A \

@@ -9,6 +9,10 @@
 
 set -euo pipefail
 
+export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
+export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
+MC="${MAMBA_EXE}"
+
 DATA_BASE="${DATA_BASE:-/xdisk/haining/maarowosegbe/RNA-seq}"
 OUTDIR="${1:-${DATA_BASE}/results/multiqc}"
 SEARCH_DIRS=(
@@ -31,7 +35,7 @@ for d in "${SEARCH_DIRS[@]}"; do
   [[ -d "$d" ]] && existing_dirs+=("$d")
 done
 
-micromamba run -n rnaseq_env \
+"${MC}" run -n rnaseq_env \
   multiqc \
     "${existing_dirs[@]}" \
     --outdir "${OUTDIR}" \

@@ -4,8 +4,11 @@ name: spladder_env
 # Activate: conda activate spladder_env
 # Example input: BAM files (STAR-aligned), GENCODE vM25 GTF
 # SRA accessions: SRR28119110-SRR28119113
+#
+# NOTE: h5py and pysam are installed via pip, not conda.
+# Their PyPI wheels bundle their own libhdf5/libhtslib, bypassing the
+# conda-forge c-ares/libdeflate version constraints on UA HPC.
 channels:
-  - bioconda
   - conda-forge
   - nodefaults
 dependencies:
@@ -15,7 +18,7 @@ dependencies:
   - scipy>=1.10
   - pandas>=1.5
   - matplotlib>=3.7
-  - h5py>=3.7
-  - pysam>=0.20
   - pip:
+      - h5py
+      - pysam
       - spladder

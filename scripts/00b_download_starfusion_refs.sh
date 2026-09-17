@@ -18,9 +18,9 @@ set -euo pipefail
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 REFS_DIR="/xdisk/haining/maarowosegbe/refs"
-CTAT_TARBALL="GRCh38_gencode_v44_CTAT_lib_Apr012024.plug-n-play.tar.gz"
+CTAT_TARBALL="GRCh38_gencode_v44_CTAT_lib_Oct292023.plug-n-play.tar.gz"
 CTAT_URL="https://data.broadinstitute.org/Trinity/CTAT_RESOURCE_LIB/${CTAT_TARBALL}"
-CTAT_DIR="${REFS_DIR}/GRCh38_gencode_v44_CTAT_lib_Apr012024.plug-n-play"
+CTAT_DIR="${REFS_DIR}/GRCh38_gencode_v44_CTAT_lib_Oct292023.plug-n-play"
 
 mkdir -p "${REFS_DIR}"
 
@@ -51,6 +51,6 @@ echo "      --bind /xdisk/haining/maarowosegbe:/xdisk/haining/maarowosegbe \\"
 echo "      \$SIF STAR-Fusion \\"
 echo "      --left_fq R1.fastq.gz \\"
 echo "      --right_fq R2.fastq.gz \\"
-echo "      --genome_lib_dir ${CTAT_DIR} \\"
+echo "      --genome_lib_dir ${CTAT_DIR}/ctat_genome_lib_build_dir \\"
 echo "      --CPU 8 \\"
 echo "      --output_dir star_fusion_output"

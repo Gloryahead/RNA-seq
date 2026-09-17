@@ -5,11 +5,15 @@ name: esviritu_env
 # Database (download once):
 #   esviritu download_db -o ~/esviritu_db
 #   Source: Zenodo record 7876309 (EsViritu DB v2.0.2)
+#
+# UA HPC NOTE: esviritu was removed from bioconda; installing via pip instead.
+# biopython is kept in conda-forge (no htslib chain).
 channels:
-  - bioconda
   - conda-forge
   - nodefaults
 dependencies:
   - python=3.9
-  - esviritu>=2.0
+  - pip
   - biopython>=1.80
+  - pip:
+      - esviritu

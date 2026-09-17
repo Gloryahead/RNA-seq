@@ -2,16 +2,23 @@ name: fusioncatcher_env
 # Tutorial: Part 16.2 (fusion gene detection with FusionCatcher)
 # FusionCatcher installs STAR, BOWTIE, BLAT internally as dependencies.
 # Tutorial recommendation: conda create -p ~/Env_FusionCatcher -y fusioncatcher
-# Activate: conda activate fusioncatcher_env  (or conda activate ~/Env_FusionCatcher)
+# Activate: conda activate fusioncatcher_env
 # Example input: paired-end FASTQ, SRR30961741 (rhabdomyosarcoma, PAX3-FOXO1 fusion)
 # Requirements: ≥20-30M read pairs, read length ≥75bp, fragment size >300bp
 # Database builds (run once, ~15 GB each):
 #   fusioncatcher-build -g homo_sapiens    -o ~/fusioncatcher_Index_human
 #   fusioncatcher-build -g mus_musculus    -o ~/fusioncatcher_Index_mouse
 #   fusioncatcher-build -g rattus_norvegicus -o ~/fusioncatcher_Index_rat
+#
+# UA HPC NOTE: the bioconda fusioncatcher package requires openpyxl=2.5.0a2
+#   (a 2016 alpha release no longer in any channel). Installing via pip instead.
+#   External tools (STAR, BOWTIE, BLAT, samtools) must be available in PATH.
+#   Use rnaseq_env tools: module load star; module load samtools; etc.
 channels:
-  - bioconda
   - conda-forge
   - nodefaults
 dependencies:
-  - fusioncatcher             # Bundles STAR, BOWTIE, BLAT; omit separate version pins
+  - python=3.9
+  - pip
+  - pip:
+      - fusioncatcher

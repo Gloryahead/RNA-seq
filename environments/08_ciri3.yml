@@ -8,19 +8,19 @@ name: ciri3_env
 # Bioconductor (edgeR, limma) installed via:
 #   Rscript environments/r_scripts/install_ciri3_r.R
 #
-# NOTE: samtools, subread/featureCounts, bwa, and openjdk excluded from conda —
-#   bwa and openjdk both chain through native libs that conflict on UA HPC.
-#   Load system modules before running:
-#     module load bwa
-#     module load java   (or: module load openjdk)
-#     module load samtools  (for BAM conversion steps — or use rnaseq_env)
-#   featureCounts: run from rnaseq_env (already has subread installed)
+# UA HPC NOTE — the following are excluded from conda due to native-lib conflicts:
+#   bwa, openjdk, sra-tools, samtools, subread/featureCounts
+# Use system modules or rnaseq_env for those steps:
+#   module load bwa
+#   module load java  (or: module load openjdk)
+#   module load samtools   (or activate rnaseq_env)
+#   featureCounts: activate rnaseq_env (subread is already installed there)
+#   SRA downloads: activate rnaseq_env (sra-tools is already installed there)
 channels:
   - bioconda
   - conda-forge
   - nodefaults
 dependencies:
-  - star>=2.7                # Gene expression quantification; works in env 1
-  - sra-tools>=3.0
+  - star>=2.7                # Gene expression quantification
   - python=3.9
   # Downstream R analysis (edgeR/limma): use rnaseq_r_env

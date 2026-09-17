@@ -21,7 +21,7 @@ for yml in "${ENVDIR}"/*.yml; do
     name=$(grep '^name:' "${yml}" | awk '{print $2}')
     echo ""
     echo "=== ${name} ($(basename "${yml}")) ==="
-    if "${MC}" env list | grep -q "^${name} "; then
+    if [[ -d "${MAMBA_ROOT_PREFIX}/envs/${name}" ]]; then
         echo "  already exists, skipping"
     else
         "${MC}" env create -f "${yml}" --yes

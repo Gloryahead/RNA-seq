@@ -9,7 +9,7 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - r-base=4.4.1
+  - r-base>=4.2
   # ── Core DEG (shared with rnaseq_r_env) ──────────────────────────────────────
   - bioconductor-edger
   - bioconductor-limma

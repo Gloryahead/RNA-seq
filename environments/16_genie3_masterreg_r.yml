@@ -11,7 +11,7 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - r-base=4.4.1
+  - r-base>=4.2
   # ── Regulatory network inference ─────────────────────────────────────────────
   - bioconductor-genie3
   - bioconductor-dorothea     # TF regulon database (DoRothEA)

@@ -15,7 +15,7 @@ dependencies:
   - mageck=0.5.9.5
   - seqtk=1.4
   # ── R for pathway analysis ────────────────────────────────────────────────────
-  - r-base=4.4.1
+  - r-base>=4.2
   - r-essentials
   - r-ggplot2
   - r-ggrepel

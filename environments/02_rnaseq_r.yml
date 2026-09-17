@@ -11,7 +11,7 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - r-base=4.4.1
+  - r-base>=4.2
   # ── Differential expression ──────────────────────────────────────────────────
   - bioconductor-deseq2
   - bioconductor-edger

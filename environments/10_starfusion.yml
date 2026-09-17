@@ -1,44 +1,64 @@
 name: fusiongene_env
-# Fusion gene detection with Arriba
-# Replaces STAR-Fusion (bioconda linux-64 officially unsupported since 2019).
-# Arriba v2.5+ is a C++ tool, actively maintained (Aug 2025), linux-64 native,
-# and is among the highest-sensitivity fusion callers in benchmark studies.
+# Fusion gene detection via Apptainer (STAR-Fusion or Arriba)
 # Activate: micromamba activate fusiongene_env
+# Example input: paired-end FASTQ, SRR30961741 (rhabdomyosarcoma, PAX3-FOXO1)
 #
-# Workflow (Arriba requires STAR run with specific flags):
-#   # Step 1 — align with Arriba-specific STAR flags:
-#   micromamba run -n fusiongene_env STAR \
+# UA HPC NOTE: ALL arriba versions are blocked on UA HPC:
+#   - arriba >=1.2: every htslib build requires libdeflate ranges that conflict
+#     across arriba versions (no single libdeflate satisfies any combination).
+#   - arriba 1.0-1.1: require r-base =3.3.1 (absent from conda-forge), which
+#     forces ncurses =5.9 incompatible with python 3.9.
+#   - STAR-Fusion: bioconda linux-64 officially unsupported since 2019.
+#   Use Apptainer images below — they bundle all dependencies.
+#
+# ── Apptainer setup (download once to xdisk) ─────────────────────────────────
+#   mkdir -p /xdisk/haining/maarowosegbe/apptainer_images
+#
+#   # Option 1 — STAR-Fusion (recommended, actively maintained):
+#   apptainer pull \
+#       --dir /xdisk/haining/maarowosegbe/apptainer_images \
+#       docker://trinityctat/starfusion:latest
+#
+#   # Option 2 — Arriba (high-sensitivity C++ caller):
+#   apptainer pull \
+#       --dir /xdisk/haining/maarowosegbe/apptainer_images \
+#       docker://uhrigs/arriba:latest
+#
+# ── STAR-Fusion usage ─────────────────────────────────────────────────────────
+#   # Download plug-n-play genome lib (~30 GB) once:
+#   #   https://data.broadinstitute.org/Trinity/CTAT_RESOURCE_LIB/
+#   #   GRCh38_gencode_v37_CTAT_lib_Mar012021.plug-n-play.tar.gz
+#   SIF=/xdisk/haining/maarowosegbe/apptainer_images/starfusion_latest.sif
+#   CTAT=/xdisk/haining/maarowosegbe/refs/ctat_genome_lib_GRCh38
+#   apptainer exec --bind $CTAT:/ctat_lib $SIF STAR-Fusion \
+#       --left_fq  R1.fastq.gz \
+#       --right_fq R2.fastq.gz \
+#       --genome_lib_dir /ctat_lib \
+#       --CPU 8 \
+#       --output_dir star_fusion_output
+#
+# ── Arriba usage ──────────────────────────────────────────────────────────────
+#   # Step 1 — align with STAR (use rnaseq_env) with Arriba-specific flags:
+#   micromamba run -n rnaseq_env STAR \
 #       --runMode alignReads \
 #       --outSAMtype BAM SortedByCoordinate \
 #       --outSAMstrandField intronMotif \
 #       --outFilterIntronMotifs RemoveNoncanonical \
 #       --chimSegmentMin 10 \
 #       --chimOutType WithinBAM SoftClip \
-#       --chimJunctionOverhangMin 10 \
-#       --chimScoreMin 1 \
-#       ...
+#       --chimJunctionOverhangMin 10 --chimScoreMin 1 ...
 #   # Step 2 — call fusions:
-#   micromamba run -n fusiongene_env arriba \
+#   SIF=/xdisk/haining/maarowosegbe/apptainer_images/arriba_latest.sif
+#   apptainer exec $SIF arriba \
 #       -x Aligned.sortedByCoord.out.bam \
 #       -a genome.fa -g annotation.gtf \
 #       -o fusions.tsv -O fusions.discarded.tsv
 #
-# Reference files (download once, ~2 GB for GRCh38):
-#   download_references.sh GRCh38  # script bundled with arriba
-# Example input: paired-end FASTQ, SRR30961741 (rhabdomyosarcoma, PAX3-FOXO1)
-#
-# UA HPC NOTE: sra-tools excluded — use rnaseq_env for SRA downloads.
-  # UA HPC NOTE: arriba>=2.5 links against conda htslib>=1.21 → same c-ares
-  # chain that blocks all htslib>=1.17 on this HPC. star is also excluded:
-  # it sets a libdeflate upper bound incompatible with arriba's range.
-  # Alignment: use STAR from rnaseq_env.
-  # trim-galore and pigz: use mirna_env or rnaseq_env.
-  # No version pin on arriba — solver will try older builds (pre-htslib-1.17)
-  # that may be compatible with c-ares<=1.16.x on UA HPC.
+# This stub env provides Python helpers for post-processing fusion results.
 channels:
-  - bioconda
   - conda-forge
   - nodefaults
 dependencies:
   - python=3.9
-  - arriba                   # no pin — solver tries oldest compatible build
+  - pip
+  - pandas>=1.5             # fusion result parsing / filtering scripts

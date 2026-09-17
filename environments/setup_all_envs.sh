@@ -18,10 +18,12 @@ MC="${MAMBA_EXE}"
 ENVDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 for yml in "${ENVDIR}"/*.yml; do
-    name=$(grep '^name:' "${yml}" | awk '{print $2}')
+    # tr -d '\r' strips Windows carriage returns if files were edited on Windows
+    name=$(grep '^name:' "${yml}" | awk '{print $2}' | tr -d '\r')
     echo ""
     echo "=== ${name} ($(basename "${yml}")) ==="
-    if [[ -d "${MAMBA_ROOT_PREFIX}/envs/${name}" ]]; then
+    # awk '{print $1}' handles micromamba env list's leading-space format
+    if "${MC}" env list 2>/dev/null | awk '{print $1}' | grep -qx "${name}"; then
         echo "  already exists, skipping"
     else
         "${MC}" env create -f "${yml}" --yes

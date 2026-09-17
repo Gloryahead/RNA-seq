@@ -1,32 +1,40 @@
-name: starfusion_env
-# Tutorial: Part 16 (fusion gene detection with STAR-Fusion)
-# IMPORTANT: STAR-Fusion works best (and is officially supported) via Docker/Singularity:
-#   docker://trinitycancergenomics/star-fusion:latest
-# Activate: micromamba activate starfusion_env
-# Example input: paired-end FASTQ, GSE279335, SRR30961741
-# Reference (required — ~30 GB, download once):
-#   https://data.broadinstitute.org/Trinity/CTAT_RESOURCE_LIB/
-# Annotation: gencode.v47.basic.annotation.gtf.gz (hg38)
+name: fusiongene_env
+# Fusion gene detection with Arriba
+# Replaces STAR-Fusion (bioconda linux-64 officially unsupported since 2019).
+# Arriba v2.5+ is a C++ tool, actively maintained (Aug 2025), linux-64 native,
+# and is among the highest-sensitivity fusion callers in benchmark studies.
+# Activate: micromamba activate fusiongene_env
 #
-# UA HPC — THIS ENV CANNOT BE BUILT VIA MICROMAMBA ON UA HPC (PERMANENTLY).
-# Two independent, irresolvable blockers confirmed across multiple attempts:
-#   1. star-fusion >=1.12 requires star ==2.7.11a → htslib >=1.17 → libcurl →
-#      libnghttp2 → c-ares >=1.17.1, but UA HPC conda-forge only has c-ares <=1.16.x.
-#   2. star-fusion >=1.14 requires perl-db_file → libdb >=6.2.32 which also
-#      conflicts with any installable versions on this HPC.
-# Use Apptainer instead (recommended by the STAR-Fusion team):
-#   apptainer pull docker://trinitycancergenomics/star-fusion:latest
-#   apptainer exec star-fusion.sif STAR-Fusion --left_fq R1.fq.gz --right_fq R2.fq.gz \
-#     --genome_lib_dir /path/to/ctat_genome_lib --output_dir StarFusion_out
+# Workflow (Arriba requires STAR run with specific flags):
+#   # Step 1 — align with Arriba-specific STAR flags:
+#   micromamba run -n fusiongene_env STAR \
+#       --runMode alignReads \
+#       --outSAMtype BAM SortedByCoordinate \
+#       --outSAMstrandField intronMotif \
+#       --outFilterIntronMotifs RemoveNoncanonical \
+#       --chimSegmentMin 10 \
+#       --chimOutType WithinBAM SoftClip \
+#       --chimJunctionOverhangMin 10 \
+#       --chimScoreMin 1 \
+#       ...
+#   # Step 2 — call fusions:
+#   micromamba run -n fusiongene_env arriba \
+#       -x Aligned.sortedByCoord.out.bam \
+#       -a genome.fa -g annotation.gtf \
+#       -o fusions.tsv -O fusions.discarded.tsv
+#
+# Reference files (download once, ~2 GB for GRCh38):
+#   download_references.sh GRCh38  # script bundled with arriba
+# Example input: paired-end FASTQ, SRR30961741 (rhabdomyosarcoma, PAX3-FOXO1)
+#
+# UA HPC NOTE: sra-tools excluded — use rnaseq_env for SRA downloads.
 channels:
   - bioconda
   - conda-forge
   - nodefaults
 dependencies:
   - python=3.9
-  - star-fusion>=1.12
-  - star>=2.7
-  - trim-galore>=0.6
-  - sra-tools>=3.0
-  - perl>=5.32
-  - pigz
+  - arriba>=2.5              # C++ binary; bundles htslib statically; no c-ares dep
+  - star>=2.7                # alignment (Arriba requires specific STAR flags above)
+  - trim-galore>=0.6         # adapter trimming
+  - pigz                     # parallel gzip for FASTQ

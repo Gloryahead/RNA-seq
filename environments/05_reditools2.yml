@@ -1,41 +1,32 @@
-name: reditools2_env
-# Tutorial: Part 9 (RNA editing analysis with REDItools2)
-# WARNING: REDItools2 requires Python 2.7 (end-of-life).
-#   Alternative modern tools: GIREMI, SPRINT — consider those for new projects.
-# Activate: micromamba activate reditools2_env
-# Post-activation setup:
-#   git clone https://github.com/tflati/reditools2.0.git
-#   cd reditools2.0 && pip install -r requirements.txt
-# Example input: BAM (RNA-seq, STAR-aligned), Mouse GRCm38 FASTA
+name: rnaediting_env
+# RNA editing analysis with JACUSA2
+# Replaces REDItools2 (Python 2.7 EOL, no linux-64 conda support).
+# JACUSA2 v2.1+ is Java-based, actively maintained (Jun 2026), and detects
+# A-to-I (and other) editing events from RNA-seq BAM files.
+# Activate: micromamba activate rnaediting_env
+#
+# Basic workflow:
+#   # Step 1 — align (use rnaseq_env):
+#   micromamba run -n rnaseq_env STAR --runMode alignReads ...
+#   micromamba run -n rnaseq_env samtools sort -o sorted.bam Aligned.out.bam
+#   micromamba run -n rnaseq_env samtools index sorted.bam
+#   # Step 2 — call editing sites:
+#   micromamba run -n rnaediting_env JACUSA2 call-1 \
+#       -r editing_sites.tsv sorted.bam
+#
+# Example input: RNA-seq BAM (STAR-aligned), reference FASTA, dbSNP VCF
 # SRA accession: SRR28119110
 #
-# UA HPC — THIS ENV CANNOT BE BUILT VIA MICROMAMBA ON UA HPC (PERMANENTLY).
-# Root cause: samtools >=1.18 → htslib >=1.17 → libcurl → libnghttp2 → c-ares
-#   >=1.17.1, but UA HPC conda-forge only carries c-ares <=1.16.x.
-# Use Apptainer instead:
-#   apptainer pull docker://biocontainers/reditools2:latest
-#   apptainer exec reditools2.sif reditools.py ...
-# For openmpi/parallel mode: module load openmpi before invoking REDItools2.
-# For single-threaded use, no MPI is needed.
+# UA HPC NOTE: samtools excluded — htslib chain blocked; use rnaseq_env for
+#   BAM sorting/indexing. JACUSA2 reads BAM directly via its own Java library.
 channels:
   - bioconda
   - conda-forge
   - nodefaults
 dependencies:
-  - python=2.7
-  # ── Build dependencies required by REDItools2 ─────────────────────────────────
-  - libffi
-  - libxml2
-  - libxslt
-  - zlib
-  - bzip2
-  - xz               # provides lzma — 'lzma' is not a conda package
-  - ncurses
-  # ── Genomics tools ────────────────────────────────────────────────────────────
-  - htslib>=1.18
-  - samtools>=1.18
-  - tabix
-  - bedtools>=2.30
-  - gffread>=0.12
-  # ── Downstream R analysis — run in rnaseq_r_env, not here ───────────────────
-  # R packages used: data.table, limma, edgeR (already in rnaseq_r_env)
+  - python=3.9
+  - jacusa2>=2.1             # Java-based; no htslib/c-ares conda dep
+  - r-base                   # downstream editing analysis
+  - r-ggplot2
+  - r-dplyr
+  - r-data.table

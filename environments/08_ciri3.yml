@@ -8,18 +8,19 @@ name: ciri3_env
 # Bioconductor (edgeR, limma) installed via:
 #   Rscript environments/r_scripts/install_ciri3_r.R
 #
-# NOTE: samtools and subread/featureCounts excluded — both require htslib which
-#   is not installable via conda on UA HPC due to a c-ares version constraint.
-#   For BAM conversion and gene-count steps, activate rnaseq_env and run
-#   samtools/featureCounts from there.
+# NOTE: samtools, subread/featureCounts, bwa, and openjdk excluded from conda —
+#   bwa and openjdk both chain through native libs that conflict on UA HPC.
+#   Load system modules before running:
+#     module load bwa
+#     module load java   (or: module load openjdk)
+#     module load samtools  (for BAM conversion steps — or use rnaseq_env)
+#   featureCounts: run from rnaseq_env (already has subread installed)
 channels:
   - bioconda
   - conda-forge
   - nodefaults
 dependencies:
-  - openjdk>=17              # CIRI3 runtime requirement
-  - bwa>=0.7.17              # Read alignment for CIRI3
-  - star>=2.7                # Gene expression quantification side
+  - star>=2.7                # Gene expression quantification; works in env 1
   - sra-tools>=3.0
   - python=3.9
   # Downstream R analysis (edgeR/limma): use rnaseq_r_env

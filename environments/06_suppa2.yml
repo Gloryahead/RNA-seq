@@ -17,5 +17,5 @@ dependencies:
   - scipy>=1.10
   - pandas>=1.5
   - scikit-learn>=1.3
-  - r-base                  # For optional downstream R analysis
   - samtools>=1.18
+  # Downstream R analysis: use rnaseq_r_env

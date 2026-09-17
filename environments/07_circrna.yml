@@ -10,11 +10,11 @@ channels:
   - nodefaults
 dependencies:
   - python=3.9
-  - circexplorer2=2.3.8
-  - star=2.7.11b             # Required for back-splice chimeric alignment mode
-  - trim-galore=0.6.10
-  - samtools=1.21
-  - hisat2=2.2.1             # Optional alternative aligner
-  - bowtie=1.3.1             # Optional alternative aligner
-  - sra-tools=3.1.1
-  - pigz=2.8
+  - circexplorer2>=2.3
+  - star>=2.7
+  - trim-galore>=0.6
+  - samtools>=1.18
+  - hisat2>=2.2
+  - bowtie>=1.3
+  - sra-tools>=3.0
+  - pigz

@@ -11,12 +11,11 @@ channels:
 dependencies:
   - python=3.9
   - pip
-  - numpy=1.26.4
-  - scipy=1.13.1
-  - pandas=2.2.2
-  - matplotlib=3.9.1
-  - h5py=3.11.0
-  - pysam=0.22.1
-  - samtools=1.21
+  - numpy>=1.24
+  - scipy>=1.10
+  - pandas>=1.5
+  - matplotlib>=3.7
+  - h5py>=3.7
+  - pysam>=0.20
   - pip:
-      - spladder           # No bioconda package; use pip
+      - spladder

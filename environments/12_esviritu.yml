@@ -11,5 +11,5 @@ channels:
   - nodefaults
 dependencies:
   - python=3.9
-  - esviritu=2.0.2
-  - biopython=1.83
+  - esviritu>=2.0
+  - biopython>=1.80

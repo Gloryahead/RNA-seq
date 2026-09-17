@@ -19,5 +19,4 @@ dependencies:
   - star>=2.7                # Gene expression quantification side
   - sra-tools>=3.0
   - python=3.9
-  - r-base
-  - r-biocmanager
+  # Downstream R analysis (edgeR/limma): use rnaseq_r_env

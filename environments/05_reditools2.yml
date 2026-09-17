@@ -26,10 +26,10 @@ dependencies:
   - openmpi
   - mpi4py
   # ── Genomics tools ────────────────────────────────────────────────────────────
-  - htslib=1.21
-  - samtools=1.21
-  - tabix=1.11
-  - bedtools=2.31.1
-  - gffread=0.12.7
+  - htslib>=1.18
+  - samtools>=1.18
+  - tabix
+  - bedtools>=2.30
+  - gffread>=0.12
   # ── Downstream R analysis — run in rnaseq_r_env, not here ───────────────────
   # R packages used: data.table, limma, edgeR (already in rnaseq_r_env)

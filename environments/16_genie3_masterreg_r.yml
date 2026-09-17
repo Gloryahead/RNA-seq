@@ -9,7 +9,7 @@ name: genie3_masterreg_env
 channels:
   - bioconda
   - conda-forge
-  - defaults
+  - nodefaults
 dependencies:
   - r-base=4.4.1
   # ── Regulatory network inference ─────────────────────────────────────────────

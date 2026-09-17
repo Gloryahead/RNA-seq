@@ -10,7 +10,7 @@ name: suppa2_env
 channels:
   - bioconda
   - conda-forge
-  - defaults
+  - nodefaults
 dependencies:
   - python=3.8              # SUPPA2 is tested on Python 3.8
   - numpy=1.24.4

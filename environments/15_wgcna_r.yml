@@ -7,7 +7,7 @@ name: wgcna_env
 channels:
   - bioconda
   - conda-forge
-  - defaults
+  - nodefaults
 dependencies:
   - r-base=4.4.1
   # ── Co-expression network ─────────────────────────────────────────────────────

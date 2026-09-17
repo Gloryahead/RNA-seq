@@ -12,6 +12,6 @@ name: fusioncatcher_env
 channels:
   - bioconda
   - conda-forge
-  - defaults
+  - nodefaults
 dependencies:
   - fusioncatcher             # Bundles STAR, BOWTIE, BLAT; omit separate version pins

@@ -11,7 +11,7 @@ name: ciri3_env
 channels:
   - bioconda
   - conda-forge
-  - defaults
+  - nodefaults
 dependencies:
   - openjdk=17.0.11          # CIRI3 runtime requirement
   - bwa=0.7.18               # Read alignment for CIRI3

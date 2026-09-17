@@ -10,7 +10,7 @@ name: virtus2_env
 channels:
   - bioconda
   - conda-forge
-  - defaults
+  - nodefaults
 dependencies:
   - python=3.9
   - cwltool=3.1.20240508115211

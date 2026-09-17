@@ -7,7 +7,7 @@ name: spladder_env
 channels:
   - bioconda
   - conda-forge
-  - defaults
+  - nodefaults
 dependencies:
   - python=3.9
   - pip

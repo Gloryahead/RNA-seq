@@ -7,7 +7,7 @@ name: cancer_subtype_env
 channels:
   - bioconda
   - conda-forge
-  - defaults
+  - nodefaults
 dependencies:
   - r-base=4.4.1
   # ── Core DEG (shared with rnaseq_r_env) ──────────────────────────────────────

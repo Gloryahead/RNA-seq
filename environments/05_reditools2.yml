@@ -12,7 +12,7 @@ name: reditools2_env
 channels:
   - bioconda
   - conda-forge
-  - defaults
+  - nodefaults
 dependencies:
   - python=2.7
   # ── Build / MPI dependencies required by REDItools2 ──────────────────────────

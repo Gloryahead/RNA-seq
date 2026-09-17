@@ -8,7 +8,7 @@ name: esviritu_env
 channels:
   - bioconda
   - conda-forge
-  - defaults
+  - nodefaults
 dependencies:
   - python=3.9
   - esviritu=2.0.2

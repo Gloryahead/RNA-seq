@@ -19,6 +19,10 @@ name: rnaediting_env
 #
 # UA HPC NOTE: samtools excluded — htslib chain blocked; use rnaseq_env for
 #   BAM sorting/indexing. JACUSA2 reads BAM directly via its own Java library.
+  # UA HPC NOTE: R packages excluded — bioconda's old r-dplyr/r-ggplot2 builds
+  # require r-base =3.3.1 (no longer in conda-forge), poisoning the solver.
+  # Use rnaseq_r_env for all downstream R analysis (r-ggplot2, r-dplyr, etc.
+  # are already installed there).
 channels:
   - bioconda
   - conda-forge
@@ -26,7 +30,3 @@ channels:
 dependencies:
   - python=3.9
   - jacusa2>=2.1             # Java-based; no htslib/c-ares conda dep
-  - r-base                   # downstream editing analysis
-  - r-ggplot2
-  - r-dplyr
-  - r-data.table

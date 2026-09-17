@@ -28,13 +28,17 @@ name: fusiongene_env
 # Example input: paired-end FASTQ, SRR30961741 (rhabdomyosarcoma, PAX3-FOXO1)
 #
 # UA HPC NOTE: sra-tools excluded — use rnaseq_env for SRA downloads.
+  # UA HPC NOTE: arriba>=2.5 links against conda htslib>=1.21 → same c-ares
+  # chain that blocks all htslib>=1.17 on this HPC. star is also excluded:
+  # it sets a libdeflate upper bound incompatible with arriba's range.
+  # Alignment: use STAR from rnaseq_env.
+  # trim-galore and pigz: use mirna_env or rnaseq_env.
+  # No version pin on arriba — solver will try older builds (pre-htslib-1.17)
+  # that may be compatible with c-ares<=1.16.x on UA HPC.
 channels:
   - bioconda
   - conda-forge
   - nodefaults
 dependencies:
   - python=3.9
-  - arriba>=2.5              # C++ binary; bundles htslib statically; no c-ares dep
-  - star>=2.7                # alignment (Arriba requires specific STAR flags above)
-  - trim-galore>=0.6         # adapter trimming
-  - pigz                     # parallel gzip for FASTQ
+  - arriba                   # no pin — solver tries oldest compatible build

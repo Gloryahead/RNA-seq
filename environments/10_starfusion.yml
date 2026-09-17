@@ -2,14 +2,22 @@ name: starfusion_env
 # Tutorial: Part 16 (fusion gene detection with STAR-Fusion)
 # IMPORTANT: STAR-Fusion works best (and is officially supported) via Docker/Singularity:
 #   docker://trinitycancergenomics/star-fusion:latest
-# The conda install below is provided for HPC clusters without container support.
 # Activate: micromamba activate starfusion_env
 # Example input: paired-end FASTQ, GSE279335, SRR30961741
 # Reference (required — ~30 GB, download once):
 #   https://data.broadinstitute.org/Trinity/CTAT_RESOURCE_LIB/
 # Annotation: gencode.v47.basic.annotation.gtf.gz (hg38)
-# NOTE: samtools excluded — star-fusion's bioconda package includes samtools as
-#   an internal dep; explicit listing here caused solver conflicts on UA HPC.
+#
+# UA HPC — THIS ENV CANNOT BE BUILT VIA MICROMAMBA ON UA HPC (PERMANENTLY).
+# Two independent, irresolvable blockers confirmed across multiple attempts:
+#   1. star-fusion >=1.12 requires star ==2.7.11a → htslib >=1.17 → libcurl →
+#      libnghttp2 → c-ares >=1.17.1, but UA HPC conda-forge only has c-ares <=1.16.x.
+#   2. star-fusion >=1.14 requires perl-db_file → libdb >=6.2.32 which also
+#      conflicts with any installable versions on this HPC.
+# Use Apptainer instead (recommended by the STAR-Fusion team):
+#   apptainer pull docker://trinitycancergenomics/star-fusion:latest
+#   apptainer exec star-fusion.sif STAR-Fusion --left_fq R1.fq.gz --right_fq R2.fq.gz \
+#     --genome_lib_dir /path/to/ctat_genome_lib --output_dir StarFusion_out
 channels:
   - bioconda
   - conda-forge

@@ -9,9 +9,13 @@ name: reditools2_env
 # Example input: BAM (RNA-seq, STAR-aligned), Mouse GRCm38 FASTA
 # SRA accession: SRR28119110
 #
-# NOTE: openmpi/mpi4py are NOT in this micromamba env — they chain through an old
-# c-ares that conflicts with samtools/htslib. Load the HPC system MPI instead:
-#   module load openmpi  (before running REDItools2 parallel mode)
+# UA HPC — THIS ENV CANNOT BE BUILT VIA MICROMAMBA ON UA HPC (PERMANENTLY).
+# Root cause: samtools >=1.18 → htslib >=1.17 → libcurl → libnghttp2 → c-ares
+#   >=1.17.1, but UA HPC conda-forge only carries c-ares <=1.16.x.
+# Use Apptainer instead:
+#   apptainer pull docker://biocontainers/reditools2:latest
+#   apptainer exec reditools2.sif reditools.py ...
+# For openmpi/parallel mode: module load openmpi before invoking REDItools2.
 # For single-threaded use, no MPI is needed.
 channels:
   - bioconda

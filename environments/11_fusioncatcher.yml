@@ -10,15 +10,22 @@ name: fusioncatcher_env
 #   fusioncatcher-build -g mus_musculus    -o ~/fusioncatcher_Index_mouse
 #   fusioncatcher-build -g rattus_norvegicus -o ~/fusioncatcher_Index_rat
 #
-# UA HPC NOTE: the bioconda fusioncatcher package requires openpyxl=2.5.0a2
-#   (a 2016 alpha release no longer in any channel). Installing via pip instead.
-#   External tools (STAR, BOWTIE, BLAT, samtools) must be available in PATH.
-#   Use rnaseq_env tools: module load star; module load samtools; etc.
+# UA HPC NOTE:
+#   bioconda fusioncatcher requires openpyxl=2.5.0a2 (2016 alpha, gone from all
+#   channels). fusioncatcher is NOT on PyPI (micromamba 2.x pip sections fail
+#   for packages that don't exist there). This env is a stub with runtime deps.
+#   Install fusioncatcher manually after env is built:
+#     micromamba activate fusioncatcher_env
+#     pip install git+https://github.com/ndaniel/fusioncatcher.git
+#   OR use the Apptainer/Singularity image (recommended for complex pipelines):
+#     apptainer pull docker://ndaniel/fusioncatcher
+#   External tools (STAR, BOWTIE, BLAT, samtools): use rnaseq_env or module load.
 channels:
   - conda-forge
   - nodefaults
 dependencies:
   - python=3.9
   - pip
-  - pip:
-      - fusioncatcher
+  - biopython>=1.80            # FusionCatcher runtime dep (no htslib chain)
+  - numpy>=1.24
+  - scipy>=1.10

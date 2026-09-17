@@ -6,8 +6,12 @@ name: esviritu_env
 #   esviritu download_db -o ~/esviritu_db
 #   Source: Zenodo record 7876309 (EsViritu DB v2.0.2)
 #
-# UA HPC NOTE: esviritu was removed from bioconda; installing via pip instead.
-# biopython is kept in conda-forge (no htslib chain).
+# UA HPC NOTE: esviritu was removed from bioconda and is NOT on PyPI
+#   (micromamba 2.x pip sections fail for packages that don't exist on PyPI).
+#   Install manually after env is built:
+#     micromamba activate esviritu_env
+#     pip install git+https://github.com/mtisza1/EsViritu.git
+# biopython kept in conda-forge (no htslib chain).
 channels:
   - conda-forge
   - nodefaults
@@ -15,5 +19,3 @@ dependencies:
   - python=3.9
   - pip
   - biopython>=1.80
-  - pip:
-      - esviritu

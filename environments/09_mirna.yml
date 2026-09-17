@@ -8,6 +8,7 @@ name: mirna_env
 #   miRBase: ftp://mirbase.org/pub/mirbase/CURRENT/
 #   Ensembl: ftp://ftp.ensembl.org/pub/release-113/
 # QIAseq miRNA Kit used in Part 15.2 (UMI handling with umi_tools)
+# NOTE: samtools excluded — use rnaseq_env for BAM-level operations.
 channels:
   - bioconda
   - conda-forge
@@ -24,5 +25,4 @@ dependencies:
   # ── QC and general utilities ──────────────────────────────────────────────────
   - trim-galore>=0.6
   - fastqc>=0.12
-  - samtools>=1.18
   - sra-tools>=3.0

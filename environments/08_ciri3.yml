@@ -7,6 +7,11 @@ name: ciri3_env
 # SRA accessions: SRR5398213-SRR5398218 (GSE97239, gastric cancer exosomal circRNAs)
 # Bioconductor (edgeR, limma) installed via:
 #   Rscript environments/r_scripts/install_ciri3_r.R
+#
+# NOTE: samtools and subread/featureCounts excluded — both require htslib which
+#   is not installable via conda on UA HPC due to a c-ares version constraint.
+#   For BAM conversion and gene-count steps, activate rnaseq_env and run
+#   samtools/featureCounts from there.
 channels:
   - bioconda
   - conda-forge
@@ -14,8 +19,6 @@ channels:
 dependencies:
   - openjdk>=17              # CIRI3 runtime requirement
   - bwa>=0.7.17              # Read alignment for CIRI3
-  - samtools>=1.18
-  - subread>=2.0             # featureCounts for host gene expression
   - star>=2.7                # Gene expression quantification side
   - sra-tools>=3.0
   - python=3.9

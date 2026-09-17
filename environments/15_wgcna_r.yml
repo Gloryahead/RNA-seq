@@ -1,6 +1,6 @@
 name: wgcna_env
 # Tutorial: WGCNA gene co-expression network analysis
-# CRAN packages only via conda; Bioconductor installed via:
+# CRAN packages only via conda; WGCNA and Bioconductor installed via:
 #   conda activate wgcna_env
 #   Rscript environments/r_scripts/install_wgcna_r.R
 # Example input: normalized_counts.tsv, sample_info.tsv, gene_data.tsv
@@ -8,12 +8,14 @@ name: wgcna_env
 # External database: STRING v11.5 (species 9606 for Homo sapiens)
 # Enable multi-threading (call in R before WGCNA):
 #   WGCNA::enableWGCNAThreads(nThreads = 8)
+# NOTE: r-wgcna excluded from conda — its conda-forge package has Bioconductor
+#   transitive dependencies that conflict with r-base on UA HPC. WGCNA is
+#   installed post-activation via BiocManager::install("WGCNA") in the R script.
 channels:
   - conda-forge
   - nodefaults
 dependencies:
   - r-base
-  - r-wgcna
   - r-igraph
   - r-reshape2
   - r-rcolorbrewer

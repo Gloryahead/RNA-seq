@@ -7,8 +7,9 @@ name: suppa2_env
 #   cd SUPPA && pip install -e .
 # Example input: Salmon quant.sf files, GENCODE vM25 GTF (GRCm38)
 # Reference annotation: gencode.vM25.annotation.gtf
+# NOTE: samtools excluded — use rnaseq_env for BAM-level operations.
+# Downstream R analysis: use rnaseq_r_env
 channels:
-  - bioconda
   - conda-forge
   - nodefaults
 dependencies:
@@ -17,5 +18,3 @@ dependencies:
   - scipy>=1.10
   - pandas>=1.5
   - scikit-learn>=1.3
-  - samtools>=1.18
-  # Downstream R analysis: use rnaseq_r_env

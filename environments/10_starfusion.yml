@@ -8,6 +8,8 @@ name: starfusion_env
 # Reference (required — ~30 GB, download once):
 #   https://data.broadinstitute.org/Trinity/CTAT_RESOURCE_LIB/
 # Annotation: gencode.v47.basic.annotation.gtf.gz (hg38)
+# NOTE: samtools excluded — star-fusion's bioconda package includes samtools as
+#   an internal dep; explicit listing here caused solver conflicts on UA HPC.
 channels:
   - bioconda
   - conda-forge
@@ -17,7 +19,6 @@ dependencies:
   - star-fusion>=1.12
   - star>=2.7
   - trim-galore>=0.6
-  - samtools>=1.18
   - sra-tools>=3.0
   - perl>=5.32
   - pigz

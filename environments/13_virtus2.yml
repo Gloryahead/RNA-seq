@@ -7,14 +7,14 @@ name: virtus2_env
 # Reference genome: GRCh38.p13, Gencode release 33
 # Virus reference: provided in the VIRTUS2 repository
 # Example input: paired-end RNA-seq FASTQ (.fastq.gz)
+# NOTE: singularity is not in conda — load the UA HPC system module instead:
+#   module load singularity   (or: module load apptainer)
 channels:
-  - bioconda
   - conda-forge
   - nodefaults
 dependencies:
   - python=3.9
   - cwltool>=3.1
-  - singularity>=3.8            # Required to pull VIRTUS2's containerized sub-tools
   - numpy>=1.24
   - pandas>=1.5
   - scipy>=1.10

@@ -6,6 +6,7 @@ name: mageck_env
 #   Demo data: http://cistrome.org/MAGeCKFlute/demo.tar.gz
 # Bioconductor (clusterProfiler, pathview, etc.) installed via:
 #   Rscript environments/r_scripts/install_mageck_r.R
+# NOTE: seqtk excluded — it requires htslib which conflicts on UA HPC.
 channels:
   - conda-forge
   - nodefaults
@@ -13,7 +14,6 @@ dependencies:
   - python=3.9
   # ── CRISPR screen ─────────────────────────────────────────────────────────────
   - mageck
-  - seqtk
   # ── R for pathway analysis ────────────────────────────────────────────────────
   - r-base
   - r-ggplot2

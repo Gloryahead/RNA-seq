@@ -1,7 +1,7 @@
 name: spladder_env
 # Tutorial: Part 8 (alternative splicing analysis with SplAdder)
 # SplAdder is pip-installable; BAM inputs come from rnaseq_env alignment.
-# Activate: conda activate spladder_env
+# Activate: micromamba activate spladder_env
 # Example input: BAM files (STAR-aligned), GENCODE vM25 GTF
 # SRA accessions: SRR28119110-SRR28119113
 #

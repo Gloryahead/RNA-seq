@@ -2,7 +2,7 @@
 # install_wgcna_r.R
 # Run after activating wgcna_env to install WGCNA and Bioconductor packages.
 # r-wgcna is NOT in the conda YAML (Bioconductor transitive deps conflict on UA HPC).
-# Usage: conda activate wgcna_env && Rscript environments/r_scripts/install_wgcna_r.R
+# Usage: micromamba activate wgcna_env && Rscript environments/r_scripts/install_wgcna_r.R
 
 if (!require("BiocManager", quietly = TRUE))
   install.packages("BiocManager", repos = "https://cloud.r-project.org")

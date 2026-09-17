@@ -1,7 +1,7 @@
 name: circrna_env
 # Tutorial: Part 13 (circular RNA-seq analysis with CIRCexplorer2)
 # CIRCexplorer2 uses STAR chimeric alignments to detect back-splice junctions.
-# Activate: conda activate circrna_env
+# Activate: micromamba activate circrna_env
 # Example input: paired-end FASTQ (gzip), hg38 STAR index, RefSeq/KnownGenes annotation
 # Output: circularRNA_known.txt
 #

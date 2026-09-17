@@ -1,6 +1,6 @@
 name: mageck_env
 # Tutorial: CRISPR screen analysis (fastq → sgRNA counts → gene scores → pathways)
-# Activate: conda activate mageck_env
+# Activate: micromamba activate mageck_env
 # Example input: single-end FASTQ, sgRNA library brunello.tsv
 #   Library:   https://zenodo.org/records/5750854/files/brunello.tsv
 #   Demo data: http://cistrome.org/MAGeCKFlute/demo.tar.gz

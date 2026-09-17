@@ -1,8 +1,8 @@
 name: fusioncatcher_env
 # Tutorial: Part 16.2 (fusion gene detection with FusionCatcher)
 # FusionCatcher installs STAR, BOWTIE, BLAT internally as dependencies.
-# Tutorial recommendation: conda create -p ~/Env_FusionCatcher -y fusioncatcher
-# Activate: conda activate fusioncatcher_env
+# Tutorial recommendation: micromamba create -p ~/Env_FusionCatcher -y fusioncatcher
+# Activate: micromamba activate fusioncatcher_env
 # Example input: paired-end FASTQ, SRR30961741 (rhabdomyosarcoma, PAX3-FOXO1 fusion)
 # Requirements: ≥20-30M read pairs, read length ≥75bp, fragment size >300bp
 # Database builds (run once, ~15 GB each):

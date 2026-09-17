@@ -1,7 +1,7 @@
 name: suppa2_env
 # Tutorial: Part 11 (transcript-level alternative splicing with SUPPA2)
 # SUPPA2 has no bioconda package; install from GitHub after env creation.
-# Activate: conda activate suppa2_env
+# Activate: micromamba activate suppa2_env
 # Post-activation setup:
 #   git clone https://github.com/comprna/SUPPA.git
 #   cd SUPPA && pip install -e .

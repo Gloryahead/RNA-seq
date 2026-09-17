@@ -1,7 +1,7 @@
 name: mirna_env
 # Tutorials: Part 15 (miRNA-seq with miRDeep2), Part 15.2 (UMI-based miRNA-seq)
 # miRDeep2 requires Bowtie v1 (not Bowtie2) for its internal alignment steps.
-# Activate: conda activate mirna_env
+# Activate: micromamba activate mirna_env
 # Example input (Part 15): GSE64977, SRR1759248, adapter TGGAATTCTCGGGTGCCAAGG,
 #   read length 18-30 nt, Ensembl GRCh38 genome (release 113), miRBase mature.fa + hairpin.fa
 # Reference databases (download manually):
@@ -12,7 +12,7 @@ name: mirna_env
 # UA HPC NOTE — excluded from conda:
 #   mirdeep2: its bioconda package lists umi_tools+cutadapt as conda runtime deps,
 #     which conflict through pysam→libdeflate on UA HPC. Install manually:
-#       conda activate mirna_env
+#       micromamba activate mirna_env
 #       git clone https://github.com/rajewsky-lab/mirdeep2.git
 #       cd mirdeep2 && perl install.pl
 #   sra-tools: libcurl→libnghttp2→c-ares chain blocked on UA HPC; use rnaseq_env

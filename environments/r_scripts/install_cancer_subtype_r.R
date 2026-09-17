@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 # install_cancer_subtype_r.R
 # Run after activating cancer_subtype_env.
-# Usage: conda activate cancer_subtype_env && Rscript environments/r_scripts/install_cancer_subtype_r.R
+# Usage: micromamba activate cancer_subtype_env && Rscript environments/r_scripts/install_cancer_subtype_r.R
 
 if (!require("BiocManager", quietly = TRUE))
   install.packages("BiocManager", repos = "https://cloud.r-project.org")

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # setup_all_envs.sh
-# Creates all conda environments for the RNA-seq pipeline.
+# Creates all micromamba environments for the RNA-seq pipeline.
 # Each YAML file defines its own environment name.
 # Continues past individual env failures — run again to retry any that failed.
 #

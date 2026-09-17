@@ -29,8 +29,9 @@ mkdir -p "${DATA_BASE}/logs/slurm" "${DATA_BASE}/data/fastq" "${DATA_BASE}/tmp"
 set +eu; source ~/.bashrc; set -eu
 export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
 export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
-eval "$(micromamba shell hook --shell=bash)"
-micromamba activate rnaseq_env
+MC="${MAMBA_EXE}"
+eval "$("${MC}" shell hook --shell=bash)"
+"${MC}" activate rnaseq_env
 
 # ── Which datasets to download? ───────────────────────────────────────
 # Uncomment the modules you want. "all" downloads everything.

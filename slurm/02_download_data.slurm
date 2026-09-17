@@ -29,8 +29,9 @@ mkdir -p "${TMPDIR}"
 set +eu; source ~/.bashrc; set -eu
 export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
 export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
-eval "$(micromamba shell hook --shell=bash)"
-micromamba activate rnaseq_env
+MC="${MAMBA_EXE}"
+eval "$("${MC}" shell hook --shell=bash)"
+"${MC}" activate rnaseq_env
 
 ACCESSION_FILE="${DATA_BASE}/data/sra_accessions.txt"
 FASTQ_DIR="${DATA_BASE}/data/fastq"

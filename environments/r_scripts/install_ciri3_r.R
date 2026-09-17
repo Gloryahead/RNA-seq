@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 # install_ciri3_r.R
 # Run after activating ciri3_env to install Bioconductor packages for DE.
-# Usage: conda activate ciri3_env && Rscript environments/r_scripts/install_ciri3_r.R
+# Usage: micromamba activate ciri3_env && Rscript environments/r_scripts/install_ciri3_r.R
 
 if (!require("BiocManager", quietly = TRUE))
   install.packages("BiocManager", repos = "https://cloud.r-project.org")

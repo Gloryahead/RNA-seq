@@ -1,7 +1,7 @@
 name: wgcna_env
 # Tutorial: WGCNA gene co-expression network analysis
 # CRAN packages only via conda; WGCNA and Bioconductor installed via:
-#   conda activate wgcna_env
+#   micromamba activate wgcna_env
 #   Rscript environments/r_scripts/install_wgcna_r.R
 # Example input: normalized_counts.tsv, sample_info.tsv, gene_data.tsv
 # GEO dataset: GSE261875 (32 samples, 8 conditions, human TDP-43 study)

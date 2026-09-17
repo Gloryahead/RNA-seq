@@ -1,7 +1,7 @@
 name: cancer_subtype_env
 # Tutorial: Part 6 (cancer subtype prediction — PAM50 for breast cancer)
 # CRAN packages only via conda; Bioconductor installed via:
-#   conda activate cancer_subtype_env
+#   micromamba activate cancer_subtype_env
 #   Rscript environments/r_scripts/install_cancer_subtype_r.R
 channels:
   - conda-forge

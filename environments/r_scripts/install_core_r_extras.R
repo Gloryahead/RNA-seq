@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 # install_core_r_extras.R
 # Run after activating rnaseq_r_env to install Bioconductor + CRAN extras.
-# Usage: conda activate rnaseq_r_env && Rscript environments/r_scripts/install_core_r_extras.R
+# Usage: micromamba activate rnaseq_r_env && Rscript environments/r_scripts/install_core_r_extras.R
 
 if (!require("BiocManager", quietly = TRUE))
   install.packages("BiocManager", repos = "https://cloud.r-project.org")

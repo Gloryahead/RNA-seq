@@ -1,7 +1,7 @@
 name: virtus2_env
 # Tutorial: Part 17 (viral sequence detection with VIRTUS2)
 # VIRTUS2 uses CWL workflows; Singularity is required to pull its containerized tools.
-# Activate: conda activate virtus2_env
+# Activate: micromamba activate virtus2_env
 # Post-activation setup:
 #   git clone https://github.com/yyoshiaki/VIRTUS2.git
 # Reference genome: GRCh38.p13, Gencode release 33

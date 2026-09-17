@@ -33,8 +33,9 @@ export DATA_BASE
 set +eu; source ~/.bashrc; set -eu
 export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
 export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
-eval "$(micromamba shell hook --shell=bash)"
-micromamba activate snakemake_env   # see NOTE below
+MC="${MAMBA_EXE}"
+eval "$("${MC}" shell hook --shell=bash)"
+"${MC}" activate snakemake_env   # see NOTE below
 
 echo ""
 echo "--- Snakemake dry run (DAG check) ---"
@@ -63,7 +64,7 @@ snakemake \
 
 echo ""
 echo "--- MultiQC summary ---"
-micromamba activate rnaseq_env
+"${MC}" activate rnaseq_env
 bash "${SCRIPT_BASE}/scripts/06_multiqc.sh"
 
 echo "========== Pipeline finished at: $(date) =========="

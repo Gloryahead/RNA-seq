@@ -2,7 +2,7 @@ name: genie3_masterreg_env
 # Tutorials: GENIE3 gene regulatory network + Master Regulator Analysis (RegEnrich, RTN)
 # Combined because both are TF/regulatory network analyses with heavily overlapping deps.
 # CRAN packages only via conda; Bioconductor installed via:
-#   conda activate genie3_masterreg_env
+#   micromamba activate genie3_masterreg_env
 #   Rscript environments/r_scripts/install_genie3_masterreg_r.R
 # Example input (GENIE3):       normalized_counts.tsv, sample_info.tsv — GSE261875
 # Example input (Master Reg):   expression matrix — GSE53239 (6 treatment + 6 control)

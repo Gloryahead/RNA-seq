@@ -3,7 +3,7 @@ name: starfusion_env
 # IMPORTANT: STAR-Fusion works best (and is officially supported) via Docker/Singularity:
 #   docker://trinitycancergenomics/star-fusion:latest
 # The conda install below is provided for HPC clusters without container support.
-# Activate: conda activate starfusion_env
+# Activate: micromamba activate starfusion_env
 # Example input: paired-end FASTQ, GSE279335, SRR30961741
 # Reference (required — ~30 GB, download once):
 #   https://data.broadinstitute.org/Trinity/CTAT_RESOURCE_LIB/

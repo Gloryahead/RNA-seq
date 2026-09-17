@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 # install_genie3_masterreg_r.R
 # Run after activating genie3_masterreg_env to install ALL Bioconductor packages.
-# Usage: conda activate genie3_masterreg_env && Rscript environments/r_scripts/install_genie3_masterreg_r.R
+# Usage: micromamba activate genie3_masterreg_env && Rscript environments/r_scripts/install_genie3_masterreg_r.R
 
 if (!require("BiocManager", quietly = TRUE))
   install.packages("BiocManager", repos = "https://cloud.r-project.org")

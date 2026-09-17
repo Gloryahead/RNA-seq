@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 # install_mageck_r.R
 # Run after activating mageck_env to install Bioconductor + CRAN extras.
-# Usage: conda activate mageck_env && Rscript environments/r_scripts/install_mageck_r.R
+# Usage: micromamba activate mageck_env && Rscript environments/r_scripts/install_mageck_r.R
 
 if (!require("BiocManager", quietly = TRUE))
   install.packages("BiocManager", repos = "https://cloud.r-project.org")

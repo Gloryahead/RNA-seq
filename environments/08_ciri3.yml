@@ -2,7 +2,7 @@ name: ciri3_env
 # Tutorial: Part 13.2 (CIRI3 v1.8.0 — advanced circRNA detection and DE)
 # CIRI3 distributes its own environment.yaml; this file mirrors and pins it.
 # Download CIRI3 jar from: https://github.com/bioinfo-biols/CIRI-cookbook/releases
-# Activate: conda activate ciri3_env
+# Activate: micromamba activate ciri3_env
 # Example input: paired-end FASTQ (gzip), GRCh38 primary assembly FASTA, GRCh38.110 GTF
 # SRA accessions: SRR5398213-SRR5398218 (GSE97239, gastric cancer exosomal circRNAs)
 # Bioconductor (edgeR, limma) installed via:

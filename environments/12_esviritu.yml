@@ -1,6 +1,6 @@
 name: esviritu_env
 # Tutorial: Part 17 (viral sequence detection with EsViritu v2.0.2)
-# Activate: conda activate esviritu_env
+# Activate: micromamba activate esviritu_env
 # Example input: paired-end RNA-seq FASTQ (.fastq.gz)
 # Database (download once):
 #   esviritu download_db -o ~/esviritu_db

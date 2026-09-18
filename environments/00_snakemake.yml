@@ -12,6 +12,7 @@ name: snakemake_env
 #   micromamba run -n snakemake_env snakemake --profile workflow/profiles/slurm
 channels:
   - conda-forge
+  - bioconda
   - nodefaults
 dependencies:
   - python=3.11

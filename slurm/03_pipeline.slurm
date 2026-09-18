@@ -52,9 +52,6 @@ snakemake \
   --snakefile "${SCRIPT_BASE}/workflow/Snakefile" \
   --configfile "${SCRIPT_BASE}/config/config.yaml" \
   --profile "${SCRIPT_BASE}/workflow/profiles/slurm" \
-  --use-conda \
-  --conda-frontend mamba \
-  --conda-prefix "${DATA_BASE}/.snakemake/conda" \
   --rerun-incomplete \
   --keep-going \
   --latency-wait 60 \
@@ -69,6 +66,5 @@ bash "${SCRIPT_BASE}/scripts/06_multiqc.sh"
 
 echo "========== Pipeline finished at: $(date) =========="
 
-# NOTE: create a minimal snakemake_env if you don't have one:
-#   mamba-haining create -n snakemake_env -c conda-forge -c bioconda \
-#     snakemake=8.20 python=3.11 -y
+# NOTE: build snakemake_env once with:
+#   micromamba env create -f environments/00_snakemake.yml --yes

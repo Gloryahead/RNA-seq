@@ -1,7 +1,7 @@
 """
 Rules: QC, trimming, STAR alignment, featureCounts
 Tutorials: Parts 1, 2
-Container: rnaseq_env (01_rnaseq_core.yml / containers/rnaseq_core.sif)
+Environment: rnaseq_env (01_rnaseq_core.yml)
 """
 
 OUTDIR = config["outdir"]
@@ -18,23 +18,25 @@ rule fastqc_raw:
         zip_r1  = f"{OUTDIR}/qc/fastqc/{{sample}}_R1_fastqc.zip",
         zip_r2  = f"{OUTDIR}/qc/fastqc/{{sample}}_R2_fastqc.zip",
     log:   f"{LOGDIR}/fastqc/{{sample}}.log"
-    conda: "../../environments/01_rnaseq_core.yml"
-    container: "file://containers/rnaseq_core.sif"
     threads: 2
     resources:
         mem_mb   = 4000,
         runtime  = 30,
         slurm_partition = "standard",
+    params:
+        activate = mamba_activate("rnaseq_env"),
+        outdir   = f"{OUTDIR}/qc/fastqc",
     shell:
         """
-        outdir=$(dirname {output.html_r1})
-        fastqc --threads {threads} --outdir $outdir {input.r1} {input.r2} 2>{log}
+        set -eo pipefail
+        {params.activate}
+        fastqc --threads {threads} --outdir {params.outdir} {input.r1} {input.r2} 2>{log}
         base_r1=$(basename {input.r1} .fastq.gz)
         base_r2=$(basename {input.r2} .fastq.gz)
-        mv $outdir/${{base_r1}}_fastqc.html {output.html_r1}
-        mv $outdir/${{base_r2}}_fastqc.html {output.html_r2}
-        mv $outdir/${{base_r1}}_fastqc.zip  {output.zip_r1}
-        mv $outdir/${{base_r2}}_fastqc.zip  {output.zip_r2}
+        mv {params.outdir}/${{base_r1}}_fastqc.html {output.html_r1}
+        mv {params.outdir}/${{base_r2}}_fastqc.html {output.html_r2}
+        mv {params.outdir}/${{base_r1}}_fastqc.zip  {output.zip_r1}
+        mv {params.outdir}/${{base_r2}}_fastqc.zip  {output.zip_r2}
         """
 
 
@@ -48,19 +50,20 @@ rule trim_galore:
         r2     = temp(f"{OUTDIR}/trimmed/{{sample}}_val_2.fq.gz"),
         report = f"{OUTDIR}/qc/trimming/{{sample}}_trimming_report.txt",
     log:   f"{LOGDIR}/trim_galore/{{sample}}.log"
-    conda: "../../environments/01_rnaseq_core.yml"
-    container: "file://containers/rnaseq_core.sif"
     threads: config["trimming"]["cores"]
     resources:
         mem_mb   = 8000,
         runtime  = 60,
         slurm_partition = "standard",
     params:
+        activate   = mamba_activate("rnaseq_env"),
         quality    = config["trimming"]["quality"],
         min_length = config["trimming"]["min_length"],
         outdir     = f"{OUTDIR}/trimmed",
     shell:
         """
+        set -eo pipefail
+        {params.activate}
         trim_galore \
             --quality {params.quality} \
             --length {params.min_length} \
@@ -70,7 +73,6 @@ rule trim_galore:
             --output_dir {params.outdir} \
             {input.r1} {input.r2} \
             2>{log}
-        # Move trimming report to QC dir
         mv {params.outdir}/{wildcards.sample}*_trimming_report.txt {output.report} 2>>{log}
         """
 
@@ -82,23 +84,24 @@ rule star_align:
         r2    = f"{OUTDIR}/trimmed/{{sample}}_val_2.fq.gz",
         index = config["genome"]["star_index"],
     output:
-        bam    = f"{OUTDIR}/bam/{{sample}}_Aligned.sortedByCoord.out.bam",
-        log    = f"{OUTDIR}/bam/{{sample}}_Log.final.out",
-        chimeric = f"{OUTDIR}/bam/{{sample}}_Chimeric.out.junction",  # for STAR-Fusion / circRNA
+        bam      = f"{OUTDIR}/bam/{{sample}}_Aligned.sortedByCoord.out.bam",
+        log      = f"{OUTDIR}/bam/{{sample}}_Log.final.out",
+        chimeric = f"{OUTDIR}/bam/{{sample}}_Chimeric.out.junction",
     log:   f"{LOGDIR}/star/{{sample}}.log"
-    conda: "../../environments/01_rnaseq_core.yml"
-    container: "file://containers/rnaseq_core.sif"
     threads: config["star"]["threads"]
     resources:
         mem_mb   = 40000,
         runtime  = 120,
         slurm_partition = "standard",
     params:
-        extra  = config["star"]["extra"],
-        prefix = f"{OUTDIR}/bam/{{sample}}_",
-        gtf    = config["genome"]["gtf"],
+        activate = mamba_activate("rnaseq_env"),
+        extra    = config["star"]["extra"],
+        prefix   = f"{OUTDIR}/bam/{{sample}}_",
+        gtf      = config["genome"]["gtf"],
     shell:
         """
+        set -eo pipefail
+        {params.activate}
         STAR \
             --genomeDir {input.index} \
             --readFilesIn {input.r1} {input.r2} \
@@ -119,11 +122,16 @@ rule samtools_index:
     input:  f"{OUTDIR}/bam/{{sample}}_Aligned.sortedByCoord.out.bam"
     output: f"{OUTDIR}/bam/{{sample}}_Aligned.sortedByCoord.out.bam.bai"
     log:    f"{LOGDIR}/samtools/{{sample}}_index.log"
-    conda: "../../environments/01_rnaseq_core.yml"
-    container: "file://containers/rnaseq_core.sif"
     threads: 4
     resources: mem_mb=4000, runtime=30
-    shell: "samtools index -@ {threads} {input} 2>{log}"
+    params:
+        activate = mamba_activate("rnaseq_env"),
+    shell:
+        """
+        set -eo pipefail
+        {params.activate}
+        samtools index -@ {threads} {input} 2>{log}
+        """
 
 
 # ── featureCounts (gene-level count matrix) ───────────────────────────
@@ -133,23 +141,24 @@ rule featurecounts:
                       sample=SAMPLES),
         gtf  = config["genome"]["gtf"],
     output:
-        counts = f"{OUTDIR}/counts/counts_raw.tsv",
+        counts  = f"{OUTDIR}/counts/counts_raw.tsv",
         summary = f"{OUTDIR}/counts/counts_raw.tsv.summary",
     log:   f"{LOGDIR}/featurecounts/featurecounts.log"
-    conda: "../../environments/01_rnaseq_core.yml"
-    container: "file://containers/rnaseq_core.sif"
     threads: config["featurecounts"]["threads"]
     resources:
         mem_mb   = 16000,
         runtime  = 60,
         slurm_partition = "standard",
     params:
-        strand   = config["library"]["strandedness"],
-        feature  = config["featurecounts"]["feature_type"],
-        attr     = config["featurecounts"]["attribute"],
+        activate    = mamba_activate("rnaseq_env"),
+        strand      = config["library"]["strandedness"],
+        feature     = config["featurecounts"]["feature_type"],
+        attr        = config["featurecounts"]["attribute"],
         paired_flag = "-p" if config["library"]["paired"] else "",
     shell:
         """
+        set -eo pipefail
+        {params.activate}
         featureCounts \
             -T {threads} \
             -t {params.feature} \
@@ -163,7 +172,7 @@ rule featurecounts:
         """
 
 
-# ── Salmon (transcript-level quantification, Part 10) ─────────────────
+# ── Salmon (transcript-level quantification) ──────────────────────────
 rule salmon_quant:
     input:
         r1    = f"{OUTDIR}/trimmed/{{sample}}_val_1.fq.gz",
@@ -173,14 +182,15 @@ rule salmon_quant:
         quant = f"{OUTDIR}/salmon/{{sample}}/quant.sf",
         dir   = directory(f"{OUTDIR}/salmon/{{sample}}"),
     log:   f"{LOGDIR}/salmon/{{sample}}.log"
-    conda: "../../environments/01_rnaseq_core.yml"
-    container: "file://containers/rnaseq_core.sif"
     threads: config["salmon"]["threads"]
     resources: mem_mb=16000, runtime=60
     params:
+        activate = mamba_activate("rnaseq_env"),
         lib_type = config["salmon"]["lib_type"],
     shell:
         """
+        set -eo pipefail
+        {params.activate}
         salmon quant \
             --index {input.index} \
             --libType {params.lib_type} \
@@ -201,14 +211,15 @@ rule multiqc:
         f"{OUTDIR}/counts/counts_raw.tsv.summary",
     output: f"{OUTDIR}/qc/multiqc_report.html"
     log:    f"{LOGDIR}/multiqc/multiqc.log"
-    conda: "../../environments/01_rnaseq_core.yml"
-    container: "file://containers/rnaseq_core.sif"
     resources: mem_mb=8000, runtime=30
     params:
-        indir  = OUTDIR,
-        outdir = f"{OUTDIR}/qc",
+        activate = mamba_activate("rnaseq_env"),
+        indir    = OUTDIR,
+        outdir   = f"{OUTDIR}/qc",
     shell:
         """
+        set -eo pipefail
+        {params.activate}
         multiqc {params.indir} \
             --outdir {params.outdir} \
             --filename multiqc_report.html \

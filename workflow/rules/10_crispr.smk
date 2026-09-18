@@ -1,6 +1,6 @@
 """
 Rules: CRISPR screen analysis with MAGeCK (Part 20)
-Container: mageck_env (14_mageck.yml / containers/mageck.sif)
+Environment: mageck_env (14_mageck.yml)
 Input: FASTQ files from sequencing of sgRNA libraries
 """
 
@@ -9,24 +9,24 @@ LOGDIR = config["logdir"]
 
 
 rule mageck_count:
-    """Count sgRNA reads per sample from FASTQ."""
     input:
         r1      = get_r1,
         library = config["crispr"]["library"],
     output:
-        count  = f"{OUTDIR}/crispr/counts/{{sample}}.count.txt",
-        log_   = f"{OUTDIR}/crispr/counts/{{sample}}.count_normalized.txt",
+        count = f"{OUTDIR}/crispr/counts/{{sample}}.count.txt",
+        log_  = f"{OUTDIR}/crispr/counts/{{sample}}.count_normalized.txt",
     log:   f"{LOGDIR}/mageck/count_{{sample}}.log"
-    conda: "../../environments/14_mageck.yml"
-    container: "file://containers/mageck.sif"
     threads: 4
     resources: mem_mb=8000, runtime=60
     params:
+        activate  = mamba_activate("mageck_env"),
         outpfx    = f"{OUTDIR}/crispr/counts/{{sample}}",
         pam       = config["crispr"].get("pam", "TTTN"),
         sgrna_len = config["crispr"].get("sgrna_length", 20),
     shell:
         """
+        set -eo pipefail
+        {params.activate}
         mageck count \
             -l {input.library} \
             --fastq {input.r1} \
@@ -38,7 +38,6 @@ rule mageck_count:
 
 
 rule mageck_merge_counts:
-    """Merge per-sample count files into a single count matrix."""
     input:
         counts = expand(f"{OUTDIR}/crispr/counts/{{sample}}.count.txt", sample=SAMPLES),
     output:
@@ -56,18 +55,16 @@ rule mageck_merge_counts:
 
 
 rule mageck_test:
-    """MAGeCK MLE/RRA test for enriched/depleted sgRNAs per comparison."""
     input:
         matrix = f"{OUTDIR}/crispr/all_samples.count_matrix.txt",
     output:
-        gene_summary   = f"{OUTDIR}/crispr/results/{{comp}}.gene_summary.txt",
-        sgrna_summary  = f"{OUTDIR}/crispr/results/{{comp}}.sgrna_summary.txt",
+        gene_summary  = f"{OUTDIR}/crispr/results/{{comp}}.gene_summary.txt",
+        sgrna_summary = f"{OUTDIR}/crispr/results/{{comp}}.sgrna_summary.txt",
     log:   f"{LOGDIR}/mageck/test_{{comp}}.log"
-    conda: "../../environments/14_mageck.yml"
-    container: "file://containers/mageck.sif"
     threads: 4
     resources: mem_mb=8000, runtime=60
     params:
+        activate  = mamba_activate("mageck_env"),
         outpfx    = f"{OUTDIR}/crispr/results/{{comp}}",
         treatment = lambda wc: ",".join(
             samples_df[samples_df.group == wc.comp.split("_vs_")[0]].index.tolist()
@@ -78,6 +75,8 @@ rule mageck_test:
         norm      = config["crispr"].get("normalization", "median"),
     shell:
         """
+        set -eo pipefail
+        {params.activate}
         mageck test \
             -k {input.matrix} \
             -t {params.treatment} \
@@ -89,7 +88,6 @@ rule mageck_test:
 
 
 rule mageck_plot:
-    """MAGeCK R-based visualization: volcano, GSEA enrichment plots."""
     input:
         gene_summary = expand(
             f"{OUTDIR}/crispr/results/{{comp}}.gene_summary.txt",
@@ -98,15 +96,16 @@ rule mageck_plot:
     output:
         plots = directory(f"{OUTDIR}/crispr/figures"),
     log:   f"{LOGDIR}/mageck/plot.log"
-    conda: "../../environments/14_mageck.yml"
-    container: "file://containers/mageck.sif"
     resources: mem_mb=8000, runtime=30
     params:
+        activate = mamba_activate("mageck_env"),
         indir    = f"{OUTDIR}/crispr/results",
         outdir   = f"{OUTDIR}/crispr/figures",
         organism = config["organism"],
     shell:
         """
+        set -eo pipefail
+        {params.activate}
         Rscript workflow/scripts/mageck_plots.R \
             --indir    {params.indir} \
             --outdir   {params.outdir} \

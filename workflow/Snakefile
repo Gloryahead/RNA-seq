@@ -2,19 +2,30 @@
 NGS101 RNA-seq Pipeline — Snakemake entry point
 Covers: Parts 1-20 of ngs101.com tutorial series.
 
+Each rule runs inside a pre-built micromamba environment; Snakemake submits
+each rule as a separate SLURM job via the executor plugin.
+
+Prerequisites:
+    micromamba env create -f environments/00_snakemake.yml --yes
+
 Usage:
-    # Dry run (show what would run):
-    snakemake -n --use-conda
+    # Activate snakemake env:
+    micromamba activate snakemake_env
 
-    # Run with conda environments (HPC with conda available):
-    snakemake --use-conda --cores 40 --profile workflow/profiles/slurm
+    # Dry run — show what would run without submitting jobs:
+    snakemake -n --profile workflow/profiles/slurm
 
-    # Run with Apptainer SIFs (build containers first with containers/build_all_sifs.sh):
-    snakemake --use-singularity --singularity-args "--bind /ref,/data" \
-              --cores 40 --profile workflow/profiles/slurm
+    # Submit all jobs to SLURM:
+    snakemake --profile workflow/profiles/slurm
 
     # Resume after failure (Snakemake auto-detects completed outputs):
-    snakemake --use-conda --cores 40 --profile workflow/profiles/slurm
+    snakemake --profile workflow/profiles/slurm
+
+    # Run only the core pipeline (QC + alignment + DEG):
+    snakemake --profile workflow/profiles/slurm results/qc/multiqc_report.html
+
+    # Force re-run of a specific rule:
+    snakemake --profile workflow/profiles/slurm --forcerun star_align
 
     # Generate pipeline DAG:
     snakemake --dag | dot -Tpdf > dag.pdf
@@ -24,6 +35,19 @@ import pandas as pd
 from pathlib import Path
 
 configfile: "config/config.yaml"
+
+# ── micromamba activation helper ──────────────────────────────────────
+# Rules use mamba_activate(env_name) in params to activate pre-built envs.
+# Each sbatch job sources the micromamba hook then activates the named env.
+_MAMBA_EXE  = "/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba"
+_MAMBA_ROOT = "/groups/haining/maarowosegbe/micromamba"
+
+def mamba_activate(env_name):
+    return (
+        f"export MAMBA_ROOT_PREFIX={_MAMBA_ROOT}\n"
+        f'eval "$({_MAMBA_EXE} shell hook --shell bash)"\n'
+        f"micromamba activate {env_name}"
+    )
 
 # ── Load sample sheet ─────────────────────────────────────────────────
 samples_df = pd.read_csv(config["samples"], sep="\t", dtype=str).set_index("sample")

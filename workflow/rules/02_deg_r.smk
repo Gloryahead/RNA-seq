@@ -1,8 +1,7 @@
 """
 Rules: Differential expression analysis
 Tutorials: Parts 3, 4, 19, 20
-Container: rnaseq_r_env (02_rnaseq_r.yml / containers/rnaseq_r.sif)
-Supports DESeq2, edgeR, and limma-voom (set in config.yaml deg.method)
+Environment: rnaseq_r_env (02_rnaseq_r.yml)
 """
 
 OUTDIR = config["outdir"]
@@ -10,10 +9,6 @@ LOGDIR = config["logdir"]
 
 
 rule deg_analysis:
-    """
-    Runs DEG analysis for one comparison (treatment vs control).
-    Outputs: DEG table, PCA plot, MA plot, sample-distance heatmap.
-    """
     input:
         counts  = f"{OUTDIR}/counts/counts_raw.tsv",
         samples = config["samples"],
@@ -24,14 +19,13 @@ rule deg_analysis:
         heatmap = f"{OUTDIR}/figures/{{comp}}_sample_distance.pdf",
         rds     = f"{OUTDIR}/deg/{{comp}}_dge_object.rds",
     log:   f"{LOGDIR}/deg/{{comp}}.log"
-    conda: "../../environments/02_rnaseq_r.yml"
-    container: "file://containers/rnaseq_r.sif"
     threads: 4
     resources:
         mem_mb   = 16000,
         runtime  = 60,
         slurm_partition = "standard",
     params:
+        activate    = mamba_activate("rnaseq_r_env"),
         method      = config["deg"]["method"],
         min_count   = config["deg"]["min_count"],
         min_samples = config["deg"]["min_samples"],
@@ -44,6 +38,8 @@ rule deg_analysis:
         script      = "workflow/scripts/deg_analysis.R",
     shell:
         """
+        set -eo pipefail
+        {params.activate}
         Rscript {params.script} \
             --counts    {input.counts} \
             --samples   {input.samples} \
@@ -65,10 +61,6 @@ rule deg_analysis:
 
 
 rule publication_figures:
-    """
-    Publication-ready figures from DEG results (Part 4):
-    EnhancedVolcano, pheatmap of top DEGs, PCA biplot.
-    """
     input:
         degs = f"{OUTDIR}/deg/{{comp}}_DEG_results.tsv",
         rds  = f"{OUTDIR}/deg/{{comp}}_dge_object.rds",
@@ -76,17 +68,18 @@ rule publication_figures:
         volcano = f"{OUTDIR}/figures/{{comp}}_volcano.pdf",
         heatmap = f"{OUTDIR}/figures/{{comp}}_top50_heatmap.pdf",
     log:   f"{LOGDIR}/figures/{{comp}}.log"
-    conda: "../../environments/02_rnaseq_r.yml"
-    container: "file://containers/rnaseq_r.sif"
     threads: 1
     resources: mem_mb=8000, runtime=30
     params:
-        alpha      = config["deg"]["alpha"],
-        lfc        = config["deg"]["lfc_threshold"],
-        treatment  = lambda wc: wc.comp.split("_vs_")[0],
-        control    = lambda wc: wc.comp.split("_vs_")[1],
+        activate  = mamba_activate("rnaseq_r_env"),
+        alpha     = config["deg"]["alpha"],
+        lfc       = config["deg"]["lfc_threshold"],
+        treatment = lambda wc: wc.comp.split("_vs_")[0],
+        control   = lambda wc: wc.comp.split("_vs_")[1],
     shell:
         """
+        set -eo pipefail
+        {params.activate}
         Rscript workflow/scripts/figures.R \
             --degs     {input.degs} \
             --rds      {input.rds} \
@@ -101,22 +94,20 @@ rule publication_figures:
 
 
 rule normalization_report:
-    """
-    Normalization comparison report (Part 19):
-    CPM, TPM, RPKM, TMM, VST — side-by-side density plots.
-    """
     input:
         counts = f"{OUTDIR}/counts/counts_raw.tsv",
         gtf    = config["genome"]["gtf"],
     output:
         report = f"{OUTDIR}/qc/normalization_comparison.pdf",
     log:   f"{LOGDIR}/normalization/normalization.log"
-    conda: "../../environments/02_rnaseq_r.yml"
-    container: "file://containers/rnaseq_r.sif"
     threads: 1
     resources: mem_mb=8000, runtime=30
+    params:
+        activate = mamba_activate("rnaseq_r_env"),
     shell:
         """
+        set -eo pipefail
+        {params.activate}
         Rscript workflow/scripts/normalization.R \
             --counts {input.counts} \
             --gtf    {input.gtf} \

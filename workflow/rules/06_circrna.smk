@@ -1,7 +1,7 @@
 """
 Rules: circRNA detection (Parts 13, 13.2)
-  - CIRCexplorer2 (Part 13): uses STAR chimeric junctions
-  - CIRI3 v1.8.0  (Part 13.2): uses BWA alignment
+  - CIRCexplorer2 (Part 13): uses STAR chimeric junctions → circrna_env
+  - CIRI3 (Part 13.2): uses BWA alignment → ciri3_env
 Input: trimmed FASTQs from trim_galore
 """
 
@@ -13,17 +13,18 @@ LOGDIR = config["logdir"]
 if config["circrna"]["run_circexplorer2"]:
 
     rule circexplorer2_parse:
-        """Parse STAR chimeric junctions for back-splice junctions."""
         input:
             chimeric = f"{OUTDIR}/bam/{{sample}}_Chimeric.out.junction",
         output:
             bed = f"{OUTDIR}/circrna/circexplorer2/{{sample}}_junction.bed",
         log:   f"{LOGDIR}/circexplorer2/{{sample}}_parse.log"
-        conda: "../../environments/07_circrna.yml"
-        container: "file://containers/circrna.sif"
         resources: mem_mb=8000, runtime=30
+        params:
+            activate = mamba_activate("circrna_env"),
         shell:
             """
+            set -eo pipefail
+            {params.activate}
             CIRCexplorer2 parse \
                 -t STAR \
                 {input.chimeric} \
@@ -32,7 +33,6 @@ if config["circrna"]["run_circexplorer2"]:
             """
 
     rule circexplorer2_annotate:
-        """Annotate BSJs against reference transcriptome."""
         input:
             bed    = f"{OUTDIR}/circrna/circexplorer2/{{sample}}_junction.bed",
             fasta  = config["genome"]["fasta"],
@@ -40,11 +40,13 @@ if config["circrna"]["run_circexplorer2"]:
         output:
             txt = f"{OUTDIR}/circrna/circexplorer2/{{sample}}_circularRNA_known.txt",
         log:   f"{LOGDIR}/circexplorer2/{{sample}}_annotate.log"
-        conda: "../../environments/07_circrna.yml"
-        container: "file://containers/circrna.sif"
         resources: mem_mb=8000, runtime=30
+        params:
+            activate = mamba_activate("circrna_env"),
         shell:
             """
+            set -eo pipefail
+            {params.activate}
             CIRCexplorer2 annotate \
                 -r {input.refann} \
                 -g {input.fasta} \
@@ -58,7 +60,6 @@ if config["circrna"]["run_circexplorer2"]:
 if config["circrna"]["run_ciri3"]:
 
     rule bwa_align_ciri3:
-        """BWA-MEM alignment for CIRI3 (requires unfiltered alignments)."""
         input:
             r1    = f"{OUTDIR}/trimmed/{{sample}}_val_1.fq.gz",
             r2    = f"{OUTDIR}/trimmed/{{sample}}_val_2.fq.gz",
@@ -66,12 +67,14 @@ if config["circrna"]["run_ciri3"]:
         output:
             bam = f"{OUTDIR}/bam_bwa/{{sample}}.bam",
         log:   f"{LOGDIR}/bwa/{{sample}}.log"
-        conda: "../../environments/08_ciri3.yml"
-        container: "file://containers/ciri3.sif"
         threads: 16
         resources: mem_mb=32000, runtime=120
+        params:
+            activate = mamba_activate("ciri3_env"),
         shell:
             """
+            set -eo pipefail
+            {params.activate}
             bwa mem -T 19 -t {threads} \
                 {input.fasta} {input.r1} {input.r2} \
                 | samtools sort -@ 4 -o {output.bam} \
@@ -80,7 +83,6 @@ if config["circrna"]["run_ciri3"]:
             """
 
     rule ciri3_detect:
-        """Detect circRNAs with CIRI3 per sample."""
         input:
             bam   = f"{OUTDIR}/bam_bwa/{{sample}}.bam",
             fasta = config["genome"]["fasta"],
@@ -88,14 +90,15 @@ if config["circrna"]["run_ciri3"]:
         output:
             txt = f"{OUTDIR}/circrna/ciri3/{{sample}}_ciri3.txt",
         log:   f"{LOGDIR}/ciri3/{{sample}}.log"
-        conda: "../../environments/08_ciri3.yml"
-        container: "file://containers/ciri3.sif"
         threads: 8
         resources: mem_mb=16000, runtime=90
         params:
-            jar = config["circrna"]["ciri3_jar"],
+            activate = mamba_activate("ciri3_env"),
+            jar      = config["circrna"]["ciri3_jar"],
         shell:
             """
+            set -eo pipefail
+            {params.activate}
             java -jar {params.jar} \
                 -bam  {input.bam} \
                 -ref  {input.fasta} \
@@ -106,20 +109,20 @@ if config["circrna"]["run_ciri3"]:
             """
 
     rule ciri3_merge:
-        """Merge per-sample CIRI3 outputs into BSJ/FSJ matrices."""
         input:
             txts = expand(f"{OUTDIR}/circrna/ciri3/{{sample}}_ciri3.txt", sample=SAMPLES),
         output:
             bsj = f"{OUTDIR}/circrna/ciri3/all_samples.BSJ_Matrix.txt",
             fsj = f"{OUTDIR}/circrna/ciri3/all_samples.FSJ_Matrix.txt",
         log:   f"{LOGDIR}/ciri3/merge.log"
-        conda: "../../environments/08_ciri3.yml"
-        container: "file://containers/ciri3.sif"
         params:
-            jar  = config["circrna"]["ciri3_jar"],
-            indir= f"{OUTDIR}/circrna/ciri3",
+            activate = mamba_activate("ciri3_env"),
+            jar      = config["circrna"]["ciri3_jar"],
+            indir    = f"{OUTDIR}/circrna/ciri3",
         shell:
             """
+            set -eo pipefail
+            {params.activate}
             java -jar {params.jar} merge \
                 -indir  {params.indir} \
                 -outbsj {output.bsj} \

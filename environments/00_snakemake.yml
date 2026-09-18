@@ -1,0 +1,21 @@
+name: snakemake_env
+# Snakemake orchestration environment with SLURM executor plugin.
+# Build this env first, then use it to launch all pipeline jobs via SLURM.
+#
+# Build:
+#   micromamba env create -f environments/00_snakemake.yml --yes
+#
+# Run pipeline (dry run first):
+#   micromamba run -n snakemake_env snakemake -n --profile workflow/profiles/slurm
+#
+# Submit all jobs to SLURM:
+#   micromamba run -n snakemake_env snakemake --profile workflow/profiles/slurm
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.11
+  - snakemake>=8.0
+  - snakemake-executor-plugin-slurm
+  - pandas>=1.5             # used in Snakefile for sample sheet loading
+  - graphviz                # optional: for dag/rulegraph visualization

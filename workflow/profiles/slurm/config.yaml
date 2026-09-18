@@ -22,13 +22,6 @@ default-resources:
   runtime: 60                    # minutes
   cpus_per_task: 4
 
-# ── Container args — bind xdisk and ref paths ────────────────────────
-singularity-args: "--bind /xdisk/haining/maarowosegbe,/home/u11/maarowosegbe"
-
-# ── Conda / container ─────────────────────────────────────────────────
-# use-conda: true      # uncomment to default to --use-conda
-# use-singularity: true
-
 # ── Output ────────────────────────────────────────────────────────────
 printshellcmds: true
 show-failed-logs: true

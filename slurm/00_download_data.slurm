@@ -26,12 +26,9 @@ DATA_BASE=/xdisk/haining/maarowosegbe/RNA-seq
 export SCRIPT_BASE DATA_BASE THREADS=${SLURM_NTASKS}
 mkdir -p "${DATA_BASE}/logs/slurm" "${DATA_BASE}/data/fastq" "${DATA_BASE}/tmp"
 
-set +eu; source ~/.bashrc; set -eu
 export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
 export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
 MC="${MAMBA_EXE}"
-eval "$("${MC}" shell hook --shell=bash)"
-"${MC}" activate rnaseq_env
 
 # ── Which datasets to download? ───────────────────────────────────────
 # Uncomment the modules you want. "all" downloads everything.
@@ -39,7 +36,8 @@ MODULE="${1:-core}"    # core | mirna | circrna | fusion | wgcna | crispr | all
 
 echo ""
 echo "--- Downloading module: ${MODULE} ---"
-bash "${SCRIPT_BASE}/scripts/download_all_data.sh" "${MODULE}"
+"${MC}" run -n rnaseq_env \
+  bash "${SCRIPT_BASE}/scripts/download_all_data.sh" "${MODULE}"
 
 echo ""
 echo "========== Download finished at: $(date) =========="

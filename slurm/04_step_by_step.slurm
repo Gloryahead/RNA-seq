@@ -35,64 +35,46 @@ ORGANISM=$(grep '^organism:' "${SCRIPT_BASE}/config/config.yaml" | awk '{print $
 
 mkdir -p "${DATA_BASE}/logs/slurm"
 
-# Activate mamba (UA HPC pattern)
-set +eu
-source ~/.bashrc
 export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
 export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
 MC="${MAMBA_EXE}"
-set -eu
-eval "$("${MC}" shell hook --shell=bash)"
-
-# Helper: run a script only if it exists (from your eclip_pipeline pattern)
-run_if_exists() {
-    local script_path="$1"
-    shift
-    if [[ -f "${script_path}" ]]; then
-        echo ""
-        echo ">>> Running: ${script_path} $*"
-        bash "${script_path}" "$@"
-    else
-        echo "WARNING: Script not found: ${script_path}"
-    fi
-}
 
 # ── Step 1: QC + trimming ─────────────────────────────────────────────
-"${MC}" activate rnaseq_env
-run_if_exists "${SCRIPT_BASE}/scripts/03_qc_trim.sh"
+"${MC}" run -n rnaseq_env bash "${SCRIPT_BASE}/scripts/03_qc_trim.sh"
 
 # ── Step 2: STAR alignment ────────────────────────────────────────────
-run_if_exists "${SCRIPT_BASE}/scripts/04_align_star.sh"
+"${MC}" run -n rnaseq_env bash "${SCRIPT_BASE}/scripts/04_align_star.sh"
 
 # ── Step 3: Gene + transcript quantification ──────────────────────────
-run_if_exists "${SCRIPT_BASE}/scripts/05_quantify.sh"
+"${MC}" run -n rnaseq_env bash "${SCRIPT_BASE}/scripts/05_quantify.sh"
 
 # ── Step 4: MultiQC ───────────────────────────────────────────────────
-run_if_exists "${SCRIPT_BASE}/scripts/06_multiqc.sh"
+"${MC}" run -n rnaseq_env bash "${SCRIPT_BASE}/scripts/06_multiqc.sh"
 
 # ── Step 5: DEG analysis (R) ─────────────────────────────────────────
-"${MC}" activate rnaseq_r_env
-Rscript "${SCRIPT_BASE}/workflow/scripts/deg_analysis.R" \
-  --counts   "${DATA_BASE}/results/counts/counts_raw.tsv" \
-  --samples  "${SCRIPT_BASE}/config/samples.tsv" \
-  --outdir   "${DATA_BASE}/results/deg" \
-  --method   DESeq2 \
-  2>"${DATA_BASE}/logs/slurm/deg_${SLURM_JOB_ID}.log"
+"${MC}" run -n rnaseq_r_env \
+  Rscript "${SCRIPT_BASE}/workflow/scripts/deg_analysis.R" \
+    --counts   "${DATA_BASE}/results/counts/counts_raw.tsv" \
+    --samples  "${SCRIPT_BASE}/config/samples.tsv" \
+    --outdir   "${DATA_BASE}/results/deg" \
+    --method   DESeq2 \
+    2>"${DATA_BASE}/logs/slurm/deg_${SLURM_JOB_ID}.log"
 
 # ── Step 6: Pathway enrichment (R) ───────────────────────────────────
-Rscript "${SCRIPT_BASE}/workflow/scripts/pathway_analysis.R" \
-  --deg      "${DATA_BASE}/results/deg/$(ls ${DATA_BASE}/results/deg/*_DEG_results.tsv | head -1)" \
-  --organism "${ORGANISM}" \
-  --outdir   "${DATA_BASE}/results/pathways" \
-  2>"${DATA_BASE}/logs/slurm/pathways_${SLURM_JOB_ID}.log"
+"${MC}" run -n rnaseq_r_env \
+  Rscript "${SCRIPT_BASE}/workflow/scripts/pathway_analysis.R" \
+    --deg      "${DATA_BASE}/results/deg/$(ls ${DATA_BASE}/results/deg/*_DEG_results.tsv | head -1)" \
+    --organism "${ORGANISM}" \
+    --outdir   "${DATA_BASE}/results/pathways" \
+    2>"${DATA_BASE}/logs/slurm/pathways_${SLURM_JOB_ID}.log"
 
 # ── Optional: WGCNA (comment out if not needed) ───────────────────────
-# "${MC}" activate wgcna_env
-# run_if_exists "${SCRIPT_BASE}/workflow/scripts/wgcna.R" \
-#   --counts  "${DATA_BASE}/results/counts/counts_raw.tsv" \
-#   --samples "${SCRIPT_BASE}/config/samples.tsv" \
-#   --threads "${THREADS}" \
-#   --outdir  "${DATA_BASE}/results/networks/wgcna"
+# "${MC}" run -n wgcna_env \
+#   Rscript "${SCRIPT_BASE}/workflow/scripts/wgcna.R" \
+#     --counts  "${DATA_BASE}/results/counts/counts_raw.tsv" \
+#     --samples "${SCRIPT_BASE}/config/samples.tsv" \
+#     --threads "${THREADS}" \
+#     --outdir  "${DATA_BASE}/results/networks/wgcna"
 
 echo ""
 echo "========== Job finished at: $(date) =========="

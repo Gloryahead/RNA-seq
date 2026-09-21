@@ -26,12 +26,9 @@ export THREADS=${SLURM_NTASKS}
 export TMPDIR="${DATA_BASE}/tmp"
 mkdir -p "${TMPDIR}"
 
-set +eu; source ~/.bashrc; set -eu
 export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
 export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
 MC="${MAMBA_EXE}"
-eval "$("${MC}" shell hook --shell=bash)"
-"${MC}" activate rnaseq_env
 
 ACCESSION_FILE="${DATA_BASE}/data/sra_accessions.txt"
 FASTQ_DIR="${DATA_BASE}/data/fastq"
@@ -43,8 +40,9 @@ if [[ ! -s "${ACCESSION_FILE}" ]]; then
 fi
 
 echo "Downloading SRA accessions from: ${ACCESSION_FILE}"
-bash "${SCRIPT_BASE}/scripts/02_download_sra.sh" \
-  "${ACCESSION_FILE}" \
-  "${FASTQ_DIR}"
+"${MC}" run -n rnaseq_env \
+  bash "${SCRIPT_BASE}/scripts/02_download_sra.sh" \
+    "${ACCESSION_FILE}" \
+    "${FASTQ_DIR}"
 
 echo "========== Download job finished at: $(date) =========="

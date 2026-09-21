@@ -44,24 +44,20 @@ export DATA_BASE
 # Ensure xdisk tree exists
 bash "${SCRIPT_BASE}/scripts/setup_xdisk.sh"
 
-# Activate the core conda environment
-set +eu
-source ~/.bashrc
 export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
 export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
 MC="${MAMBA_EXE}"
-set -eu
-eval "$("${MC}" shell hook --shell=bash)"
-"${MC}" activate rnaseq_env
 
 echo ""
 echo "--- Step 1: Download references ---"
 ORGANISM="${ORGANISM:-human}"
-bash "${SCRIPT_BASE}/scripts/00_download_refs.sh" "${ORGANISM}" "${THREADS}"
+"${MC}" run -n rnaseq_env \
+  bash "${SCRIPT_BASE}/scripts/00_download_refs.sh" "${ORGANISM}" "${THREADS}"
 
 echo ""
 echo "--- Step 2: Build indices ---"
-bash "${SCRIPT_BASE}/scripts/01_build_indices.sh"
+"${MC}" run -n rnaseq_env \
+  bash "${SCRIPT_BASE}/scripts/01_build_indices.sh"
 
 echo ""
 echo "========== Setup job finished at: $(date) =========="

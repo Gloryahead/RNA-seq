@@ -50,7 +50,7 @@ def mamba_activate(env_name):
     )
 
 # ── Load sample sheet ─────────────────────────────────────────────────
-samples_df = pd.read_csv(config["samples"], sep="\t", dtype=str).set_index("sample")
+samples_df = pd.read_csv(config["samples"], sep="\t", dtype=str, comment="#").set_index("sample")
 SAMPLES   = list(samples_df.index)
 GROUPS    = list(samples_df["group"].unique())
 COMPARISONS = [f"{t}_vs_{c}" for t, c in config["comparisons"]]

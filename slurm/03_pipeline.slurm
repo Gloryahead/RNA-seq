@@ -30,39 +30,38 @@ DATA_BASE=/xdisk/haining/maarowosegbe/RNA-seq
 
 export DATA_BASE
 
-set +eu; source ~/.bashrc; set -eu
 export MAMBA_ROOT_PREFIX=/groups/haining/maarowosegbe/micromamba
 export MAMBA_EXE=/opt/ohpc/pub/apps/micromamba/2.0.2-2/bin/micromamba
 MC="${MAMBA_EXE}"
-eval "$("${MC}" shell hook --shell=bash)"
-"${MC}" activate snakemake_env   # see NOTE below
 
 echo ""
 echo "--- Snakemake dry run (DAG check) ---"
-snakemake \
-  --snakefile "${SCRIPT_BASE}/workflow/Snakefile" \
-  --configfile "${SCRIPT_BASE}/config/config.yaml" \
-  --profile "${SCRIPT_BASE}/workflow/profiles/slurm" \
-  --dry-run \
-  --quiet
+"${MC}" run -n snakemake_env \
+  snakemake \
+    --snakefile "${SCRIPT_BASE}/workflow/Snakefile" \
+    --configfile "${SCRIPT_BASE}/config/config.yaml" \
+    --profile "${SCRIPT_BASE}/workflow/profiles/slurm" \
+    --dry-run \
+    --quiet
 
 echo ""
 echo "--- Full pipeline run ---"
-snakemake \
-  --snakefile "${SCRIPT_BASE}/workflow/Snakefile" \
-  --configfile "${SCRIPT_BASE}/config/config.yaml" \
-  --profile "${SCRIPT_BASE}/workflow/profiles/slurm" \
-  --rerun-incomplete \
-  --keep-going \
-  --latency-wait 60 \
-  --jobs 100 \
-  --printshellcmds \
+"${MC}" run -n snakemake_env \
+  snakemake \
+    --snakefile "${SCRIPT_BASE}/workflow/Snakefile" \
+    --configfile "${SCRIPT_BASE}/config/config.yaml" \
+    --profile "${SCRIPT_BASE}/workflow/profiles/slurm" \
+    --rerun-incomplete \
+    --keep-going \
+    --latency-wait 60 \
+    --jobs 100 \
+    --printshellcmds \
   2>&1 | tee "${DATA_BASE}/logs/slurm/snakemake_${SLURM_JOB_ID}.log"
 
 echo ""
 echo "--- MultiQC summary ---"
-"${MC}" activate rnaseq_env
-bash "${SCRIPT_BASE}/scripts/06_multiqc.sh"
+"${MC}" run -n rnaseq_env \
+  bash "${SCRIPT_BASE}/scripts/06_multiqc.sh"
 
 echo "========== Pipeline finished at: $(date) =========="
 

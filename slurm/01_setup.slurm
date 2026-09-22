@@ -28,6 +28,8 @@
 ### PART 2: Setup
 # --------------------------------------------------------------
 
+set -euo pipefail
+
 echo "========== Setup job started at: $(date) =========="
 echo "  Node    : $(hostname)"
 echo "  Job ID  : ${SLURM_JOB_ID}"
@@ -57,8 +59,7 @@ echo "  Organism from config: ${ORGANISM}"
 
 echo ""
 echo "--- Step 2: Build indices ---"
-"${MC}" run -n rnaseq_env \
-  bash "${SCRIPT_BASE}/scripts/01_build_indices.sh"
+bash "${SCRIPT_BASE}/scripts/01_build_indices.sh"
 
 echo ""
 echo "========== Setup job finished at: $(date) =========="

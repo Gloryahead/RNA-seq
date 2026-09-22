@@ -70,15 +70,16 @@ fi
 
 # ── 2. Salmon transcript index ────────────────────────────────────────
 SALMON_INDEX="${REF_DIR}/salmon_index"
-if $BUILD_SALMON && [[ ! -d "${SALMON_INDEX}" ]]; then
+SALMON_DECOYS="${REF_DIR}/salmon_decoys.txt"
+if $BUILD_SALMON && [[ ! -f "${SALMON_INDEX}/seq.bin" ]]; then
   [[ -f "${TRANSCRIPTS}" ]] || { echo "ERROR: ${TRANSCRIPTS} missing. Re-run 00_download_refs.sh"; exit 1; }
   echo "=== Building Salmon index ==="
+  grep "^>" "${FASTA}" | cut -d ' ' -f 1 | tr -d '>' > "${SALMON_DECOYS}"
   "${MC}" run -n rnaseq_env \
     salmon index \
       -t "${TRANSCRIPTS}" \
-      -d <(grep "^>" "${FASTA}" | cut -d ' ' -f 1 | tr -d '>') \
+      -d "${SALMON_DECOYS}" \
       -i "${SALMON_INDEX}" \
-      --gencode \
       -p "${THREADS}"
   echo "  -> ${SALMON_INDEX}"
 elif $BUILD_SALMON; then
@@ -98,10 +99,11 @@ elif $BUILD_BOWTIE; then
 fi
 
 # ── 4. BWA index (for CIRI3 circRNA detection) ────────────────────────
+# bwa is excluded from ciri3_env (native-lib conflicts); use system module
 if $BUILD_BWA && [[ ! -f "${FASTA}.bwt" ]]; then
   echo "=== Building BWA index (for CIRI3, ~2 hours for hg38) ==="
-  "${MC}" run -n ciri3_env \
-    bwa index "${FASTA}"
+  module load bwa 2>/dev/null || true
+  bwa index "${FASTA}"
   echo "  -> ${FASTA}.bwt"
 elif $BUILD_BWA; then
   echo "[BWA] Index already exists, skipping"

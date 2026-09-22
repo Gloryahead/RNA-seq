@@ -118,8 +118,7 @@ fi
 TRANSCRIPTS="${REF_DIR}/transcriptome.fa"
 if [[ ! -f "${TRANSCRIPTS}" ]]; then
   echo "[5/5] Extracting transcript sequences from genome + GTF..."
-  "${MC}" run -n rnaseq_env \
-    gffread "${GTF}" -g "${FASTA}" -w "${TRANSCRIPTS}"
+  gffread "${GTF}" -g "${FASTA}" -w "${TRANSCRIPTS}"
   echo "  -> ${TRANSCRIPTS}"
 else
   echo "[5/5] ${TRANSCRIPTS} already exists, skipping"

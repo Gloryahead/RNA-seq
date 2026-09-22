@@ -104,10 +104,10 @@ if [[ ! -f "${MIRBASE_MATURE}" ]]; then
   echo "[4/5] Downloading miRBase v${MIRBASE_VER} mature/hairpin sequences..."
   wget -q -O - \
     "https://mirbase.org/ftp/${MIRBASE_VER}/mature.fa.gz" \
-    | gunzip -c | grep -A1 "^>${MIRBASE_SPECIES}-" > "${MIRBASE_MATURE}"
+    | gunzip -c | grep -A1 "^>${MIRBASE_SPECIES}-" > "${MIRBASE_MATURE}" || true
   wget -q -O - \
     "https://mirbase.org/ftp/${MIRBASE_VER}/hairpin.fa.gz" \
-    | gunzip -c | grep -A1 "^>${MIRBASE_SPECIES}-" > "${MIRBASE_HAIRPIN}"
+    | gunzip -c | grep -A1 "^>${MIRBASE_SPECIES}-" > "${MIRBASE_HAIRPIN}" || true
   echo "  -> ${MIRBASE_MATURE}"
   echo "  -> ${MIRBASE_HAIRPIN}"
 else

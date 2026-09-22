@@ -50,7 +50,8 @@ MC="${MAMBA_EXE}"
 
 echo ""
 echo "--- Step 1: Download references ---"
-ORGANISM="${ORGANISM:-human}"
+ORGANISM=$(grep '^organism:' "${SCRIPT_BASE}/config/config.yaml" | awk '{print $2}' | tr -d '"')
+echo "  Organism from config: ${ORGANISM}"
 "${MC}" run -n rnaseq_env \
   bash "${SCRIPT_BASE}/scripts/00_download_refs.sh" "${ORGANISM}" "${THREADS}"
 

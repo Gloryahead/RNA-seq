@@ -23,6 +23,7 @@ dependencies:
   - subread>=2.0
   # ── Transcript quantification ────────────────────────────────────────────────
   - salmon>=1.10
+  - gffread>=0.12
   # ── Data download ────────────────────────────────────────────────────────────
   - sra-tools>=3.0
   - pigz

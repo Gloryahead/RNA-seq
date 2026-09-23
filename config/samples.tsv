@@ -3,7 +3,7 @@
 # KRAS_SPIB: SPIB-overexpressing (induces neoplasia)
 # FASTQs populated after running: bash scripts/download_all_data.sh core
 sample	group	fastq_r1	fastq_r2	batch
-KRAS_rep1	KRAS	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/SRR28119110_1.fastq.gz	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/SRR28119110_2.fastq.gz	1
-KRAS_rep2	KRAS	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/SRR28119111_1.fastq.gz	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/SRR28119111_2.fastq.gz	1
-KRAS_SPIB_rep1	KRAS_SPIB	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/SRR28119112_1.fastq.gz	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/SRR28119112_2.fastq.gz	1
-KRAS_SPIB_rep2	KRAS_SPIB	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/SRR28119113_1.fastq.gz	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/SRR28119113_2.fastq.gz	1
+KRAS_rep1	KRAS	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/core/SRR28119110_1.fastq.gz	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/core/SRR28119110_2.fastq.gz	1
+KRAS_rep2	KRAS	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/core/SRR28119111_1.fastq.gz	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/core/SRR28119111_2.fastq.gz	1
+KRAS_SPIB_rep1	KRAS_SPIB	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/core/SRR28119112_1.fastq.gz	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/core/SRR28119112_2.fastq.gz	1
+KRAS_SPIB_rep2	KRAS_SPIB	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/core/SRR28119113_1.fastq.gz	/xdisk/haining/maarowosegbe/RNA-seq/data/fastq/core/SRR28119113_2.fastq.gz	1

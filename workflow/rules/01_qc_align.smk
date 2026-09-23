@@ -73,7 +73,13 @@ rule trim_galore:
             --output_dir {params.outdir} \
             {input.r1} {input.r2} \
             2>{log}
-        mv {params.outdir}/{wildcards.sample}*_trimming_report.txt {output.report} 2>>{log}
+        base_r1=$(basename {input.r1} .fastq.gz)
+        base_r2=$(basename {input.r2} .fastq.gz)
+        mv {params.outdir}/${{base_r1}}_val_1.fq.gz {output.r1}
+        mv {params.outdir}/${{base_r2}}_val_2.fq.gz {output.r2}
+        cat {params.outdir}/${{base_r1}}.fastq.gz_trimming_report.txt \
+            {params.outdir}/${{base_r2}}.fastq.gz_trimming_report.txt \
+            > {output.report} 2>>{log}
         """
 
 

@@ -96,9 +96,8 @@ rule star_align:
     log:   f"{LOGDIR}/star/{{sample}}.log"
     threads: 8
     resources:
-        mem_mb        = 40000,
-        cpus_per_task = 8,
-        runtime       = 180,
+        cpus_per_task   = 8,    # 8 × 5 GB/CPU = 40 GB on Puma standard nodes
+        runtime         = 180,
         slurm_partition = "standard",
     params:
         activate = mamba_activate("rnaseq_env"),

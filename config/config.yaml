@@ -46,7 +46,7 @@ trimming:
 # ── STAR alignment ────────────────────────────────────────────────────
 star:
   threads: 20
-  extra: "--outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI AS NM"
+  extra: ""
 
 # ── featureCounts ─────────────────────────────────────────────────────
 featurecounts:

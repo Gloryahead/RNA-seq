@@ -1,0 +1,11 @@
+name: transcript_splicing_env
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - python=3.9
+  - stringtie>=2.2
+  - rmats>=4.3.0
+  - numpy>=1.24
+  - pandas>=1.5

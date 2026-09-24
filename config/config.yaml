@@ -87,6 +87,13 @@ splicing:
   run_suppa2: false
   suppa2_dir: "/opt/SUPPA"   # path to cloned SUPPA repo
 
+# ── Transcript-level quantification & alternative splicing (BAM-based) ─
+# StringTie: per-sample assembly → merge → re-estimate expression
+# rMATS: differential AS for 5 event types (SE, A3SS, A5SS, MXE, RI)
+transcript_splicing:
+  run_stringtie: false
+  run_rmats: false
+
 # ── circRNA (Parts 13, 13.2) ──────────────────────────────────────────
 circrna:
   run_circexplorer2: false

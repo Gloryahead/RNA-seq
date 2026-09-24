@@ -109,6 +109,9 @@ if any([config["networks"]["run_wgcna"],
 if config["cancer_subtype"]["run"]:
     include: "rules/12_cancer_subtype.smk"
 
+if config["transcript_splicing"]["run_stringtie"] or config["transcript_splicing"]["run_rmats"]:
+    include: "rules/13_transcript_splicing.smk"
+
 # ── Master target rule ────────────────────────────────────────────────
 rule all:
     input:
@@ -140,3 +143,7 @@ rule all:
                out=config["outdir"], comp=COMPARISONS) if config["crispr"]["run"] else [],
         expand("{out}/networks/wgcna/module_trait_correlations.pdf",
                out=config["outdir"]) if config["networks"]["run_wgcna"] else [],
+        expand("{out}/stringtie/quant/{sample}/t_data.ctab",
+               out=config["outdir"], sample=SAMPLES) if config["transcript_splicing"]["run_stringtie"] else [],
+        expand("{out}/rmats/{comp}/SE.MATS.JC.txt",
+               out=config["outdir"], comp=COMPARISONS) if config["transcript_splicing"]["run_rmats"] else [],

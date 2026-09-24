@@ -9,3 +9,5 @@ dependencies:
   - rmats>=4.3.0
   - numpy>=1.24
   - pandas>=1.5
+  - rmats2sashimiplot>=2.0.4
+  - samtools>=1.18       # rmats2sashimiplot needs samtools on PATH

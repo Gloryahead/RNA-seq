@@ -52,7 +52,7 @@ star:
 featurecounts:
   threads: 8
   feature_type: "exon"
-  attribute: "gene_name"
+  attribute: "gene_id"      # annotation.gtf uses gene_id (Ensembl IDs), not gene_name
 
 # ── Salmon (isoform / Part 10, 11) ────────────────────────────────────
 salmon:
@@ -158,5 +158,5 @@ use_conda: true          # default: use conda YAMLs
 singularity_args: "--bind /ref,/data"   # bind-mount cluster paths into containers
 
 # ── Output directories ────────────────────────────────────────────────
-outdir: "results"
-logdir: "logs"
+outdir: "/xdisk/haining/maarowosegbe/RNA-seq/results"
+logdir: "/xdisk/haining/maarowosegbe/RNA-seq/logs"

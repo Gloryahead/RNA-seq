@@ -217,7 +217,7 @@ rule multiqc:
         f"{OUTDIR}/counts/counts_raw.tsv.summary",
     output: f"{OUTDIR}/qc/multiqc_report.html"
     log:    f"{LOGDIR}/multiqc/multiqc.log"
-    resources: mem_mb=8000, runtime=30
+    resources: runtime=30
     params:
         activate = mamba_activate("rnaseq_env"),
         indir    = OUTDIR,

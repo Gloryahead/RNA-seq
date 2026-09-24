@@ -17,6 +17,7 @@ default-resources:
   slurm_account: "haining"
   runtime: 30                    # minutes
   cpus_per_task: 64              # 64 CPUs × 5 GB/CPU = 320 GB on Puma standard nodes
+  mem_mb_per_cpu: 5120           # 5 GB per CPU (Puma's rate); maps to --mem-per-cpu=5120
 
 # ── Output ────────────────────────────────────────────────────────────
 printshellcmds: true

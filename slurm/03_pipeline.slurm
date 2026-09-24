@@ -9,12 +9,13 @@
 #SBATCH --account=haining
 #SBATCH --partition=standard
 
-### The SLURM job itself only runs the Snakemake controller (1 CPU, low RAM).
-### Snakemake then submits individual rules as child SLURM jobs automatically.
-### Each child job requests its own CPUs/memory (defined in the SLURM profile).
+### The SLURM job itself only runs the Snakemake controller — not the pipeline steps.
+### Snakemake submits each rule as its own child SLURM job with 64 CPUs/320 GB RAM
+### (set in workflow/profiles/slurm/config.yaml and each rule's resources block).
+### The controller only needs a few CPUs; do NOT set ntasks=64 here — that would
+### hold 320 GB idle for the full wall time doing nothing.
 #SBATCH --nodes=1
-#SBATCH --ntasks=2
-#SBATCH --mem-per-cpu=4gb
+#SBATCH --ntasks=4
 #SBATCH --time=240:00:00       # controller must stay alive for the whole run
 
 # --------------------------------------------------------------

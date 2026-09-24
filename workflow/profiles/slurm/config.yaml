@@ -15,8 +15,8 @@ restart-times: 2                 # auto-retry failed jobs twice
 default-resources:
   slurm_partition: "standard"
   slurm_account: "haining"
-  runtime: 60                    # minutes
-  cpus_per_task: 4               # 4 CPUs × 5 GB/CPU = 20 GB on Puma standard nodes
+  runtime: 30                    # minutes
+  cpus_per_task: 64              # 64 CPUs × 5 GB/CPU = 320 GB on Puma standard nodes
 
 # ── Output ────────────────────────────────────────────────────────────
 printshellcmds: true

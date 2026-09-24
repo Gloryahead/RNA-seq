@@ -18,10 +18,10 @@ rule fastqc_raw:
         zip_r1  = f"{OUTDIR}/qc/fastqc/{{sample}}_R1_fastqc.zip",
         zip_r2  = f"{OUTDIR}/qc/fastqc/{{sample}}_R2_fastqc.zip",
     log:   f"{LOGDIR}/fastqc/{{sample}}.log"
-    threads: 2
+    threads: 64
     resources:
-        mem_mb   = 4000,
-        runtime  = 30,
+        cpus_per_task   = 64,
+        runtime         = 15,
         slurm_partition = "standard",
     params:
         activate = mamba_activate("rnaseq_env"),
@@ -50,10 +50,10 @@ rule trim_galore:
         r2     = temp(f"{OUTDIR}/trimmed/{{sample}}_val_2.fq.gz"),
         report = f"{OUTDIR}/qc/trimming/{{sample}}_trimming_report.txt",
     log:   f"{LOGDIR}/trim_galore/{{sample}}.log"
-    threads: config["trimming"]["cores"]
+    threads: 64
     resources:
-        mem_mb   = 8000,
-        runtime  = 60,
+        cpus_per_task   = 64,
+        runtime         = 30,
         slurm_partition = "standard",
     params:
         activate   = mamba_activate("rnaseq_env"),
@@ -94,10 +94,10 @@ rule star_align:
         log      = f"{OUTDIR}/bam/{{sample}}_Log.final.out",
         chimeric = f"{OUTDIR}/bam/{{sample}}_Chimeric.out.junction",
     log:   f"{LOGDIR}/star/{{sample}}.log"
-    threads: 8
+    threads: 64
     resources:
-        cpus_per_task   = 8,    # 8 × 5 GB/CPU = 40 GB on Puma standard nodes
-        runtime         = 180,
+        cpus_per_task   = 64,
+        runtime         = 90,
         slurm_partition = "standard",
     params:
         activate = mamba_activate("rnaseq_env"),
@@ -128,8 +128,8 @@ rule samtools_index:
     input:  f"{OUTDIR}/bam/{{sample}}_Aligned.sortedByCoord.out.bam"
     output: f"{OUTDIR}/bam/{{sample}}_Aligned.sortedByCoord.out.bam.bai"
     log:    f"{LOGDIR}/samtools/{{sample}}_index.log"
-    threads: 4
-    resources: mem_mb=4000, runtime=30
+    threads: 64
+    resources: cpus_per_task=64, runtime=15
     params:
         activate = mamba_activate("rnaseq_env"),
     shell:
@@ -150,10 +150,10 @@ rule featurecounts:
         counts  = f"{OUTDIR}/counts/counts_raw.tsv",
         summary = f"{OUTDIR}/counts/counts_raw.tsv.summary",
     log:   f"{LOGDIR}/featurecounts/featurecounts.log"
-    threads: config["featurecounts"]["threads"]
+    threads: 64
     resources:
-        mem_mb   = 16000,
-        runtime  = 60,
+        cpus_per_task   = 64,
+        runtime         = 30,
         slurm_partition = "standard",
     params:
         activate    = mamba_activate("rnaseq_env"),
@@ -188,8 +188,8 @@ rule salmon_quant:
         quant = f"{OUTDIR}/salmon/{{sample}}/quant.sf",
         dir   = directory(f"{OUTDIR}/salmon/{{sample}}"),
     log:   f"{LOGDIR}/salmon/{{sample}}.log"
-    threads: config["salmon"]["threads"]
-    resources: mem_mb=16000, runtime=60
+    threads: 64
+    resources: cpus_per_task=64, runtime=30
     params:
         activate = mamba_activate("rnaseq_env"),
         lib_type = config["salmon"]["lib_type"],

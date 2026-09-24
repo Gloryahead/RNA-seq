@@ -94,10 +94,11 @@ rule star_align:
         log      = f"{OUTDIR}/bam/{{sample}}_Log.final.out",
         chimeric = f"{OUTDIR}/bam/{{sample}}_Chimeric.out.junction",
     log:   f"{LOGDIR}/star/{{sample}}.log"
-    threads: config["star"]["threads"]
+    threads: 8
     resources:
-        mem_mb   = 40000,
-        runtime  = 120,
+        mem_mb        = 40000,
+        cpus_per_task = 8,
+        runtime       = 180,
         slurm_partition = "standard",
     params:
         activate = mamba_activate("rnaseq_env"),

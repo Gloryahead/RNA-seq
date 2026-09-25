@@ -235,9 +235,12 @@ message("Saved: ", out_scatter)
 
 # ── Plot: top rescue events PSI bar chart ──────────────────────────────────────
 if (nrow(rescue) > 0) {
-  top10 <- head(rescue, 10)
+  # One best event per gene (largest |dPSI_Disease_vs_Control|) to avoid duplicate labels
+  rescue_dedup <- rescue[order(abs(rescue$dPSI_Disease_vs_Control), decreasing = TRUE), ]
+  rescue_dedup <- rescue_dedup[!duplicated(rescue_dedup$geneSymbol), ]
+  top10 <- head(rescue_dedup, 10)
   top10$label <- paste0(top10$geneSymbol, " (", top10$event_type, ")")
-  top10$label <- factor(top10$label, levels = rev(top10$label))
+  top10$label <- factor(top10$label, levels = rev(unique(top10$label)))
 
   bar_df <- rbind(
     data.frame(label = top10$label, condition = "Control",

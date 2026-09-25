@@ -21,7 +21,7 @@
 #SBATCH --error=/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/logs/spladder_%j.err
 #SBATCH --account=haining
 #SBATCH --partition=standard
-#SBATCH --ntasks=8
+#SBATCH --ntasks=16
 #SBATCH --time=06:00:00
 
 # ── Paths ──────────────────────────────────────────────────────────────
@@ -48,12 +48,11 @@ echo "========== SPLAdder started at: $(date) =========="
 # ── Step 1: build augmented splice graph from all BAMs ─────────────────
 echo "--- Step 1: build splice graph ---"
 spladder build \
-    --bams "${CONTROL},${DISEASE},${REMEDY}" \
-    --gtf  "${GTF}" \
-    --outdir "${OUTDIR}/graph" \
-    --threads ${THREADS} \
+    -b "${CONTROL},${DISEASE},${REMEDY}" \
+    -a "${GTF}" \
+    -o "${OUTDIR}/graph" \
+    --parallel ${THREADS} \
     --event-types exon_skip,intron_retention,alt_3prime,alt_5prime,mult_exon_skip \
-    --readlen ${READ_LENGTH} \
     2>"${LOGDIR}/spladder_build.log"
 echo "  Done: ${OUTDIR}/graph/"
 
@@ -64,14 +63,17 @@ run_test() {
     local LABEL=$1
     local COND_A=$2
     local COND_B=$3
+    local LA="${LABEL%%_vs_*}"        # e.g. Disease
+    local LB="${LABEL##*_vs_}"        # e.g. Control
     echo "  Testing ${LABEL}..."
     spladder test \
-        --outdir "${OUTDIR}/graph" \
+        -o "${OUTDIR}/graph" \
         --conditionA "${COND_A}" \
         --conditionB "${COND_B}" \
-        --output "${OUTDIR}/${LABEL}_events.tsv" \
+        --labelA "${LA}" \
+        --labelB "${LB}" \
         2>"${LOGDIR}/spladder_test_${LABEL}.log"
-    echo "  Done: ${OUTDIR}/${LABEL}_events.tsv"
+    echo "  Done: ${OUTDIR}/graph/testing_${LA}_${LB}/"
 }
 
 run_test "Disease_vs_Control" "${DISEASE}" "${CONTROL}"
@@ -81,7 +83,7 @@ run_test "Remedy_vs_Disease"  "${REMEDY}"  "${DISEASE}"
 echo "========== SPLAdder finished at: $(date) =========="
 echo ""
 echo "Outputs:"
-echo "  Splice graph : ${OUTDIR}/graph/"
-echo "  Disease_vs_Control : ${OUTDIR}/Disease_vs_Control_events.tsv"
-echo "  Remedy_vs_Control  : ${OUTDIR}/Remedy_vs_Control_events.tsv"
-echo "  Remedy_vs_Disease  : ${OUTDIR}/Remedy_vs_Disease_events.tsv"
+echo "  Splice graph        : ${OUTDIR}/graph/"
+echo "  Disease_vs_Control  : ${OUTDIR}/graph/testing_Disease_Control/"
+echo "  Remedy_vs_Control   : ${OUTDIR}/graph/testing_Remedy_Control/"
+echo "  Remedy_vs_Disease   : ${OUTDIR}/graph/testing_Remedy_Disease/"

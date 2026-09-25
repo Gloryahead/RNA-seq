@@ -22,7 +22,7 @@
 #SBATCH --error=/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/logs/rmats_%j.err
 #SBATCH --account=haining
 #SBATCH --partition=standard
-#SBATCH --ntasks=8
+#SBATCH --ntasks=16
 #SBATCH --time=06:00:00
 
 # ── Paths ──────────────────────────────────────────────────────────────

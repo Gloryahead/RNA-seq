@@ -52,10 +52,11 @@ load_events <- function(comp, event) {
 }
 
 message("Loading rMATS files...")
-raw <- rbindlist(lapply(COMPARISONS, function(comp)
+file_list <- unlist(lapply(COMPARISONS, function(comp)
   lapply(EVENT_TYPES, function(ev) load_events(comp, ev))),
-  fill = TRUE, use.names = TRUE)
-raw <- as.data.frame(raw)
+  recursive = FALSE)
+file_list <- Filter(Negate(is.null), file_list)
+raw <- as.data.frame(rbindlist(file_list, fill = TRUE, use.names = TRUE))
 
 message("  Loaded ", nrow(raw), " total events across all comparisons and event types")
 

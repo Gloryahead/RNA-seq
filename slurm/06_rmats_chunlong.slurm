@@ -22,7 +22,7 @@
 #SBATCH --error=/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/logs/rmats_%j.err
 #SBATCH --account=haining
 #SBATCH --partition=standard
-#SBATCH --ntasks=24
+#SBATCH --ntasks=16
 #SBATCH --time=06:00:00
 
 # ── Paths ──────────────────────────────────────────────────────────────
@@ -46,15 +46,20 @@ mkdir -p "${LOGDIR}"
 
 run_rmats() {
     local LABEL=$1
-    local B1=$2
-    local B2=$3
+    local B1_BAM=$2
+    local B2_BAM=$3
     local OUTDIR="${OUTBASE}/${LABEL}"
     local TMPDIR="${OUTBASE}/tmp_${LABEL}"
     mkdir -p "${OUTDIR}" "${TMPDIR}"
+
+    # rMATS --b1/--b2 expect text files listing BAM paths, not direct BAM paths
+    echo "${B1_BAM}" > "${TMPDIR}/b1.txt"
+    echo "${B2_BAM}" > "${TMPDIR}/b2.txt"
+
     echo "--- ${LABEL}: $(date) ---"
     rmats.py \
-        --b1 "${B1}" \
-        --b2 "${B2}" \
+        --b1 "${TMPDIR}/b1.txt" \
+        --b2 "${TMPDIR}/b2.txt" \
         --gtf "${GTF}" \
         -t paired \
         --readLength ${READ_LENGTH} \

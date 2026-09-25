@@ -58,7 +58,7 @@ rownames(counts) <- raw$Geneid
 colnames(counts) <- gsub(".*/|_Aligned.*|\\.bam$", "", colnames(counts))
 
 # ── Load sample sheet and subset to this comparison ───────────────────
-meta <- read.delim(opt$samples, stringsAsFactors=FALSE)
+meta <- read.delim(opt$samples, stringsAsFactors=FALSE, comment.char="#")
 meta <- meta[meta$group %in% c(opt$treatment, opt$control), ]
 meta$group <- factor(meta$group, levels=c(opt$control, opt$treatment))
 meta <- meta[order(meta$group), ]

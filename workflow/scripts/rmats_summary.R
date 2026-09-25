@@ -17,6 +17,7 @@
 #   rescue_events.tsv           — events changed in Disease and reversed by Remedy
 #   MAPT_events.tsv             — all MAPT events (unfiltered)
 #   MAPT_PSI_barplot.pdf        — PSI per condition per MAPT event type
+#   MAPT_splicing_efficiency.pdf— intron retention flipped to splicing efficiency (%)
 #   rescue_scatter.pdf          — dPSI scatter: Disease_vs_Control vs Remedy_vs_Disease
 #   top_rescue_barplot.pdf      — PSI bar chart for top 10 rescue events
 
@@ -233,6 +234,78 @@ if (nrow(mapt) > 0) {
   } else {
     message("No matching Disease_vs_Control + Remedy_vs_Control events for ", GENE_OF_INTEREST)
   }
+}
+
+# ── Plot: MAPT splicing efficiency from intron retention (RI) events ──────────
+# Splicing efficiency = (1 - RI_PSI) × 100%
+# High bar = intron efficiently spliced out; low bar = intron retained / splicing stalled
+# Uses ALL MAPT RI events (no dPSI threshold) so every intron is shown.
+mapt_ri <- raw[!is.na(raw$geneSymbol) & raw$geneSymbol == GENE_OF_INTEREST &
+               !is.na(raw$event_type)  & raw$event_type == "RI" & valid_psi, ]
+
+if (nrow(mapt_ri) > 0) {
+  ri_coord <- if ("riExonStart_0base" %in% colnames(mapt_ri))
+    ifelse(!is.na(mapt_ri$riExonStart_0base),
+           as.character(mapt_ri$riExonStart_0base), "")
+  else rep("", nrow(mapt_ri))
+
+  mapt_ri$event_key <- paste("RI", mapt_ri$chr, mapt_ri$strand, ri_coord, sep = "_")
+
+  dc_ri <- mapt_ri[mapt_ri$comparison == "Disease_vs_Control",
+                   c("event_key", "chr", "strand", "PSI1", "PSI2")]
+  rc_ri <- mapt_ri[mapt_ri$comparison == "Remedy_vs_Control",
+                   c("event_key", "PSI1")]
+
+  ri3 <- merge(dc_ri, rc_ri, by = "event_key", all.x = TRUE)
+  names(ri3)[names(ri3) == "PSI1.x"] <- "RET_Disease"
+  names(ri3)[names(ri3) == "PSI2"]   <- "RET_Control"
+  names(ri3)[names(ri3) == "PSI1.y"] <- "RET_Remedy"
+
+  if (nrow(ri3) > 0) {
+    ri3$SE_Control <- (1 - ri3$RET_Control) * 100
+    ri3$SE_Disease <- (1 - ri3$RET_Disease) * 100
+    ri3$SE_Remedy  <- (1 - ri3$RET_Remedy)  * 100
+
+    ri3$pos <- mapply(function(key, chr, strand) {
+      sub(paste0("RI_", chr, "_", strand, "_"), "", key, fixed = TRUE)
+    }, ri3$event_key, ri3$chr, ri3$strand)
+    ri3$label <- paste0("Intron\n", ri3$chr, ":", ri3$strand, "\n@", ri3$pos)
+    ri3$label <- factor(ri3$label, levels = unique(ri3$label))
+
+    ri_long <- rbind(
+      data.frame(label = ri3$label, condition = "Control", efficiency = ri3$SE_Control),
+      data.frame(label = ri3$label, condition = "Disease", efficiency = ri3$SE_Disease),
+      data.frame(label = ri3$label, condition = "Remedy",
+                 efficiency = ifelse(is.na(ri3$SE_Remedy), NA, ri3$SE_Remedy))
+    )
+    ri_long$condition <- factor(ri_long$condition, levels = c("Control", "Disease", "Remedy"))
+
+    p_ri <- ggplot(ri_long, aes(x = condition, y = efficiency, fill = condition)) +
+      geom_col(width = 0.65, color = "white", na.rm = TRUE) +
+      geom_text(aes(label = ifelse(is.na(efficiency), "",
+                                   paste0(round(efficiency, 1), "%"))),
+                vjust = -0.4, size = 2.8, na.rm = TRUE) +
+      facet_wrap(~ label, scales = "free_y") +
+      scale_fill_manual(values = c(Control = "#4E79A7",
+                                   Disease = "#E15759",
+                                   Remedy  = "#59A14F")) +
+      scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
+      labs(title    = paste(GENE_OF_INTEREST, "- Splicing Efficiency per intron (%)"),
+           subtitle = paste("Splicing efficiency = (1 - intron retention PSI) x 100%.",
+                            "All MAPT introns with valid read counts. n=1, exploratory."),
+           y = "Splicing Efficiency (%)", x = NULL) +
+      theme_classic(base_size = 11) +
+      theme(legend.position  = "bottom",
+            strip.background = element_blank(),
+            strip.text       = element_text(size = 7, face = "bold"),
+            axis.text.x      = element_text(angle = 30, hjust = 1))
+
+    out_ri <- file.path(OUTDIR, paste0(GENE_OF_INTEREST, "_splicing_efficiency.pdf"))
+    ggsave(out_ri, p_ri, width = 14, height = 8)
+    message("Saved: ", out_ri)
+  }
+} else {
+  message("No MAPT RI events with valid PSI found.")
 }
 
 # ── Plot: rescue scatter (dPSI Disease_vs_Control vs Remedy_vs_Disease) ─────────

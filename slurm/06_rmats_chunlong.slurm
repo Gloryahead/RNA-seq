@@ -22,7 +22,7 @@
 #SBATCH --error=/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/logs/rmats_%j.err
 #SBATCH --account=haining
 #SBATCH --partition=standard
-#SBATCH --ntasks=16
+#SBATCH --ntasks=24
 #SBATCH --time=06:00:00
 
 # ── Paths ──────────────────────────────────────────────────────────────
@@ -30,7 +30,7 @@ BAM_DIR=/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/9040-0001-human-analysis
 GTF=/xdisk/haining/maarowosegbe/refs/ensembl/Homo_sapiens.GRCh38.110.gtf
 OUTBASE=/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/9040-0001-human-analysis/04.rMATS
 LOGDIR=/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/logs
-THREADS=${SLURM_NTASKS}
+THREADS=4
 READ_LENGTH=151
 
 CONTROL="${BAM_DIR}/S9040-0001-0001_Aligned.sortedByCoord.out.bam"

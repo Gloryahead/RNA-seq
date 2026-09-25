@@ -22,7 +22,7 @@
 #SBATCH --account=haining
 #SBATCH --partition=standard
 #SBATCH --ntasks=16
-#SBATCH --time=06:00:00
+#SBATCH --time=24:00:00
 
 # ── Paths ──────────────────────────────────────────────────────────────
 BAM_DIR=/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/9040-0001-human-analysis/02.BamFiles

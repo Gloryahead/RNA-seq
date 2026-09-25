@@ -148,21 +148,52 @@ fwrite(mapt, file.path(OUTDIR, paste0(GENE_OF_INTEREST, "_events.tsv")), sep = "
 #   Control = IncLevel2 from Disease_vs_Control
 #   Disease = IncLevel1 from Disease_vs_Control
 #   Remedy  = IncLevel1 from Remedy_vs_Control
+#
+# IMPORTANT: merge on event_type+chr+strand alone creates a cartesian product when
+# there are multiple MAPT events of the same type on the same strand (e.g. multiple SE
+# events on chr17:+). We build a coordinate-based event_key to match events 1-to-1.
 if (nrow(mapt) > 0) {
-  dc <- mapt[mapt$comparison == "Disease_vs_Control",
-             c("event_type", "chr", "strand", "PSI1", "PSI2", "dPSI")]
-  rc <- mapt[mapt$comparison == "Remedy_vs_Control",
-             c("event_type", "chr", "strand", "PSI1")]
+  # Build event_key from the first non-NA exon-start coordinate for each event type:
+  #   SE         → exonStart_0base
+  #   RI         → riExonStart_0base
+  #   A3SS/A5SS  → longExonStart_0base
+  #   MXE        → 1stExonStart_0base (R may rename to X1stExonStart_0base)
+  coord_val <- rep("", nrow(mapt))
+  if ("exonStart_0base"     %in% colnames(mapt))
+    coord_val <- ifelse(!is.na(mapt$exonStart_0base),
+                        as.character(mapt$exonStart_0base), coord_val)
+  if ("riExonStart_0base"   %in% colnames(mapt))
+    coord_val <- ifelse(!is.na(mapt$riExonStart_0base),
+                        as.character(mapt$riExonStart_0base), coord_val)
+  if ("longExonStart_0base" %in% colnames(mapt))
+    coord_val <- ifelse(!is.na(mapt$longExonStart_0base),
+                        as.character(mapt$longExonStart_0base), coord_val)
+  mxe_col <- intersect(c("X1stExonStart_0base", "1stExonStart_0base"), colnames(mapt))
+  if (length(mxe_col) > 0)
+    coord_val <- ifelse(!is.na(mapt[[mxe_col[1]]]),
+                        as.character(mapt[[mxe_col[1]]]), coord_val)
 
-  # Merge to get all 3 conditions on same row
-  mapt3 <- merge(dc, rc, by = c("event_type", "chr", "strand"), suffixes = c("", "_Remedy"))
-  colnames(mapt3)[colnames(mapt3) == "PSI1"]        <- "PSI_Disease"
-  colnames(mapt3)[colnames(mapt3) == "PSI2"]        <- "PSI_Control"
-  colnames(mapt3)[colnames(mapt3) == "PSI1_Remedy"] <- "PSI_Remedy"
+  mapt$event_key <- paste(mapt$event_type, mapt$chr, mapt$strand, coord_val, sep = "_")
+
+  dc_m <- mapt[mapt$comparison == "Disease_vs_Control",
+               c("event_key", "event_type", "chr", "strand", "PSI1", "PSI2")]
+  rc_m <- mapt[mapt$comparison == "Remedy_vs_Control",
+               c("event_key", "PSI1")]
+
+  # 1-to-1 merge; keep all Disease_vs_Control events, NA Remedy if not detected
+  mapt3 <- merge(dc_m, rc_m, by = "event_key", all.x = TRUE)
+  names(mapt3)[names(mapt3) == "PSI1.x"] <- "PSI_Disease"
+  names(mapt3)[names(mapt3) == "PSI2"]   <- "PSI_Control"
+  names(mapt3)[names(mapt3) == "PSI1.y"] <- "PSI_Remedy"
 
   if (nrow(mapt3) > 0) {
-    # One row per event — label with event_type + chr position
-    mapt3$label <- paste0(mapt3$event_type, "\n", mapt3$chr, ":", mapt3$strand)
+    # Build readable per-event label (event type + genomic position of the key exon)
+    mapt3$pos_label <- mapply(function(key, etype, chr, strand) {
+      prefix <- paste0(etype, "_", chr, "_", strand, "_")
+      sub(prefix, "", key, fixed = TRUE)
+    }, mapt3$event_key, mapt3$event_type, mapt3$chr, mapt3$strand)
+    mapt3$label <- paste0(mapt3$event_type, "\n", mapt3$chr, ":", mapt3$strand,
+                          "\n@", mapt3$pos_label)
     mapt3$label <- factor(mapt3$label, levels = unique(mapt3$label))
 
     # Reshape to long format
@@ -178,21 +209,22 @@ if (nrow(mapt) > 0) {
                                   levels = c("Control", "Disease", "Remedy"))
 
     p_mapt <- ggplot(mapt_long, aes(x = condition, y = PSI_pct, fill = condition)) +
-      geom_col(width = 0.65, color = "white") +
-      geom_text(aes(label = paste0(round(PSI_pct, 1), "%")),
-                vjust = -0.4, size = 2.8) +
+      geom_col(width = 0.65, color = "white", na.rm = TRUE) +
+      geom_text(aes(label = ifelse(is.na(PSI_pct), "",
+                                   paste0(round(PSI_pct, 1), "%"))),
+                vjust = -0.4, size = 2.8, na.rm = TRUE) +
       facet_wrap(~ label, scales = "free_y") +
       scale_fill_manual(values = c(Control = "#4E79A7",
                                    Disease = "#E15759",
                                    Remedy  = "#59A14F")) +
       scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
-      labs(title    = paste(GENE_OF_INTEREST, "— PSI (%) per condition"),
-           subtitle = "Each panel = one splicing event. Control / Disease / Remedy side by side. n=1, exploratory.",
+      labs(title    = paste(GENE_OF_INTEREST, "- PSI (%) per condition"),
+           subtitle = "Each panel = one splicing event (matched by genomic position). n=1, exploratory.",
            y = "PSI (%)", x = NULL) +
       theme_classic(base_size = 11) +
       theme(legend.position  = "bottom",
             strip.background = element_blank(),
-            strip.text       = element_text(size = 8, face = "bold"),
+            strip.text       = element_text(size = 7, face = "bold"),
             axis.text.x      = element_text(angle = 30, hjust = 1))
 
     out_mapt <- file.path(OUTDIR, paste0(GENE_OF_INTEREST, "_PSI_barplot.pdf"))

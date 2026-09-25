@@ -17,6 +17,7 @@
 #   rescue_events.tsv           — events changed in Disease and reversed by Remedy
 #   MAPT_events.tsv             — all MAPT events (unfiltered)
 #   MAPT_PSI_barplot.pdf        — PSI per condition per MAPT event type
+#   MAPT_RI_PSI_barplot.pdf     — intron retention PSI per condition (same style as A5SS)
 #   MAPT_splicing_efficiency.pdf— intron retention flipped to splicing efficiency (%)
 #   rescue_scatter.pdf          — dPSI scatter: Disease_vs_Control vs Remedy_vs_Disease
 #   top_rescue_barplot.pdf      — PSI bar chart for top 10 rescue events
@@ -280,6 +281,42 @@ if (nrow(mapt_ri) > 0) {
     )
     ri_long$condition <- factor(ri_long$condition, levels = c("Control", "Disease", "Remedy"))
 
+    # ── Plot 1: Intron Retention PSI — same style as A5SS barplot ─────────
+    ret_long <- rbind(
+      data.frame(label = ri3$label, condition = "Control",
+                 PSI_pct = ri3$RET_Control * 100),
+      data.frame(label = ri3$label, condition = "Disease",
+                 PSI_pct = ri3$RET_Disease * 100),
+      data.frame(label = ri3$label, condition = "Remedy",
+                 PSI_pct = ifelse(is.na(ri3$RET_Remedy), NA, ri3$RET_Remedy * 100))
+    )
+    ret_long$condition <- factor(ret_long$condition, levels = c("Control", "Disease", "Remedy"))
+
+    p_ret <- ggplot(ret_long, aes(x = condition, y = PSI_pct, fill = condition)) +
+      geom_col(width = 0.65, color = "white", na.rm = TRUE) +
+      geom_text(aes(label = ifelse(is.na(PSI_pct), "",
+                                   paste0(round(PSI_pct, 1), "%"))),
+                vjust = -0.4, size = 2.8, na.rm = TRUE) +
+      facet_wrap(~ label, scales = "free_y") +
+      scale_fill_manual(values = c(Control = "#4E79A7",
+                                   Disease = "#E15759",
+                                   Remedy  = "#59A14F")) +
+      scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
+      labs(title    = paste(GENE_OF_INTEREST, "- Intron Retention PSI (%) per condition"),
+           subtitle = paste("Higher bar = more intron retained = less efficient splicing.",
+                            "All MAPT introns with valid read counts. n=1, exploratory."),
+           y = "Intron Retention PSI (%)", x = NULL) +
+      theme_classic(base_size = 11) +
+      theme(legend.position  = "bottom",
+            strip.background = element_blank(),
+            strip.text       = element_text(size = 7, face = "bold"),
+            axis.text.x      = element_text(angle = 30, hjust = 1))
+
+    out_ret <- file.path(OUTDIR, paste0(GENE_OF_INTEREST, "_RI_PSI_barplot.pdf"))
+    ggsave(out_ret, p_ret, width = 14, height = 8)
+    message("Saved: ", out_ret)
+
+    # ── Plot 2: Splicing Efficiency — inverted view ────────────────────────
     p_ri <- ggplot(ri_long, aes(x = condition, y = efficiency, fill = condition)) +
       geom_col(width = 0.65, color = "white", na.rm = TRUE) +
       geom_text(aes(label = ifelse(is.na(efficiency), "",
@@ -292,7 +329,7 @@ if (nrow(mapt_ri) > 0) {
       scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
       labs(title    = paste(GENE_OF_INTEREST, "- Splicing Efficiency per intron (%)"),
            subtitle = paste("Splicing efficiency = (1 - intron retention PSI) x 100%.",
-                            "All MAPT introns with valid read counts. n=1, exploratory."),
+                            "Higher bar = intron efficiently spliced out. n=1, exploratory."),
            y = "Splicing Efficiency (%)", x = NULL) +
       theme_classic(base_size = 11) +
       theme(legend.position  = "bottom",

@@ -21,7 +21,7 @@
 #SBATCH --error=/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/logs/spladder_%j.err
 #SBATCH --account=haining
 #SBATCH --partition=standard
-#SBATCH --ntasks=16
+#SBATCH --ntasks=32
 #SBATCH --time=24:00:00
 
 # ── Paths ──────────────────────────────────────────────────────────────

@@ -21,7 +21,7 @@
 
 # ── Paths ──────────────────────────────────────────────────────────────
 BAM_DIR=/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/9040-0001-human-analysis/02.BamFiles
-GTF=/xdisk/haining/maarowosegbe/refs/GRCh38_gencode_v44_CTAT_lib_Oct292023.plug-n-play/ctat_genome_lib_build_dir/ref_annot.gtf
+GTF=/xdisk/haining/maarowosegbe/refs/ensembl/Homo_sapiens.GRCh38.110.gtf
 OUTDIR=/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/9040-0001-human-analysis/03.StringTie
 LOGDIR=/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/logs
 THREADS=${SLURM_NTASKS}

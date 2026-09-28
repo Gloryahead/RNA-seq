@@ -1,0 +1,256 @@
+STAR version=2.7.11b
+STAR compilation time,server,dir=2025-11-14T12:06:42+0000 :/opt/conda/conda-bld/star_1763121846936/work/source
+##### Command Line:
+/groups/haining/maarowosegbe/micromamba/envs/rnaseq_env/bin/STAR-avx2 --runMode genomeGenerate --genomeDir /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index --genomeFastaFiles /xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa --sjdbGTFfile /xdisk/haining/maarowosegbe/RNA-seq/ref/annotation.gtf --sjdbOverhang 149 --runThreadN 16 --genomeSAindexNbases 14
+##### Initial USER parameters from Command Line:
+###### All USER parameters from Command Line:
+runMode                       genomeGenerate        ~RE-DEFINED
+genomeDir                     /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index     ~RE-DEFINED
+genomeFastaFiles              /xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa        ~RE-DEFINED
+sjdbGTFfile                   /xdisk/haining/maarowosegbe/RNA-seq/ref/annotation.gtf     ~RE-DEFINED
+sjdbOverhang                  149     ~RE-DEFINED
+runThreadN                    16     ~RE-DEFINED
+genomeSAindexNbases           14     ~RE-DEFINED
+##### Finished reading parameters from all sources
+
+##### Final user re-defined parameters-----------------:
+runMode                           genomeGenerate   
+runThreadN                        16
+genomeDir                         /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index
+genomeFastaFiles                  /xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa   
+genomeSAindexNbases               14
+sjdbGTFfile                       /xdisk/haining/maarowosegbe/RNA-seq/ref/annotation.gtf
+sjdbOverhang                      149
+
+-------------------------------
+##### Final effective command line:
+/groups/haining/maarowosegbe/micromamba/envs/rnaseq_env/bin/STAR-avx2   --runMode genomeGenerate      --runThreadN 16   --genomeDir /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index   --genomeFastaFiles /xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa      --genomeSAindexNbases 14   --sjdbGTFfile /xdisk/haining/maarowosegbe/RNA-seq/ref/annotation.gtf   --sjdbOverhang 149
+----------------------------------------
+
+Number of fastq files for each mate = 1
+ParametersSolo: --soloCellFilterType CellRanger2.2 filtering parameters:  3000 0.99 10
+Finished loading and checking parameters
+--genomeDir directory exists and will be overwritten: /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index/
+!!!!! WARNING: Could not move Log.out file from ./Log.out into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index/Log.out. Will keep ./Log.out
+
+Sep 21 17:55:36 ... starting to generate Genome files
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 0  "1" chrStart: 0
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 1  "10" chrStart: 195297280
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 2  "11" chrStart: 325844992
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 3  "12" chrStart: 448004096
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 4  "13" chrStart: 568328192
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 5  "14" chrStart: 689438720
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 6  "15" chrStart: 814743552
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 7  "16" chrStart: 919076864
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 8  "17" chrStart: 1017118720
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 9  "18" chrStart: 1112539136
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 10  "19" chrStart: 1203503104
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 11  "2" chrStart: 1265106944
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 12  "3" chrStart: 1447034880
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 13  "4" chrStart: 1606942720
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 14  "5" chrStart: 1763966976
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 15  "6" chrStart: 1915748352
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 16  "7" chrStart: 2065432576
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 17  "8" chrStart: 2210660352
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 18  "9" chrStart: 2340945920
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 19  "MT" chrStart: 2465464320
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 20  "X" chrStart: 2465726464
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 21  "Y" chrStart: 2635333632
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 22  "JH584299.1" chrStart: 2726821888
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 23  "GL456233.2" chrStart: 2727870464
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 24  "JH584301.1" chrStart: 2728656896
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 25  "GL456211.1" chrStart: 2728919040
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 26  "GL456221.1" chrStart: 2729181184
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 27  "JH584297.1" chrStart: 2729443328
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 28  "JH584296.1" chrStart: 2729705472
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 29  "GL456354.1" chrStart: 2729967616
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 30  "JH584298.1" chrStart: 2730229760
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 31  "JH584300.1" chrStart: 2730491904
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 32  "GL456219.1" chrStart: 2730754048
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 33  "GL456210.1" chrStart: 2731016192
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 34  "JH584303.1" chrStart: 2731278336
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 35  "JH584302.1" chrStart: 2731540480
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 36  "GL456212.1" chrStart: 2731802624
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 37  "JH584304.1" chrStart: 2732064768
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 38  "GL456379.1" chrStart: 2732326912
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 39  "GL456366.1" chrStart: 2732589056
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 40  "GL456367.1" chrStart: 2732851200
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 41  "GL456239.1" chrStart: 2733113344
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 42  "GL456383.1" chrStart: 2733375488
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 43  "GL456385.1" chrStart: 2733637632
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 44  "GL456360.1" chrStart: 2733899776
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 45  "GL456378.1" chrStart: 2734161920
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 46  "MU069435.1" chrStart: 2734424064
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 47  "GL456389.1" chrStart: 2734686208
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 48  "GL456372.1" chrStart: 2734948352
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 49  "GL456370.1" chrStart: 2735210496
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 50  "GL456381.1" chrStart: 2735472640
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 51  "GL456387.1" chrStart: 2735734784
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 52  "GL456390.1" chrStart: 2735996928
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 53  "GL456394.1" chrStart: 2736259072
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 54  "GL456392.1" chrStart: 2736521216
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 55  "GL456382.1" chrStart: 2736783360
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 56  "GL456359.1" chrStart: 2737045504
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 57  "GL456396.1" chrStart: 2737307648
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 58  "GL456368.1" chrStart: 2737569792
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 59  "MU069434.1" chrStart: 2737831936
+/xdisk/haining/maarowosegbe/RNA-seq/ref/genome.fa : chr # 60  "JH584295.1" chrStart: 2738094080
+Chromosome sequence lengths: 
+1	195154279
+10	130530862
+11	121973369
+12	120092757
+13	120883175
+14	125139656
+15	104073951
+16	98008968
+17	95294699
+18	90720763
+19	61420004
+2	181755017
+3	159745316
+4	156860686
+5	151758149
+6	149588044
+7	144995196
+8	130127694
+9	124359700
+MT	16299
+X	169476592
+Y	91455967
+JH584299.1	953012
+GL456233.2	559103
+JH584301.1	259875
+GL456211.1	241735
+GL456221.1	206961
+JH584297.1	205776
+JH584296.1	199368
+GL456354.1	195993
+JH584298.1	184189
+JH584300.1	182347
+GL456219.1	175968
+GL456210.1	169725
+JH584303.1	158099
+JH584302.1	155838
+GL456212.1	153618
+JH584304.1	114452
+GL456379.1	72385
+GL456366.1	47073
+GL456367.1	42057
+GL456239.1	40056
+GL456383.1	38659
+GL456385.1	35240
+GL456360.1	31704
+GL456378.1	31602
+MU069435.1	31129
+GL456389.1	28772
+GL456372.1	28664
+GL456370.1	26764
+GL456381.1	25871
+GL456387.1	24685
+GL456390.1	24668
+GL456394.1	24323
+GL456392.1	23629
+GL456382.1	23158
+GL456359.1	22974
+GL456396.1	21240
+GL456368.1	20208
+MU069434.1	8412
+JH584295.1	1976
+Genome sequence total length = 2728222451
+Genome size with padding = 2738356224
+Sep 21 17:56:13 ..... processing annotations GTF
+Processing pGe.sjdbGTFfile=/xdisk/haining/maarowosegbe/RNA-seq/ref/annotation.gtf, found:
+		149194 transcripts
+		864295 exons (non-collapsed)
+		289580 collapsed junctions
+Total junctions: 289580
+Sep 21 17:56:21 ..... finished GTF processing
+
+Estimated genome size with padding and SJs: total=genome+SJ=3037356224 = 2738356224 + 299000000
+GstrandBit=32
+Number of SA indices: 5309243566
+Sep 21 17:56:26 ... starting to sort Suffix Array. This may take a long time...
+Number of chunks: 50;   chunks size limit: 957123272 bytes
+Sep 21 17:56:42 ... sorting Suffix Array chunks and saving them to disk...
+Writing 750335304 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_0 ; empty space on disk = 21285606260736 bytes ... done
+Writing 744553416 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_4 ; empty space on disk = 21285606260736 bytes ... done
+Writing 844904864 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_3 ; empty space on disk = 21285606260736 bytes ... done
+Writing 850589592 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_2 ; empty space on disk = 21285606260736 bytes ... done
+Writing 935212160 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_1 ; empty space on disk = 21285606260736 bytes ... done
+Writing 911531368 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_5 ; empty space on disk = 21285606260736 bytes ... done
+Writing 898520792 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_6 ; empty space on disk = 21285606260736 bytes ... done
+Writing 854078840 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_10 ; empty space on disk = 21285606260736 bytes ... done
+Writing 861983192 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_15 ; empty space on disk = 21285606260736 bytes ... done
+Writing 731996096 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_7 ; empty space on disk = 21285606260736 bytes ... done
+Writing 842265312 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_11 ; empty space on disk = 21285606260736 bytes ... done
+Writing 810774784 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_9 ; empty space on disk = 21285606260736 bytes ... done
+Writing 822278792 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_13 ; empty space on disk = 21285606260736 bytes ... done
+Writing 922518552 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_8 ; empty space on disk = 21285606260736 bytes ... done
+Writing 942737224 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_12 ; empty space on disk = 21284112039936 bytes ... done
+Writing 955484184 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_14 ; empty space on disk = 21284112039936 bytes ... done
+Writing 880164216 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_16 ; empty space on disk = 21272881790976 bytes ... done
+Writing 756801752 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_17 ; empty space on disk = 21272881790976 bytes ... done
+Writing 752638664 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_22 ; empty space on disk = 21271926538240 bytes ... done
+Writing 744703976 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_21 ; empty space on disk = 21271926538240 bytes ... done
+Writing 819107808 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_18 ; empty space on disk = 21271926538240 bytes ... done
+Writing 861396328 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_19 ; empty space on disk = 21271926538240 bytes ... done
+Writing 956383120 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_20 ; empty space on disk = 21271926538240 bytes ... done
+Writing 883475184 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_23 ; empty space on disk = 21271926538240 bytes ... done
+Writing 846873424 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_26 ; empty space on disk = 21271045734400 bytes ... done
+Writing 866779624 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_25 ; empty space on disk = 21271045734400 bytes ...Writing 844770664 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_29 ; empty space on disk = 21271045734400 bytes ... done
+ done
+Writing 863882072 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_31 ; empty space on disk = 21271045734400 bytes ... done
+Writing 880847832 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_28 ; empty space on disk = 21267972358144 bytes ... done
+Writing 851975776 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_30 ; empty space on disk = 21267972358144 bytes ... done
+Writing 902538744 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_24 ; empty space on disk = 21267972358144 bytes ... done
+Writing 928452088 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_27 ; empty space on disk = 21267972358144 bytes ... done
+Writing 846314736 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_32 ; empty space on disk = 21265271226368 bytes ... done
+Writing 868031704 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_33 ; empty space on disk = 21264423976960 bytes ... done
+Writing 811666592 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_34 ; empty space on disk = 21264423976960 bytes ... done
+Writing 831298888 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_35 ; empty space on disk = 21259213602816 bytes ... done
+Writing 776575424 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_37 ; empty space on disk = 21259213602816 bytes ... done
+Writing 825918896 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_38 ; empty space on disk = 21258284564480 bytes ... done
+Writing 883521976 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_36 ; empty space on disk = 21258284564480 bytes ...Writing 879966152 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_39 ; empty space on disk = 21258284564480 bytes ... done
+ done
+Writing 763263200 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_46 ; empty space on disk = 21255758544896 bytes ... done
+Writing 799986624 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_40 ; empty space on disk = 21254927024128 bytes ... done
+Writing 901358520 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_47 ; empty space on disk = 21254927024128 bytes ... done
+Writing 818397384 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_45 ; empty space on disk = 21254927024128 bytes ... done
+Writing 817575616 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_43 ; empty space on disk = 21254927024128 bytes ... done
+Writing 846073576 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_41 ; empty space on disk = 21254927024128 bytes ... done
+Writing 890045744 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_44 ; empty space on disk = 21254927024128 bytes ... done
+Writing 929334472 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_42 ; empty space on disk = 21253324800000 bytes ... done
+Writing 801751320 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_49 ; empty space on disk = 21253324800000 bytes ... done
+Writing 862311960 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA_48 ; empty space on disk = 21253324800000 bytes ... done
+Sep 21 18:05:00 ... loading chunks from disk, packing SA...
+Sep 21 18:06:21 ... finished generating suffix array
+Sep 21 18:06:21 ... generating Suffix Array index
+Sep 21 18:09:31 ... completed Suffix Array index
+WARNING: long repeat for junction # 65645 : 13 36192501 36373186; left shift = 255; right shift = 29
+WARNING: long repeat for junction # 73353 : 13 119631671 120070727; left shift = 36; right shift = 255
+WARNING: long repeat for junction # 90022 : 15 75976552 75988902; left shift = 0; right shift = 255
+WARNING: long repeat for junction # 200336 : 5 112922393 112922883; left shift = 255; right shift = 69
+WARNING: long repeat for junction # 202737 : 5 123328298 123329023; left shift = 255; right shift = 19
+WARNING: long repeat for junction # 211984 : 6 48731569 48732130; left shift = 81; right shift = 255
+WARNING: long repeat for junction # 244212 : 7 141361933 141364041; left shift = 255; right shift = 255
+Sep 21 18:09:31   Finished preparing junctions
+Sep 21 18:09:31 ..... inserting junctions into the genome indices
+Sep 21 18:10:20   Finished SA search: number of new junctions=289553, old junctions=0
+Sep 21 18:11:11   Finished sorting SA indicesL nInd=172573150
+Genome size with junctions=2824932571  2738356224   86576347
+GstrandBit1=32   GstrandBit=32
+Sep 21 18:12:08   Finished inserting junction indices
+Sep 21 18:12:33   Finished SAi
+Sep 21 18:12:33 ..... finished inserting junctions into genome
+Sep 21 18:12:33 ... writing Genome to disk ...
+Writing 2824932571 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//Genome ; empty space on disk = 21285591580672 bytes ... done
+SA size in bytes: 22612493957
+Sep 21 18:12:37 ... writing Suffix Array to disk ...
+Writing 22612493957 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SA ; empty space on disk = 21285591580672 bytes ... done
+Sep 21 18:13:05 ... writing SAindex to disk
+Writing 8 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SAindex ; empty space on disk = 21285591580672 bytes ... done
+Writing 120 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SAindex ; empty space on disk = 21285591580672 bytes ... done
+Writing 1565873491 bytes into /xdisk/haining/maarowosegbe/RNA-seq/ref/star_index//SAindex ; empty space on disk = 21285591580672 bytes ... done
+Sep 21 18:13:08 ..... finished successfully
+DONE: Genome generation, EXITING

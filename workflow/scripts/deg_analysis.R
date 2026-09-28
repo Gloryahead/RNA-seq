@@ -128,6 +128,20 @@ if (opt$method == "DESeq2") {
   stop("Unknown method: ", opt$method, ". Use DESeq2, edgeR, or limma-voom.")
 }
 
+# ── Annotate gene symbols (Ensembl → symbol) ─────────────────────────
+if (any(startsWith(na.omit(res_df$gene)[seq_len(min(5, sum(!is.na(res_df$gene))))], "ENS"))) {
+  org_db <- switch(opt$organism,
+    human = { suppressPackageStartupMessages(library(org.Hs.eg.db)); org.Hs.eg.db },
+    mouse = { suppressPackageStartupMessages(library(org.Mm.eg.db)); org.Mm.eg.db },
+    rat   = { suppressPackageStartupMessages(library(org.Rn.eg.db)); org.Rn.eg.db },
+    NULL)
+  if (!is.null(org_db)) {
+    syms <- mapIds(org_db, keys=res_df$gene, column="SYMBOL",
+                   keytype="ENSEMBL", multiVals="first")
+    res_df$gene_symbol <- ifelse(is.na(syms), res_df$gene, syms)
+  }
+}
+
 # ── Write DEG table ───────────────────────────────────────────────────
 res_df <- res_df[order(res_df$FDR, na.last=TRUE), ]
 fwrite(res_df, opt$out_degs, sep="\t", na="NA")

@@ -86,7 +86,7 @@ if (opt$method == "DESeq2") {
   res    <- results(dds, contrast=c("group", opt$treatment, opt$control),
                     alpha=opt$alpha, lfcThreshold=opt$lfc)
   res    <- lfcShrink(dds, contrast=c("group", opt$treatment, opt$control),
-                      type="ashr", res=res, quiet=TRUE)
+                      type="normal", res=res, quiet=TRUE)
   res_df <- as.data.frame(res)
   res_df <- data.frame(gene=rownames(res_df), res_df, stringsAsFactors=FALSE)
   setnames_map <- c(log2FoldChange="log2FC", pvalue="pvalue", padj="FDR")

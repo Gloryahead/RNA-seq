@@ -127,8 +127,10 @@ if (isTRUE(opt$run_gsea) && length(ranked_list) >= 10) {
     p_dot  <- dotplot(gsea_res, showCategory=15, split=".sign") +
               facet_grid(.~.sign) + theme_classic(base_size=10)
     save_plot(p_dot, file.path(opt$outdir, paste0(opt$label, "_GSEA_dotplot.pdf")), w=10, h=7)
-    p_ridge <- ridgeplot(gsea_res, showCategory=20) + theme_classic(base_size=10)
-    save_plot(p_ridge, file.path(opt$outdir, paste0(opt$label, "_GSEA_ridge.pdf")), w=9, h=8)
+    tryCatch({
+      p_ridge <- ridgeplot(gsea_res, showCategory=20) + theme_classic(base_size=10)
+      save_plot(p_ridge, file.path(opt$outdir, paste0(opt$label, "_GSEA_ridge.pdf")), w=9, h=8)
+    }, error=function(e) message("Ridge plot skipped (ggridges not installed): ", conditionMessage(e)))
   }
 }
 

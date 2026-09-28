@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
 # deg_analysis.R — Differential expression analysis (Parts 3, 20)
+# LFC shrinkage: uses type="normal" (built into DESeq2); ashr not required
 # Methods: DESeq2, edgeR, or limma-voom (set via --method flag)
 # Input:   count matrix (featureCounts format), sample sheet (TSV)
 # Output:  DEG results TSV, PCA PDF, MA PDF, sample-distance heatmap PDF, RDS object

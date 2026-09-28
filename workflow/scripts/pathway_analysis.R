@@ -62,6 +62,7 @@ universe    <- degs$ENTREZID
 # Ranked gene list for GSEA (by signed -log10 FDR or log2FC)
 ranked_list <- setNames(degs[[lfc_col]], degs$ENTREZID)
 ranked_list <- sort(ranked_list[!is.na(ranked_list)], decreasing=TRUE)
+ranked_list <- ranked_list[!duplicated(names(ranked_list))]
 
 message(length(sig_genes), " significant genes for ORA; ",
         length(ranked_list), " genes for GSEA")

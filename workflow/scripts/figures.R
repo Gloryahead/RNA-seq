@@ -11,6 +11,7 @@ suppressPackageStartupMessages({
   library(pheatmap)
   library(RColorBrewer)
   library(EnhancedVolcano)
+  library(SummarizedExperiment)
 })
 
 opt_list <- list(
@@ -49,7 +50,7 @@ obj <- readRDS(opt$rds)
 if (inherits(obj, "list") && "vsd" %in% names(obj)) {
   norm_mat <- assay(obj$vsd)
 } else if (inherits(obj, "DESeqDataSet")) {
-  norm_mat <- assay(SummarizedExperiment::assay(obj))
+  norm_mat <- assay(obj)
 } else if (inherits(obj, "DGEList")) {
   norm_mat <- edgeR::cpm(obj, log=TRUE)
 } else {

@@ -46,12 +46,14 @@ degs <- fread(opt$degs, data.table=FALSE)
 stopifnot("gene" %in% colnames(degs), "FDR" %in% colnames(degs))
 lfc_col <- intersect(c("log2FC","log2FoldChange","logFC"), colnames(degs))[1]
 
-# Map gene symbols → Entrez IDs
+# Map gene IDs → Entrez IDs (auto-detect Ensembl vs gene symbol)
 gene_symbols <- degs$gene
+from_type <- if (any(startsWith(na.omit(gene_symbols)[seq_len(min(5, sum(!is.na(gene_symbols))))], "ENS"))) "ENSEMBL" else "SYMBOL"
+message("Detected gene ID type: ", from_type)
 entrez_map <- suppressMessages(
-  bitr(gene_symbols, fromType="SYMBOL", toType="ENTREZID", OrgDb=org_db)
+  bitr(gene_symbols, fromType=from_type, toType="ENTREZID", OrgDb=org_db)
 )
-degs <- merge(degs, entrez_map, by.x="gene", by.y="SYMBOL", all.x=FALSE)
+degs <- merge(degs, entrez_map, by.x="gene", by.y=from_type, all.x=FALSE)
 
 # Significant genes for ORA
 sig_genes   <- degs$ENTREZID[!is.na(degs$FDR) & degs$FDR < opt$pval]

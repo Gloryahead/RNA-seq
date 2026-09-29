@@ -219,7 +219,7 @@ body{font-family:system-ui,sans-serif;background:#f8f8f8;color:#222;padding:16px
 h2{font-size:1.1rem;margin-bottom:8px;text-align:center}
 #controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
 #search{padding:4px 8px;border:1px solid #ccc;border-radius:4px;font-size:.9rem;width:180px}
-.legend-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}
+.legend-dot{display:inline-block;width:10px;height:10px;border-radius:50%%;margin-right:4px}
 .leg{display:flex;align-items:center;font-size:.85rem;gap:4px}
 #tooltip{position:fixed;background:rgba(0,0,0,.82);color:#fff;padding:6px 10px;border-radius:5px;
   font-size:.8rem;pointer-events:none;display:none;white-space:nowrap;z-index:999}

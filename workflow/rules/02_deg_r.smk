@@ -65,8 +65,11 @@ rule publication_figures:
         degs = f"{OUTDIR}/deg/{{comp}}_DEG_results.tsv",
         rds  = f"{OUTDIR}/deg/{{comp}}_dge_object.rds",
     output:
-        volcano = f"{OUTDIR}/figures/{{comp}}_volcano.pdf",
-        heatmap = f"{OUTDIR}/figures/{{comp}}_top50_heatmap.pdf",
+        volcano        = f"{OUTDIR}/figures/{{comp}}_volcano.pdf",
+        volcano_html   = f"{OUTDIR}/figures/{{comp}}_volcano_interactive.html",
+        heatmap        = f"{OUTDIR}/figures/{{comp}}_heatmap_all.pdf",
+        heatmap_top100 = f"{OUTDIR}/figures/{{comp}}_heatmap_top100.pdf",
+        heatmap_top50  = f"{OUTDIR}/figures/{{comp}}_heatmap_top50.pdf",
     log:   f"{LOGDIR}/figures/{{comp}}.log"
     threads: 1
     resources: mem_mb=8000, runtime=30
@@ -74,6 +77,7 @@ rule publication_figures:
         activate  = mamba_activate("rnaseq_r_env"),
         alpha     = config["deg"]["alpha"],
         lfc       = config["deg"]["lfc_threshold"],
+        organism  = config["organism"],
         treatment = lambda wc: wc.comp.split("_vs_")[0],
         control   = lambda wc: wc.comp.split("_vs_")[1],
     shell:
@@ -81,14 +85,64 @@ rule publication_figures:
         set -eo pipefail
         {params.activate}
         Rscript workflow/scripts/figures.R \
-            --degs     {input.degs} \
-            --rds      {input.rds} \
-            --treatment {params.treatment} \
-            --control   {params.control} \
-            --alpha    {params.alpha} \
-            --lfc      {params.lfc} \
-            --out_volcano {output.volcano} \
-            --out_heatmap {output.heatmap} \
+            --degs              {input.degs} \
+            --rds               {input.rds} \
+            --treatment         {params.treatment} \
+            --control           {params.control} \
+            --organism          {params.organism} \
+            --alpha             {params.alpha} \
+            --lfc               {params.lfc} \
+            --out_volcano        {output.volcano} \
+            --out_volcano_html   {output.volcano_html} \
+            --out_heatmap        {output.heatmap} \
+            --out_heatmap_top100 {output.heatmap_top100} \
+            --out_heatmap_top50  {output.heatmap_top50} \
+            2>{log}
+        """
+
+
+rule html_report:
+    input:
+        degs           = f"{OUTDIR}/deg/{{comp}}_DEG_results.tsv",
+        pca            = f"{OUTDIR}/figures/{{comp}}_pca.pdf",
+        ma             = f"{OUTDIR}/figures/{{comp}}_ma_plot.pdf",
+        sample_dist    = f"{OUTDIR}/figures/{{comp}}_sample_distance.pdf",
+        volcano        = f"{OUTDIR}/figures/{{comp}}_volcano.pdf",
+        volcano_html   = f"{OUTDIR}/figures/{{comp}}_volcano_interactive.html",
+        heatmap        = f"{OUTDIR}/figures/{{comp}}_heatmap_all.pdf",
+        heatmap_top100 = f"{OUTDIR}/figures/{{comp}}_heatmap_top100.pdf",
+        heatmap_top50  = f"{OUTDIR}/figures/{{comp}}_heatmap_top50.pdf",
+        go_table       = f"{OUTDIR}/pathways/{{comp}}_GO_results.tsv",
+    output:
+        report = f"{OUTDIR}/reports/{{comp}}_report.html",
+    log:   f"{LOGDIR}/reports/{{comp}}.log"
+    threads: 1
+    resources: mem_mb=8000, runtime=20
+    params:
+        activate     = mamba_activate("rnaseq_r_env"),
+        treatment    = lambda wc: wc.comp.split("_vs_")[0],
+        control      = lambda wc: wc.comp.split("_vs_")[1],
+        pathways_dir = f"{OUTDIR}/pathways",
+    shell:
+        """
+        set -eo pipefail
+        {params.activate}
+        mkdir -p $(dirname {output.report})
+        Rscript workflow/scripts/report.R \
+            --label          {wildcards.comp} \
+            --treatment      {params.treatment} \
+            --control        {params.control} \
+            --degs           {input.degs} \
+            --pca            {input.pca} \
+            --ma             {input.ma} \
+            --sample_dist    {input.sample_dist} \
+            --volcano        {input.volcano} \
+            --volcano_html   {input.volcano_html} \
+            --heatmap        {input.heatmap} \
+            --heatmap_top100 {input.heatmap_top100} \
+            --heatmap_top50  {input.heatmap_top50} \
+            --pathways_dir   {params.pathways_dir} \
+            --output         {output.report} \
             2>{log}
         """
 

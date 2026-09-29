@@ -92,6 +92,71 @@ if (isTRUE(opt$run_go) && length(sig_genes) >= 5) {
     p <- dotplot(ego, showCategory=20, title=paste("GO BP:", opt$label)) +
          theme_classic(base_size=11)
     save_plot(p, file.path(opt$outdir, paste0(opt$label, "_GO_dotplot.pdf")))
+
+    p_bar <- barplot(ego, showCategory=20, title=paste("GO BP:", opt$label)) +
+             theme_classic(base_size=10)
+    save_plot(p_bar, file.path(opt$outdir, paste0(opt$label, "_GO_barplot.pdf")), w=10, h=7)
+
+    tryCatch({
+      fc_vec <- setNames(degs[[lfc_col]], degs$ENTREZID)
+      p_cnet <- cnetplot(ego, showCategory=6, foldChange=fc_vec, circular=FALSE)
+      save_plot(p_cnet, file.path(opt$outdir, paste0(opt$label, "_GO_cnetplot.pdf")), w=12, h=10)
+    }, error=function(e) message("GO cnetplot skipped: ", conditionMessage(e)))
+
+    tryCatch({
+      ego2   <- pairwise_termsim(ego)
+      p_emap <- emapplot(ego2, showCategory=30)
+      save_plot(p_emap, file.path(opt$outdir, paste0(opt$label, "_GO_emapplot.pdf")), w=12, h=10)
+    }, error=function(e) message("GO emapplot skipped: ", conditionMessage(e)))
+  }
+}
+
+# ── GO CC and MF ORA ──────────────────────────────────────────────────
+if (isTRUE(opt$run_go) && length(sig_genes) >= 5) {
+  for (ont_extra in c("CC", "MF")) {
+    message("Running GO ", ont_extra, " ORA...")
+    ego_x <- suppressMessages(
+      enrichGO(gene=sig_genes, universe=universe, OrgDb=org_db,
+               ont=ont_extra, pAdjustMethod="BH",
+               pvalueCutoff=opt$pval, qvalueCutoff=opt$qval, readable=TRUE))
+    save_table(ego_x, file.path(opt$outdir, paste0(opt$label, "_GO_", ont_extra, "_results.tsv")))
+    if (!is.null(ego_x) && nrow(ego_x) > 0) {
+      p <- dotplot(ego_x, showCategory=20, title=paste("GO", ont_extra, ":", opt$label)) +
+           theme_classic(base_size=11)
+      save_plot(p, file.path(opt$outdir, paste0(opt$label, "_GO_", ont_extra, "_dotplot.pdf")))
+      p_bar <- barplot(ego_x, showCategory=20, title=paste("GO", ont_extra, ":", opt$label)) +
+               theme_classic(base_size=10)
+      save_plot(p_bar, file.path(opt$outdir, paste0(opt$label, "_GO_", ont_extra, "_barplot.pdf")), w=10, h=7)
+    }
+  }
+}
+
+# ── GO ORA split by direction ─────────────────────────────────────────
+if (isTRUE(opt$run_go)) {
+  up_genes   <- degs$ENTREZID[!is.na(degs$FDR) & degs$FDR < opt$pval & degs[[lfc_col]] > 0]
+  down_genes <- degs$ENTREZID[!is.na(degs$FDR) & degs$FDR < opt$pval & degs[[lfc_col]] < 0]
+  for (dir_info in list(list(g=up_genes, d="up"), list(g=down_genes, d="down"))) {
+    gene_set <- dir_info$g; dlabel <- dir_info$d
+    if (length(gene_set) >= 5) {
+      message("Running GO BP ORA (", dlabel, ")...")
+      ego_dir <- suppressMessages(
+        enrichGO(gene=gene_set, universe=universe, OrgDb=org_db,
+                 ont="BP", pAdjustMethod="BH",
+                 pvalueCutoff=opt$pval, qvalueCutoff=opt$qval, readable=TRUE))
+      save_table(ego_dir,
+                 file.path(opt$outdir, paste0(opt$label, "_GO_", dlabel, "_results.tsv")))
+      if (!is.null(ego_dir) && nrow(ego_dir) > 0) {
+        p <- dotplot(ego_dir, showCategory=15,
+                     title=paste0("GO BP (", dlabel, "): ", opt$label)) +
+             theme_classic(base_size=10)
+        save_plot(p, file.path(opt$outdir, paste0(opt$label, "_GO_", dlabel, "_dotplot.pdf")))
+        p_bar <- barplot(ego_dir, showCategory=15,
+                         title=paste0("GO BP (", dlabel, "): ", opt$label)) +
+                 theme_classic(base_size=10)
+        save_plot(p_bar, file.path(opt$outdir, paste0(opt$label, "_GO_", dlabel, "_barplot.pdf")),
+                  w=10, h=7)
+      }
+    }
   }
 }
 

@@ -112,7 +112,7 @@ rule html_report:
         heatmap        = f"{OUTDIR}/figures/{{comp}}_heatmap_all.pdf",
         heatmap_top100 = f"{OUTDIR}/figures/{{comp}}_heatmap_top100.pdf",
         heatmap_top50  = f"{OUTDIR}/figures/{{comp}}_heatmap_top50.pdf",
-        go_table       = f"{OUTDIR}/pathways/{{comp}}_GO_results.tsv",
+        go_table       = f"{OUTDIR}/pathways/{{comp}}/GO-ALL/output-GO-Enrichment.txt",
     output:
         report = f"{OUTDIR}/reports/{{comp}}_report.html",
     log:   f"{LOGDIR}/reports/{{comp}}.log"
@@ -122,7 +122,7 @@ rule html_report:
         activate     = mamba_activate("rnaseq_r_env"),
         treatment    = lambda wc: wc.comp.split("_vs_")[0],
         control      = lambda wc: wc.comp.split("_vs_")[1],
-        pathways_dir = f"{OUTDIR}/pathways",
+        pathways_dir = lambda wc: f"{OUTDIR}/pathways/{wc.comp}",
     shell:
         """
         set -eo pipefail

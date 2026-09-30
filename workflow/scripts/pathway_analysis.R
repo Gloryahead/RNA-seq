@@ -1,11 +1,14 @@
 #!/usr/bin/env Rscript
-# pathway_analysis.R — GO ORA, KEGG ORA, and GSEA (Part 5)
-# Input:  DEG results TSV (from deg_analysis.R)
-# Output: GO/KEGG/GSEA result tables + dot plots
-# Usage:  Called by Snakemake rule 03_pathways; standalone:
-#   Rscript workflow/scripts/pathway_analysis.R \
-#     --degs results/deg/KO_vs_WT_DEG_results.tsv \
-#     --organism mouse --outdir results/pathways --label KO_vs_WT
+# pathway_analysis.R — GO ORA + KEGG ORA organised into GO-ALL / GO-UP / GO-DOWN
+# Output structure per {outdir}:
+#   GO-ALL/  — all significant DEGs (up + down)
+#   GO-UP/   — upregulated DEGs only
+#   GO-DOWN/ — downregulated DEGs only
+# Each directory contains:
+#   output-GO-Enrichment.{csv,txt}
+#   output-KEGG.{csv,txt}
+#   output-{GO,BiologicalProcess,CellularComponent,MolecularFunction}-{dotplot,barplot,cnetplot,emapplot}.pdf
+#   output-kegg-{dotplot,barplot}.pdf
 
 suppressPackageStartupMessages({
   library(optparse)
@@ -29,7 +32,6 @@ opt_list <- list(
   make_option("--label",      type="character", default="comparison")
 )
 opt <- parse_args(OptionParser(option_list=opt_list))
-dir.create(opt$outdir, showWarnings=FALSE, recursive=TRUE)
 
 # ── Organism database ─────────────────────────────────────────────────
 org_db <- switch(opt$organism,
@@ -42,172 +44,179 @@ kegg_organism <- switch(opt$organism, human="hsa", mouse="mmu", rat="rno")
 
 # ── Load DEG table ────────────────────────────────────────────────────
 degs <- fread(opt$degs, data.table=FALSE)
-# Standardise column names (output from deg_analysis.R)
 stopifnot("gene" %in% colnames(degs), "FDR" %in% colnames(degs))
 lfc_col <- intersect(c("log2FC","log2FoldChange","logFC"), colnames(degs))[1]
 
-# Map gene IDs → Entrez IDs (auto-detect Ensembl vs gene symbol)
 gene_symbols <- degs$gene
-from_type <- if (any(startsWith(na.omit(gene_symbols)[seq_len(min(5, sum(!is.na(gene_symbols))))], "ENS"))) "ENSEMBL" else "SYMBOL"
+from_type <- if (any(startsWith(na.omit(gene_symbols)[seq_len(min(5, sum(!is.na(gene_symbols))))], "ENS")))
+  "ENSEMBL" else "SYMBOL"
 message("Detected gene ID type: ", from_type)
 entrez_map <- suppressMessages(
   bitr(gene_symbols, fromType=from_type, toType="ENTREZID", OrgDb=org_db)
 )
 degs <- merge(degs, entrez_map, by.x="gene", by.y=from_type, all.x=FALSE)
 
-# Significant genes for ORA
-sig_genes   <- degs$ENTREZID[!is.na(degs$FDR) & degs$FDR < opt$pval]
-universe    <- degs$ENTREZID
+sig_all  <- degs$ENTREZID[!is.na(degs$FDR) & degs$FDR < opt$pval]
+sig_up   <- degs$ENTREZID[!is.na(degs$FDR) & degs$FDR < opt$pval & degs[[lfc_col]] > 0]
+sig_down <- degs$ENTREZID[!is.na(degs$FDR) & degs$FDR < opt$pval & degs[[lfc_col]] < 0]
+universe <- degs$ENTREZID
+fc_vec   <- setNames(degs[[lfc_col]], degs$ENTREZID)
 
-# Ranked gene list for GSEA (by signed -log10 FDR or log2FC)
-ranked_list <- setNames(degs[[lfc_col]], degs$ENTREZID)
-ranked_list <- sort(ranked_list[!is.na(ranked_list)], decreasing=TRUE)
-ranked_list <- ranked_list[!duplicated(names(ranked_list))]
+message(length(sig_all), " significant genes (",
+        length(sig_up), " up, ", length(sig_down), " down)")
 
-message(length(sig_genes), " significant genes for ORA; ",
-        length(ranked_list), " genes for GSEA")
-
-save_table <- function(obj, path) {
-  if (!is.null(obj) && nrow(as.data.frame(obj)) > 0)
-    fwrite(as.data.frame(obj), path, sep="\t")
-}
-
+# ── Helpers ───────────────────────────────────────────────────────────
 save_plot <- function(p, path, w=8, h=6) {
-  tryCatch(ggsave(path, p, width=w, height=h), error=function(e) message("Plot failed: ", e))
+  tryCatch(ggsave(path, p, width=w, height=h),
+           error=function(e) message("Plot failed: ", conditionMessage(e)))
 }
 
-# ── GO ORA ───────────────────────────────────────────────────────────
-if (isTRUE(opt$run_go) && length(sig_genes) >= 5) {
-  message("Running GO ORA...")
-  ego <- enrichGO(gene         = sig_genes,
-                  universe     = universe,
-                  OrgDb        = org_db,
-                  ont          = "BP",
-                  pAdjustMethod= "BH",
-                  pvalueCutoff = opt$pval,
-                  qvalueCutoff = opt$qval,
-                  readable     = TRUE)
-  save_table(ego, file.path(opt$outdir, paste0(opt$label, "_GO_results.tsv")))
-  if (!is.null(ego) && nrow(ego) > 0) {
-    p <- dotplot(ego, showCategory=20, title=paste("GO BP:", opt$label)) +
-         theme_classic(base_size=11)
-    save_plot(p, file.path(opt$outdir, paste0(opt$label, "_GO_dotplot.pdf")))
-
-    p_bar <- barplot(ego, showCategory=20, title=paste("GO BP:", opt$label)) +
-             theme_classic(base_size=10)
-    save_plot(p_bar, file.path(opt$outdir, paste0(opt$label, "_GO_barplot.pdf")), w=10, h=7)
-
-    tryCatch({
-      fc_vec <- setNames(degs[[lfc_col]], degs$ENTREZID)
-      p_cnet <- cnetplot(ego, showCategory=6, foldChange=fc_vec, circular=FALSE)
-      save_plot(p_cnet, file.path(opt$outdir, paste0(opt$label, "_GO_cnetplot.pdf")), w=12, h=10)
-    }, error=function(e) message("GO cnetplot skipped: ", conditionMessage(e)))
-
-    tryCatch({
-      ego2   <- pairwise_termsim(ego)
-      p_emap <- emapplot(ego2, showCategory=30)
-      save_plot(p_emap, file.path(opt$outdir, paste0(opt$label, "_GO_emapplot.pdf")), w=12, h=10)
-    }, error=function(e) message("GO emapplot skipped: ", conditionMessage(e)))
-  }
+# Ensure sentinel text files always exist so Snakemake never fails on missing output
+ensure_file <- function(path, msg) {
+  if (!file.exists(path)) writeLines(msg, path)
 }
 
-# ── GO CC and MF ORA ──────────────────────────────────────────────────
-if (isTRUE(opt$run_go) && length(sig_genes) >= 5) {
-  for (ont_extra in c("CC", "MF")) {
-    message("Running GO ", ont_extra, " ORA...")
-    ego_x <- suppressMessages(
-      enrichGO(gene=sig_genes, universe=universe, OrgDb=org_db,
-               ont=ont_extra, pAdjustMethod="BH",
-               pvalueCutoff=opt$pval, qvalueCutoff=opt$qval, readable=TRUE))
-    save_table(ego_x, file.path(opt$outdir, paste0(opt$label, "_GO_", ont_extra, "_results.tsv")))
-    if (!is.null(ego_x) && nrow(ego_x) > 0) {
-      p <- dotplot(ego_x, showCategory=20, title=paste("GO", ont_extra, ":", opt$label)) +
-           theme_classic(base_size=11)
-      save_plot(p, file.path(opt$outdir, paste0(opt$label, "_GO_", ont_extra, "_dotplot.pdf")))
-      p_bar <- barplot(ego_x, showCategory=20, title=paste("GO", ont_extra, ":", opt$label)) +
-               theme_classic(base_size=10)
-      save_plot(p_bar, file.path(opt$outdir, paste0(opt$label, "_GO_", ont_extra, "_barplot.pdf")), w=10, h=7)
-    }
-  }
-}
+# ── Core analysis function ────────────────────────────────────────────
+run_analysis <- function(gene_set, subdir) {
+  dir.create(subdir, showWarnings=FALSE, recursive=TRUE)
 
-# ── GO ORA split by direction ─────────────────────────────────────────
-if (isTRUE(opt$run_go)) {
-  up_genes   <- degs$ENTREZID[!is.na(degs$FDR) & degs$FDR < opt$pval & degs[[lfc_col]] > 0]
-  down_genes <- degs$ENTREZID[!is.na(degs$FDR) & degs$FDR < opt$pval & degs[[lfc_col]] < 0]
-  for (dir_info in list(list(g=up_genes, d="up"), list(g=down_genes, d="down"))) {
-    gene_set <- dir_info$g; dlabel <- dir_info$d
-    if (length(gene_set) >= 5) {
-      message("Running GO BP ORA (", dlabel, ")...")
-      ego_dir <- suppressMessages(
-        enrichGO(gene=gene_set, universe=universe, OrgDb=org_db,
-                 ont="BP", pAdjustMethod="BH",
-                 pvalueCutoff=opt$pval, qvalueCutoff=opt$qval, readable=TRUE))
-      save_table(ego_dir,
-                 file.path(opt$outdir, paste0(opt$label, "_GO_", dlabel, "_results.tsv")))
-      if (!is.null(ego_dir) && nrow(ego_dir) > 0) {
-        p <- dotplot(ego_dir, showCategory=15,
-                     title=paste0("GO BP (", dlabel, "): ", opt$label)) +
-             theme_classic(base_size=10)
-        save_plot(p, file.path(opt$outdir, paste0(opt$label, "_GO_", dlabel, "_dotplot.pdf")))
-        p_bar <- barplot(ego_dir, showCategory=15,
-                         title=paste0("GO BP (", dlabel, "): ", opt$label)) +
-                 theme_classic(base_size=10)
-        save_plot(p_bar, file.path(opt$outdir, paste0(opt$label, "_GO_", dlabel, "_barplot.pdf")),
-                  w=10, h=7)
+  # GO ─────────────────────────────────────────────────────────────────
+  if (isTRUE(opt$run_go)) {
+    ont_specs <- list(
+      list(ont="ALL", prefix="GO",                title="GO All Ontologies"),
+      list(ont="BP",  prefix="BiologicalProcess", title="GO Biological Process"),
+      list(ont="CC",  prefix="CellularComponent", title="GO Cellular Component"),
+      list(ont="MF",  prefix="MolecularFunction", title="GO Molecular Function")
+    )
+
+    for (spec in ont_specs) {
+      pfx <- spec$prefix
+
+      if (length(gene_set) < 5) {
+        message("Too few genes for GO ", spec$ont, " — skipping")
+        if (spec$ont == "ALL") {
+          writeLines("No significant GO terms (fewer than 5 genes)",
+                     file.path(subdir, "output-GO-Enrichment.txt"))
+          write.csv(data.frame(), file.path(subdir, "output-GO-Enrichment.csv"), row.names=FALSE)
+        }
+        next
+      }
+
+      ego <- tryCatch(
+        suppressMessages(
+          enrichGO(gene=gene_set, universe=universe, OrgDb=org_db,
+                   ont=spec$ont, pAdjustMethod="BH",
+                   pvalueCutoff=opt$pval, qvalueCutoff=opt$qval, readable=TRUE)
+        ),
+        error=function(e) { message("GO ", spec$ont, " error: ", conditionMessage(e)); NULL }
+      )
+
+      if (spec$ont == "ALL") {
+        if (!is.null(ego) && nrow(ego) > 0) {
+          df <- as.data.frame(ego)
+          write.csv(df, file.path(subdir, "output-GO-Enrichment.csv"), row.names=FALSE)
+          write.table(df, file.path(subdir, "output-GO-Enrichment.txt"),
+                      sep="\t", row.names=FALSE, quote=FALSE)
+        } else {
+          writeLines("No significant GO terms found",
+                     file.path(subdir, "output-GO-Enrichment.txt"))
+          write.csv(data.frame(), file.path(subdir, "output-GO-Enrichment.csv"), row.names=FALSE)
+        }
+      }
+
+      if (!is.null(ego) && nrow(ego) > 0) {
+        tryCatch({
+          p <- dotplot(ego, showCategory=20, title=spec$title) + theme_classic(base_size=11)
+          save_plot(p, file.path(subdir, paste0("output-", pfx, "-dotplot.pdf")))
+        }, error=function(e) message("dotplot failed (", spec$ont, "): ", conditionMessage(e)))
+
+        tryCatch({
+          p_bar <- barplot(ego, showCategory=20, title=spec$title) + theme_classic(base_size=10)
+          save_plot(p_bar, file.path(subdir, paste0("output-", pfx, "-barplot.pdf")), w=10, h=7)
+        }, error=function(e) message("barplot failed (", spec$ont, "): ", conditionMessage(e)))
+
+        tryCatch({
+          p_cnet <- cnetplot(ego, showCategory=6, foldChange=fc_vec, circular=FALSE)
+          save_plot(p_cnet, file.path(subdir, paste0("output-", pfx, "-cnetplot.pdf")), w=12, h=10)
+        }, error=function(e) message("cnetplot failed (", spec$ont, "): ", conditionMessage(e)))
+
+        tryCatch({
+          ego2   <- pairwise_termsim(ego)
+          p_emap <- emapplot(ego2, showCategory=30)
+          save_plot(p_emap, file.path(subdir, paste0("output-", pfx, "-emapplot.pdf")), w=12, h=10)
+        }, error=function(e) message("emapplot failed (", spec$ont, "): ", conditionMessage(e)))
       }
     }
   }
-}
 
-# ── KEGG ORA ──────────────────────────────────────────────────────────
-if (isTRUE(opt$run_kegg) && length(sig_genes) >= 5) {
-  message("Running KEGG ORA...")
-  ekegg <- enrichKEGG(gene         = sig_genes,
-                      organism     = kegg_organism,
-                      pvalueCutoff = opt$pval,
-                      qvalueCutoff = opt$qval)
-  ekegg <- setReadable(ekegg, OrgDb=org_db, keyType="ENTREZID")
-  save_table(ekegg, file.path(opt$outdir, paste0(opt$label, "_KEGG_results.tsv")))
-  if (!is.null(ekegg) && nrow(ekegg) > 0) {
-    p <- dotplot(ekegg, showCategory=20, title=paste("KEGG:", opt$label)) +
-         theme_classic(base_size=11)
-    save_plot(p, file.path(opt$outdir, paste0(opt$label, "_KEGG_dotplot.pdf")))
+  # KEGG ───────────────────────────────────────────────────────────────
+  if (isTRUE(opt$run_kegg)) {
+    if (length(gene_set) < 5) {
+      writeLines("No significant KEGG terms (fewer than 5 genes)",
+                 file.path(subdir, "output-KEGG.txt"))
+      write.csv(data.frame(), file.path(subdir, "output-KEGG.csv"), row.names=FALSE)
+    } else {
+      ekegg <- tryCatch({
+        ek <- enrichKEGG(gene=gene_set, organism=kegg_organism,
+                         pvalueCutoff=opt$pval, qvalueCutoff=opt$qval)
+        if (!is.null(ek) && nrow(ek) > 0) setReadable(ek, OrgDb=org_db, keyType="ENTREZID") else ek
+      }, error=function(e) { message("KEGG error: ", conditionMessage(e)); NULL })
+
+      if (!is.null(ekegg) && nrow(ekegg) > 0) {
+        df_kegg <- as.data.frame(ekegg)
+        write.csv(df_kegg, file.path(subdir, "output-KEGG.csv"), row.names=FALSE)
+        write.table(df_kegg, file.path(subdir, "output-KEGG.txt"),
+                    sep="\t", row.names=FALSE, quote=FALSE)
+
+        tryCatch({
+          p <- dotplot(ekegg, showCategory=20, title="KEGG") + theme_classic(base_size=11)
+          save_plot(p, file.path(subdir, "output-kegg-dotplot.pdf"))
+        }, error=function(e) message("KEGG dotplot failed: ", conditionMessage(e)))
+
+        tryCatch({
+          p_bar <- barplot(ekegg, showCategory=20, title="KEGG") + theme_classic(base_size=10)
+          save_plot(p_bar, file.path(subdir, "output-kegg-barplot.pdf"), w=10, h=7)
+        }, error=function(e) message("KEGG barplot failed: ", conditionMessage(e)))
+      } else {
+        writeLines("No significant KEGG terms found", file.path(subdir, "output-KEGG.txt"))
+        write.csv(data.frame(), file.path(subdir, "output-KEGG.csv"), row.names=FALSE)
+      }
+    }
   }
+
+  ensure_file(file.path(subdir, "output-GO-Enrichment.txt"), "GO analysis not run")
+  ensure_file(file.path(subdir, "output-KEGG.txt"),          "KEGG analysis not run")
 }
 
-# ── GSEA (GO Biological Process) ──────────────────────────────────────
-if (isTRUE(opt$run_gsea) && length(ranked_list) >= 10) {
-  message("Running GSEA (GO BP)...")
-  gsea_res <- gseGO(geneList      = ranked_list,
-                    OrgDb         = org_db,
-                    ont           = "BP",
-                    minGSSize     = 10,
-                    maxGSSize     = 500,
-                    pvalueCutoff  = opt$pval,
-                    pAdjustMethod = "BH",
-                    verbose       = FALSE)
-  save_table(gsea_res, file.path(opt$outdir, paste0(opt$label, "_GSEA_results.tsv")))
-  if (!is.null(gsea_res) && nrow(gsea_res) > 0) {
-    p_dot  <- dotplot(gsea_res, showCategory=15, split=".sign") +
-              facet_grid(.~.sign) + theme_classic(base_size=10)
-    save_plot(p_dot, file.path(opt$outdir, paste0(opt$label, "_GSEA_dotplot.pdf")), w=10, h=7)
-    tryCatch({
-      p_ridge <- ridgeplot(gsea_res, showCategory=20) + theme_classic(base_size=10)
-      save_plot(p_ridge, file.path(opt$outdir, paste0(opt$label, "_GSEA_ridge.pdf")), w=9, h=8)
-    }, error=function(e) message("Ridge plot skipped (ggridges not installed): ", conditionMessage(e)))
+# ── Run for ALL, UP, DOWN ─────────────────────────────────────────────
+run_analysis(sig_all,  file.path(opt$outdir, "GO-ALL"))
+run_analysis(sig_up,   file.path(opt$outdir, "GO-UP"))
+run_analysis(sig_down, file.path(opt$outdir, "GO-DOWN"))
+
+# ── GSEA (ranked, GO BP) — written to root outdir as before ──────────
+if (isTRUE(opt$run_gsea)) {
+  ranked_list <- setNames(degs[[lfc_col]], degs$ENTREZID)
+  ranked_list <- sort(ranked_list[!is.na(ranked_list)], decreasing=TRUE)
+  ranked_list <- ranked_list[!duplicated(names(ranked_list))]
+
+  if (length(ranked_list) >= 10) {
+    message("Running GSEA (GO BP)...")
+    gsea_res <- tryCatch(
+      gseGO(geneList=ranked_list, OrgDb=org_db, ont="BP",
+            minGSSize=10, maxGSSize=500,
+            pvalueCutoff=opt$pval, pAdjustMethod="BH", verbose=FALSE),
+      error=function(e) { message("GSEA error: ", conditionMessage(e)); NULL }
+    )
+    if (!is.null(gsea_res) && nrow(gsea_res) > 0) {
+      fwrite(as.data.frame(gsea_res),
+             file.path(opt$outdir, paste0(opt$label, "_GSEA_results.tsv")), sep="\t")
+      tryCatch({
+        p_dot <- dotplot(gsea_res, showCategory=15, split=".sign") +
+                 facet_grid(.~.sign) + theme_classic(base_size=10)
+        save_plot(p_dot, file.path(opt$outdir, paste0(opt$label, "_GSEA_dotplot.pdf")), w=10, h=7)
+      }, error=function(e) message("GSEA dotplot failed: ", conditionMessage(e)))
+    }
   }
-}
-
-# ── MSigDB GSEA (optional, Part 5) ────────────────────────────────────
-if (nchar(opt$msigdb_gmt) > 0 && file.exists(opt$msigdb_gmt)) {
-  message("Running GSEA with MSigDB gene sets: ", opt$msigdb_gmt)
-  msigdb_sets <- read.gmt(opt$msigdb_gmt)
-  ranked_sym   <- setNames(degs[[lfc_col]], degs$gene)
-  ranked_sym   <- sort(ranked_sym[!is.na(ranked_sym)], decreasing=TRUE)
-  msigdb_gsea  <- GSEA(ranked_sym, TERM2GENE=msigdb_sets,
-                        pvalueCutoff=opt$pval, verbose=FALSE)
-  save_table(msigdb_gsea, file.path(opt$outdir, paste0(opt$label, "_MSigDB_GSEA_results.tsv")))
 }
 
 message("Pathway analysis complete. Results in: ", opt$outdir)

@@ -105,21 +105,20 @@ b64 <- list(
 # Pathway plots from pathways_dir
 pw_plots <- list()
 if (nzchar(opt$pathways_dir) && dir.exists(opt$pathways_dir)) {
-  lbl <- opt$label
   pw_names <- c(
-    go_dot    = paste0(lbl, "_GO_dotplot.pdf"),
-    go_bar    = paste0(lbl, "_GO_barplot.pdf"),
-    go_cnet   = paste0(lbl, "_GO_cnetplot.pdf"),
-    go_emap   = paste0(lbl, "_GO_emapplot.pdf"),
-    go_cc_dot = paste0(lbl, "_GO_CC_dotplot.pdf"),
-    go_cc_bar = paste0(lbl, "_GO_CC_barplot.pdf"),
-    go_mf_dot = paste0(lbl, "_GO_MF_dotplot.pdf"),
-    go_mf_bar = paste0(lbl, "_GO_MF_barplot.pdf"),
-    go_up_dot = paste0(lbl, "_GO_up_dotplot.pdf"),
-    go_dn_dot = paste0(lbl, "_GO_down_dotplot.pdf"),
-    kegg_dot  = paste0(lbl, "_KEGG_dotplot.pdf"),
-    gsea_dot  = paste0(lbl, "_GSEA_dotplot.pdf"),
-    gsea_rdg  = paste0(lbl, "_GSEA_ridge.pdf")
+    go_dot    = "GO-ALL/output-GO-dotplot.pdf",
+    go_bar    = "GO-ALL/output-GO-barplot.pdf",
+    go_cnet   = "GO-ALL/output-GO-cnetplot.pdf",
+    go_emap   = "GO-ALL/output-GO-emapplot.pdf",
+    go_cc_dot = "GO-ALL/output-CellularComponent-dotplot.pdf",
+    go_cc_bar = "GO-ALL/output-CellularComponent-barplot.pdf",
+    go_mf_dot = "GO-ALL/output-MolecularFunction-dotplot.pdf",
+    go_mf_bar = "GO-ALL/output-MolecularFunction-barplot.pdf",
+    go_up_dot = "GO-UP/output-GO-dotplot.pdf",
+    go_dn_dot = "GO-DOWN/output-GO-dotplot.pdf",
+    kegg_dot  = "GO-ALL/output-kegg-dotplot.pdf",
+    gsea_dot  = paste0(opt$label, "_GSEA_dotplot.pdf"),
+    gsea_rdg  = paste0(opt$label, "_GSEA_ridge.pdf")
   )
   for (nm in names(pw_names)) {
     fpath <- file.path(opt$pathways_dir, pw_names[[nm]])
@@ -161,21 +160,29 @@ if (nzchar(opt$volcano_html) && file.exists(opt$volcano_html)) {
   vcontent <- tryCatch(paste(readLines(opt$volcano_html), collapse="\n"), error=function(e) "")
   if (nzchar(vcontent)) {
     vb64 <- base64enc::base64encode(charToRaw(vcontent))
-    volcano_iframe <- sprintf(
-      '<iframe src="data:text/html;base64,%s" style="width:100%%;height:600px;border:none;border-radius:8px;" title="Interactive Volcano Plot"></iframe>',
-      vb64)
+    volcano_iframe <- paste0(
+      '<iframe src="data:text/html;base64,', vb64,
+      '" style="width:100%;height:600px;border:none;border-radius:8px;" title="Interactive Volcano Plot"></iframe>')
   }
 }
 
 # ── Build HTML ────────────────────────────────────────────────────────────
 now_str <- format(Sys.time(), "%Y-%m-%d %H:%M")
 
-html <- sprintf('<!DOCTYPE html>
+# Helper: inline value safely (no sprintf, avoids % interpretation issues)
+V <- function(x) as.character(x)
+
+volcano_section <- if (nzchar(volcano_iframe))
+  paste0('<div class="subsec"><h3>Interactive Volcano (D3)</h3>', volcano_iframe, '</div>')
+else ""
+
+html <- paste0(
+'<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>RNA-Seq Report: %s</title>
+<title>RNA-Seq Report: ', V(opt$label), '</title>
 <style>
 :root {
   --sidebar-bg: #1a3a5c;
@@ -217,7 +224,7 @@ body { display: flex; min-height: 100vh; font-family: "Segoe UI", system-ui, san
                  border-top: 1px solid rgba(255,255,255,0.1); }
 
 /* Main */
-#main { margin-left: 240px; padding: 0 32px 48px; max-width: 1200px; width: 100%%; }
+#main { margin-left: 240px; padding: 0 32px 48px; max-width: 1200px; width: 100%; }
 section { padding-top: 40px; }
 section + section { border-top: 1px solid var(--border); margin-top: 12px; }
 h2 { font-size: 1.5rem; font-weight: 700; color: var(--sidebar-bg); margin-bottom: 20px;
@@ -241,11 +248,11 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
 /* Figure grid */
 .fig-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px; margin-top: 8px; }
-.fig-cell img { max-width: 100%%; border: 1px solid var(--border); border-radius: 6px; }
+.fig-cell img { max-width: 100%; border: 1px solid var(--border); border-radius: 6px; }
 .fig-cell p.cap { font-size: 0.78rem; color: var(--muted); margin-top: 6px; text-align: center; }
 
 /* Tables */
-.dtable { width: 100%%; border-collapse: collapse; font-size: 0.82rem; }
+.dtable { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
 .dtable th { background: var(--sidebar-bg); color: #fff; padding: 8px 10px;
              text-align: left; font-weight: 600; white-space: nowrap; }
 .dtable td { padding: 6px 10px; border-bottom: 1px solid var(--border); }
@@ -253,7 +260,7 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
 .dtable tr:hover td { background: #e8f0f8; }
 
 /* Banner */
-.banner { background: linear-gradient(135deg, var(--sidebar-bg) 0%%, #2a6496 100%%);
+.banner { background: linear-gradient(135deg, var(--sidebar-bg) 0%, #2a6496 100%);
           color: #fff; padding: 28px 32px; margin: 0 -32px 0; }
 .banner h1 { font-size: 1.8rem; font-weight: 800; }
 .banner p  { opacity: 0.8; margin-top: 6px; font-size: 0.95rem; }
@@ -299,16 +306,16 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
     <a href="#deg-table-section">&#128203; DEG Table</a>
     <a href="#methods-section">&#128196; Methods</a>
   </nav>
-  <div class="meta">Generated %s<br/>NGS101 Pipeline</div>
+  <div class="meta">Generated ', V(now_str), '<br/>NGS101 Pipeline</div>
 </nav>
 
 <div id="main">
 
 <div class="banner">
-  <h1>%s</h1>
+  <h1>', V(opt$label), '</h1>
   <p>
-    <span class="badge badge-trt">Treatment: %s</span>
-    <span class="badge badge-ctl">Control: %s</span>
+    <span class="badge badge-trt">Treatment: ', V(opt$treatment), '</span>
+    <span class="badge badge-ctl">Control: ', V(opt$control), '</span>
   </p>
   <p style="margin-top:10px;opacity:0.7;font-size:0.85rem;">
     RNA-Seq differential expression and pathway enrichment analysis
@@ -320,15 +327,15 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
   <h2>&#128200; Summary</h2>
   <div class="stat-row">
     <div class="stat-tile">
-      <div class="num">%d</div>
+      <div class="num">', V(deg_stats$total), '</div>
       <div class="lbl">Total DE genes<br/>(FDR &lt; 0.05)</div>
     </div>
     <div class="stat-tile">
-      <div class="num up">%d</div>
+      <div class="num up">', V(deg_stats$up), '</div>
       <div class="lbl">Upregulated<br/>(log2FC &gt; 1)</div>
     </div>
     <div class="stat-tile">
-      <div class="num down">%d</div>
+      <div class="num down">', V(deg_stats$down), '</div>
       <div class="lbl">Downregulated<br/>(log2FC &lt; -1)</div>
     </div>
   </div>
@@ -336,7 +343,7 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
     <h3>Pipeline Overview</h3>
     <p style="line-height:1.7;color:var(--muted)">
       This report summarises the NGS101 RNA-seq pipeline run for the comparison
-      <strong>%s vs %s</strong>.
+      <strong>', V(opt$treatment), ' vs ', V(opt$control), '</strong>.
       Reads were trimmed with Trim Galore, aligned to the reference genome with STAR,
       and counts were quantified with featureCounts.
       Differential expression was performed with DESeq2 (Wald test, BH-adjusted FDR).
@@ -350,15 +357,15 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
   <h2>&#9989; Quality Control</h2>
   <div class="subsec">
     <h3>PCA Plot</h3>
-    %s
+    ', img_tag(b64$pca, "PCA"), '
   </div>
   <div class="subsec">
     <h3>Sample Distance Matrix</h3>
-    %s
+    ', img_tag(b64$sample_dist, "Sample Distance"), '
   </div>
   <div class="subsec">
     <h3>MA Plot</h3>
-    %s
+    ', img_tag(b64$ma, "MA Plot"), '
   </div>
 </section>
 
@@ -381,13 +388,13 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
   <h2>&#127776; Volcano Plot</h2>
   <div class="subsec">
     <h3>Static Volcano (EnhancedVolcano)</h3>
-    %s
+    ', img_tag(b64$volcano, "Volcano"), '
     <p class="cap" style="font-size:0.8rem;color:var(--muted);margin-top:8px">
       Top 10 most significant upregulated and downregulated genes are labelled.
       Red: |log2FC| &gt; 1 &amp; FDR &lt; 0.05. Blue: FDR &lt; 0.05 only. Grey: not significant.
     </p>
   </div>
-  %s
+  ', volcano_section, '
 </section>
 
 <!-- HEATMAPS -->
@@ -395,15 +402,15 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
   <h2>&#127863; Heatmaps</h2>
   <div class="subsec">
     <h3>All DE Genes</h3>
-    %s
+    ', img_tag(b64$heatmap, "All DE genes heatmap"), '
   </div>
   <div class="subsec">
     <h3>Top 100 DE Genes</h3>
-    %s
+    ', img_tag(b64$hm100, "Top 100 heatmap"), '
   </div>
   <div class="subsec">
     <h3>Top 50 DE Genes</h3>
-    %s
+    ', img_tag(b64$hm50, "Top 50 heatmap"), '
   </div>
 </section>
 
@@ -411,12 +418,12 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
 <section id="go-bp-section">
   <h2>&#127758; GO Biological Process</h2>
   <div class="fig-grid">
-    <div class="fig-cell">%s<p class="cap">Dotplot</p></div>
-    <div class="fig-cell">%s<p class="cap">Barplot</p></div>
+    <div class="fig-cell">', img_tag(pw_plots[["go_dot"]], "GO BP dotplot"), '<p class="cap">Dotplot</p></div>
+    <div class="fig-cell">', img_tag(pw_plots[["go_bar"]], "GO BP barplot"), '<p class="cap">Barplot</p></div>
   </div>
   <div class="fig-grid">
-    <div class="fig-cell">%s<p class="cap">Network plot (cnetplot)</p></div>
-    <div class="fig-cell">%s<p class="cap">Enrichment map (emapplot)</p></div>
+    <div class="fig-cell">', img_tag(pw_plots[["go_cnet"]], "GO BP cnetplot"), '<p class="cap">Network plot (cnetplot)</p></div>
+    <div class="fig-cell">', img_tag(pw_plots[["go_emap"]], "GO BP emapplot"), '<p class="cap">Enrichment map (emapplot)</p></div>
   </div>
 </section>
 
@@ -424,12 +431,12 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
 <section id="go-cc-mf-section">
   <h2>&#128084; GO Cellular Component &amp; Molecular Function</h2>
   <div class="fig-grid">
-    <div class="fig-cell">%s<p class="cap">CC Dotplot</p></div>
-    <div class="fig-cell">%s<p class="cap">CC Barplot</p></div>
+    <div class="fig-cell">', img_tag(pw_plots[["go_cc_dot"]], "GO CC dotplot"), '<p class="cap">CC Dotplot</p></div>
+    <div class="fig-cell">', img_tag(pw_plots[["go_cc_bar"]], "GO CC barplot"), '<p class="cap">CC Barplot</p></div>
   </div>
   <div class="fig-grid">
-    <div class="fig-cell">%s<p class="cap">MF Dotplot</p></div>
-    <div class="fig-cell">%s<p class="cap">MF Barplot</p></div>
+    <div class="fig-cell">', img_tag(pw_plots[["go_mf_dot"]], "GO MF dotplot"), '<p class="cap">MF Dotplot</p></div>
+    <div class="fig-cell">', img_tag(pw_plots[["go_mf_bar"]], "GO MF barplot"), '<p class="cap">MF Barplot</p></div>
   </div>
 </section>
 
@@ -437,23 +444,23 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
 <section id="go-dir-section">
   <h2>&#8593;&#8595; Directional GO Analysis</h2>
   <div class="fig-grid">
-    <div class="fig-cell">%s<p class="cap">Upregulated genes — GO BP dotplot</p></div>
-    <div class="fig-cell">%s<p class="cap">Downregulated genes — GO BP dotplot</p></div>
+    <div class="fig-cell">', img_tag(pw_plots[["go_up_dot"]], "Upregulated GO dotplot"), '<p class="cap">Upregulated genes — GO BP dotplot</p></div>
+    <div class="fig-cell">', img_tag(pw_plots[["go_dn_dot"]], "Downregulated GO dotplot"), '<p class="cap">Downregulated genes — GO BP dotplot</p></div>
   </div>
 </section>
 
 <!-- KEGG -->
 <section id="kegg-section">
   <h2>&#128202; KEGG Pathway Enrichment</h2>
-  <div class="subsec">%s</div>
+  <div class="subsec">', img_tag(pw_plots[["kegg_dot"]], "KEGG dotplot"), '</div>
 </section>
 
 <!-- GSEA -->
 <section id="gsea-section">
   <h2>&#128288; Gene Set Enrichment Analysis (GSEA)</h2>
   <div class="fig-grid">
-    <div class="fig-cell">%s<p class="cap">GSEA dotplot (split by direction)</p></div>
-    <div class="fig-cell">%s<p class="cap">GSEA ridgeplot</p></div>
+    <div class="fig-cell">', img_tag(pw_plots[["gsea_dot"]], "GSEA dotplot"), '<p class="cap">GSEA dotplot (split by direction)</p></div>
+    <div class="fig-cell">', img_tag(pw_plots[["gsea_rdg"]], "GSEA ridgeplot"), '<p class="cap">GSEA ridgeplot</p></div>
   </div>
 </section>
 
@@ -462,7 +469,7 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
   <h2>&#128203; Top DE Genes</h2>
   <div class="subsec">
     <h3>Top 20 significant genes (sorted by FDR)</h3>
-    %s
+    ', deg_table_html, '
   </div>
 </section>
 
@@ -487,7 +494,6 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
 </div><!-- /main -->
 
 <script>
-// Highlight active sidebar link on scroll
 const sections = document.querySelectorAll("section[id]");
 const links    = document.querySelectorAll("#sidebar nav a");
 const observer = new IntersectionObserver(entries => {
@@ -502,45 +508,7 @@ const observer = new IntersectionObserver(entries => {
 sections.forEach(s => observer.observe(s));
 </script>
 </body>
-</html>',
-  opt$label, now_str,
-  opt$label, opt$treatment, opt$control,
-  deg_stats$total, deg_stats$up, deg_stats$down,
-  opt$treatment, opt$control,
-  # QC
-  img_tag(b64$pca, "PCA"),
-  img_tag(b64$sample_dist, "Sample Distance"),
-  img_tag(b64$ma, "MA Plot"),
-  # Volcano static
-  img_tag(b64$volcano, "Volcano"),
-  # Volcano interactive iframe
-  if (nzchar(volcano_iframe)) {
-    sprintf('<div class="subsec"><h3>Interactive Volcano (D3)</h3>%s</div>', volcano_iframe)
-  } else "",
-  # Heatmaps
-  img_tag(b64$heatmap, "All DE genes heatmap"),
-  img_tag(b64$hm100,   "Top 100 heatmap"),
-  img_tag(b64$hm50,    "Top 50 heatmap"),
-  # GO BP
-  img_tag(pw_plots[["go_dot"]],  "GO BP dotplot"),
-  img_tag(pw_plots[["go_bar"]],  "GO BP barplot"),
-  img_tag(pw_plots[["go_cnet"]], "GO BP cnetplot"),
-  img_tag(pw_plots[["go_emap"]], "GO BP emapplot"),
-  # GO CC / MF
-  img_tag(pw_plots[["go_cc_dot"]], "GO CC dotplot"),
-  img_tag(pw_plots[["go_cc_bar"]], "GO CC barplot"),
-  img_tag(pw_plots[["go_mf_dot"]], "GO MF dotplot"),
-  img_tag(pw_plots[["go_mf_bar"]], "GO MF barplot"),
-  # Directional
-  img_tag(pw_plots[["go_up_dot"]], "Upregulated GO dotplot"),
-  img_tag(pw_plots[["go_dn_dot"]], "Downregulated GO dotplot"),
-  # KEGG
-  img_tag(pw_plots[["kegg_dot"]], "KEGG dotplot"),
-  # GSEA
-  img_tag(pw_plots[["gsea_dot"]], "GSEA dotplot"),
-  img_tag(pw_plots[["gsea_rdg"]], "GSEA ridgeplot"),
-  # DEG table
-  deg_table_html
+</html>'
 )
 
 writeLines(html, opt$output)

@@ -2,7 +2,8 @@
 Rules: Pathway enrichment analysis
 Tutorial: Part 5
 Environment: rnaseq_r_env (02_rnaseq_r.yml)
-Methods: GO ORA, KEGG ORA, GSEA (MSigDB optional)
+Methods: GO ORA (ALL/UP/DOWN × ALL/BP/CC/MF), KEGG ORA, GSEA optional
+Output structure: {outdir}/pathways/{comp}/GO-ALL|GO-UP|GO-DOWN/
 """
 
 OUTDIR = config["outdir"]
@@ -13,11 +14,12 @@ rule pathway_enrichment:
     input:
         degs = f"{OUTDIR}/deg/{{comp}}_DEG_results.tsv",
     output:
-        go_table   = f"{OUTDIR}/pathways/{{comp}}_GO_results.tsv"   if config["pathways"]["run_go"]   else [],
-        kegg_table = f"{OUTDIR}/pathways/{{comp}}_KEGG_results.tsv" if config["pathways"]["run_kegg"] else [],
-        gsea_table = f"{OUTDIR}/pathways/{{comp}}_GSEA_results.tsv" if config["pathways"]["run_gsea"] else [],
-        go_plot    = f"{OUTDIR}/pathways/{{comp}}_GO_dotplot.pdf"    if config["pathways"]["run_go"]   else [],
-        kegg_plot  = f"{OUTDIR}/pathways/{{comp}}_KEGG_dotplot.pdf" if config["pathways"]["run_kegg"] else [],
+        go_all_enrich  = f"{OUTDIR}/pathways/{{comp}}/GO-ALL/output-GO-Enrichment.txt"  if config["pathways"]["run_go"]   else [],
+        go_up_enrich   = f"{OUTDIR}/pathways/{{comp}}/GO-UP/output-GO-Enrichment.txt"   if config["pathways"]["run_go"]   else [],
+        go_down_enrich = f"{OUTDIR}/pathways/{{comp}}/GO-DOWN/output-GO-Enrichment.txt" if config["pathways"]["run_go"]   else [],
+        kegg_all       = f"{OUTDIR}/pathways/{{comp}}/GO-ALL/output-KEGG.txt"           if config["pathways"]["run_kegg"] else [],
+        kegg_up        = f"{OUTDIR}/pathways/{{comp}}/GO-UP/output-KEGG.txt"            if config["pathways"]["run_kegg"] else [],
+        kegg_down      = f"{OUTDIR}/pathways/{{comp}}/GO-DOWN/output-KEGG.txt"          if config["pathways"]["run_kegg"] else [],
     log:   f"{LOGDIR}/pathways/{{comp}}.log"
     threads: 2
     resources:
@@ -33,7 +35,7 @@ rule pathway_enrichment:
         run_go     = config["pathways"]["run_go"],
         run_kegg   = config["pathways"]["run_kegg"],
         run_gsea   = config["pathways"]["run_gsea"],
-        outdir     = f"{OUTDIR}/pathways",
+        outdir     = lambda wc: f"{OUTDIR}/pathways/{wc.comp}",
         label      = lambda wc: wc.comp,
     shell:
         """

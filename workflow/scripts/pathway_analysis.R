@@ -62,6 +62,19 @@ sig_down <- degs$ENTREZID[!is.na(degs$FDR) & degs$FDR < opt$pval & degs[[lfc_col
 universe <- degs$ENTREZID
 fc_vec   <- setNames(degs[[lfc_col]], degs$ENTREZID)
 
+# Symbol-keyed fc_vec for cnetplot — enrichGO(readable=TRUE) uses gene symbols,
+# newer enrichplot versions require foldChange names to match the readable names.
+sym_map <- suppressMessages(tryCatch(
+  bitr(degs$ENTREZID, fromType="ENTREZID", toType="SYMBOL", OrgDb=org_db),
+  error=function(e) NULL
+))
+fc_vec_sym <- if (!is.null(sym_map)) {
+  tmp <- merge(data.frame(ENTREZID=degs$ENTREZID, fc=degs[[lfc_col]]),
+               sym_map, by="ENTREZID", all.x=FALSE)
+  v <- setNames(tmp$fc, tmp$SYMBOL)
+  v[!duplicated(names(v))]
+} else fc_vec
+
 message(length(sig_all), " significant genes (",
         length(sig_up), " up, ", length(sig_down), " down)")
 
@@ -136,7 +149,7 @@ run_analysis <- function(gene_set, subdir) {
         }, error=function(e) message("barplot failed (", spec$ont, "): ", conditionMessage(e)))
 
         tryCatch({
-          p_cnet <- cnetplot(ego, showCategory=6, foldChange=fc_vec, circular=FALSE)
+          p_cnet <- cnetplot(ego, showCategory=6, foldChange=fc_vec_sym, circular=FALSE)
           save_plot(p_cnet, file.path(subdir, paste0("output-", pfx, "-cnetplot.pdf")), w=12, h=10)
         }, error=function(e) message("cnetplot failed (", spec$ont, "): ", conditionMessage(e)))
 

@@ -19,4 +19,6 @@ dependencies:
   - r-tidyverse
   - r-dplyr
   - r-optparse
+  - r-base64enc
+  - r-pdftools
   - r-devtools

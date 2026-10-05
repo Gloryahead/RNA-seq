@@ -172,9 +172,11 @@ now_str <- format(Sys.time(), "%Y-%m-%d %H:%M")
 # Helper: inline value safely (no sprintf, avoids % interpretation issues)
 V <- function(x) as.character(x)
 
-volcano_section <- if (nzchar(volcano_iframe))
+volcano_section <- if (nzchar(volcano_iframe)) {
   paste0('<div class="subsec"><h3>Interactive Volcano (D3)</h3>', volcano_iframe, '</div>')
-else ""
+} else {
+  ""
+}
 
 html <- paste0(
 '<!DOCTYPE html>

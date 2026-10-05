@@ -236,11 +236,11 @@ svg text{font-family:system-ui,sans-serif}
 <h2>%s</h2>
 <div id="controls">
   <input id="search" placeholder="Search gene…" oninput="highlight(this.value)">
-  <span class="leg" data-cat="up" onclick="toggleCat(this,'up')" title="Click to show/hide">
+  <span class="leg" data-cat="up" onclick="toggleCat(this,this.dataset.cat)" title="Click to show/hide">
     <span class="legend-dot" style="background:#e53935"></span><span id="leg-up"></span></span>
-  <span class="leg" data-cat="down" onclick="toggleCat(this,'down')" title="Click to show/hide">
+  <span class="leg" data-cat="down" onclick="toggleCat(this,this.dataset.cat)" title="Click to show/hide">
     <span class="legend-dot" style="background:#1e88e5"></span><span id="leg-dn"></span></span>
-  <span class="leg" data-cat="ns" onclick="toggleCat(this,'ns')" title="Click to show/hide">
+  <span class="leg" data-cat="ns" onclick="toggleCat(this,this.dataset.cat)" title="Click to show/hide">
     <span class="legend-dot" style="background:#888"></span>Non-significant</span>
   <span style="font-size:.8rem;color:#666;margin-left:auto">Click legend to filter · Scroll to zoom · Drag to pan</span>
 </div>

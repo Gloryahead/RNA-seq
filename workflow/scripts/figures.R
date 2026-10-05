@@ -220,7 +220,10 @@ h2{font-size:1.1rem;margin-bottom:8px;text-align:center}
 #controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
 #search{padding:4px 8px;border:1px solid #ccc;border-radius:4px;font-size:.9rem;width:180px}
 .legend-dot{display:inline-block;width:10px;height:10px;border-radius:50%%;margin-right:4px}
-.leg{display:flex;align-items:center;font-size:.85rem;gap:4px}
+.leg{display:flex;align-items:center;font-size:.85rem;gap:4px;cursor:pointer;
+  padding:3px 7px;border-radius:4px;border:1.5px solid transparent;user-select:none;transition:opacity .15s}
+.leg:hover{background:rgba(0,0,0,.06)}
+.leg.hidden{opacity:.35;text-decoration:line-through}
 #tooltip{position:fixed;background:rgba(0,0,0,.82);color:#fff;padding:6px 10px;border-radius:5px;
   font-size:.8rem;pointer-events:none;display:none;white-space:nowrap;z-index:999}
 svg text{font-family:system-ui,sans-serif}
@@ -233,10 +236,13 @@ svg text{font-family:system-ui,sans-serif}
 <h2>%s</h2>
 <div id="controls">
   <input id="search" placeholder="Search gene…" oninput="highlight(this.value)">
-  <span class="leg"><span class="legend-dot" style="background:red"></span><span id="leg-up"></span></span>
-  <span class="leg"><span class="legend-dot" style="background:#1e88e5"></span><span id="leg-dn"></span></span>
-  <span class="leg"><span class="legend-dot" style="background:#888"></span>Non-significant</span>
-  <span style="font-size:.8rem;color:#666;margin-left:auto">Scroll to zoom · Drag to pan · Hover for info</span>
+  <span class="leg" data-cat="up" onclick="toggleCat(this,'up')" title="Click to show/hide">
+    <span class="legend-dot" style="background:#e53935"></span><span id="leg-up"></span></span>
+  <span class="leg" data-cat="down" onclick="toggleCat(this,'down')" title="Click to show/hide">
+    <span class="legend-dot" style="background:#1e88e5"></span><span id="leg-dn"></span></span>
+  <span class="leg" data-cat="ns" onclick="toggleCat(this,'ns')" title="Click to show/hide">
+    <span class="legend-dot" style="background:#888"></span>Non-significant</span>
+  <span style="font-size:.8rem;color:#666;margin-left:auto">Click legend to filter · Scroll to zoom · Drag to pan</span>
 </div>
 <svg id="chart"></svg>
 <div id="tooltip"></div>
@@ -327,6 +333,18 @@ const zoom = d3.zoom().scaleExtent([0.4,40]).on("zoom", ({transform}) => {
   drawRefs(nx, ny);
 });
 svg.call(zoom);
+
+// Category filter
+const hidden = new Set();
+function toggleCat(el, cat) {
+  if (hidden.has(cat)) { hidden.delete(cat); el.classList.remove("hidden"); }
+  else                 { hidden.add(cat);    el.classList.add("hidden"); }
+  applyVisibility();
+}
+function applyVisibility() {
+  circles.attr("display", d => hidden.has(d.s) ? "none" : null);
+  labels.attr("display",  d => hidden.has(d.s) ? "none" : null);
+}
 
 // Search
 function highlight(q) {

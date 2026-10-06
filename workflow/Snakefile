@@ -132,10 +132,6 @@ rule all:
                out=config["outdir"], comp=COMPARISONS),
         expand("{out}/figures/{comp}_heatmap_top50.pdf",
                out=config["outdir"], comp=COMPARISONS),
-        expand("{out}/pathways/{comp}_GO_results.tsv",
-               out=config["outdir"], comp=COMPARISONS) if config["pathways"]["run_go"] else [],
-        expand("{out}/pathways/{comp}_KEGG_results.tsv",
-               out=config["outdir"], comp=COMPARISONS) if config["pathways"]["run_kegg"] else [],
         expand("{out}/reports/{comp}_report.html",
                out=config["outdir"], comp=COMPARISONS),
         # ── Conditional outputs ────────────────────────────────────

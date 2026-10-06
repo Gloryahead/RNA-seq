@@ -74,7 +74,7 @@ sig_up   <- sig_up[order(sig_up[[p_col]]), ][seq_len(min(10, nrow(sig_up))), ]
 sig_down <- sig_down[order(sig_down[[p_col]]), ][seq_len(min(10, nrow(sig_down))), ]
 selected_labs <- c(sig_up[[label_col]], sig_down[[label_col]])
 
-pdf(opt$out_volcano, width=16/2.54, height=18/2.54)
+pdf(opt$out_volcano, width=22/2.54, height=18/2.54)
 print(EnhancedVolcano(degs,
   lab              = degs[[label_col]],
   selectLab        = selected_labs,
@@ -90,9 +90,9 @@ print(EnhancedVolcano(degs,
   colCustom        = keyvals,
   axisLabSize      = 20,
   labSize          = 3,
-  legendLabSize    = 16,
-  legendIconSize   = 7,
-  captionLabSize   = 16,
+  legendLabSize    = 12,
+  legendIconSize   = 5,
+  captionLabSize   = 14,
   colAlpha         = 1,
   pointSize        = 0.3,
   drawConnectors   = TRUE,

@@ -226,7 +226,7 @@ body { display: flex; min-height: 100vh; font-family: "Segoe UI", system-ui, san
                  border-top: 1px solid rgba(255,255,255,0.1); }
 
 /* Main */
-#main { margin-left: 240px; padding: 0 32px 48px; max-width: 1200px; width: 100%; }
+#main { margin-left: 240px; padding: 0 32px 48px; max-width: 1200px; width: calc(100% - 240px); }
 section { padding-top: 40px; }
 section + section { border-top: 1px solid var(--border); margin-top: 12px; }
 h2 { font-size: 1.5rem; font-weight: 700; color: var(--sidebar-bg); margin-bottom: 20px;
@@ -273,7 +273,7 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
 
 @media (max-width: 768px) {
   #sidebar { width: 200px; }
-  #main { margin-left: 200px; padding: 0 16px 40px; }
+  #main { margin-left: 200px; padding: 0 16px 40px; width: calc(100% - 200px); }
   .fig-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {

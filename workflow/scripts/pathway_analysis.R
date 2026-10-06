@@ -149,7 +149,7 @@ run_analysis <- function(gene_set, subdir) {
         }, error=function(e) message("barplot failed (", spec$ont, "): ", conditionMessage(e)))
 
         tryCatch({
-          p_cnet <- cnetplot(ego, showCategory=6, foldChange=fc_vec_sym, circular=FALSE)
+          p_cnet <- cnetplot(ego, showCategory=6, foldChange=fc_vec_sym)
           save_plot(p_cnet, file.path(subdir, paste0("output-", pfx, "-cnetplot.pdf")), w=12, h=10)
         }, error=function(e) message("cnetplot failed (", spec$ont, "): ", conditionMessage(e)))
 

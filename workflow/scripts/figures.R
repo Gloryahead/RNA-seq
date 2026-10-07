@@ -63,8 +63,9 @@ keyvals <- ifelse(
   degs[[lfc_col]] < -opt$lfc & degs[[p_col]] < opt$alpha, "blue",
   ifelse(degs[[lfc_col]] >  opt$lfc & degs[[p_col]] < opt$alpha, "red", "grey30")
 )
-names(keyvals)[keyvals == "blue"]   <- paste0("Downregulated (n=", n_down, ")")
-names(keyvals)[keyvals == "red"]    <- paste0("Upregulated (n=", n_up, ")")
+lfc_label <- if (opt$lfc > 0) paste0(", |log₂FC| ≥ ", opt$lfc) else ""
+names(keyvals)[keyvals == "blue"]   <- paste0("Downregulated (n=", n_down, lfc_label, ")")
+names(keyvals)[keyvals == "red"]    <- paste0("Upregulated (n=", n_up,   lfc_label, ")")
 names(keyvals)[keyvals == "grey30"] <- "Non-significant"
 
 # Select top 20 most significant DEGs (10 up + 10 down) for labeling

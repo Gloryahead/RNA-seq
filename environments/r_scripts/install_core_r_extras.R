@@ -8,10 +8,13 @@ if (!require("BiocManager", quietly = TRUE))
 
 bioc_pkgs <- c(
   "DESeq2",             # Differential expression
+  "apeglm",             # apeglm LFC shrinkage for DESeq2::lfcShrink()
   "edgeR",              # Differential expression (TMM normalization)
   "limma",              # Linear models for microarray/RNA-seq
   "tximport",           # Import Salmon/Kallisto quantification
   "biomaRt",            # Bioconductor interface to Ensembl BioMart
+  "org.Mm.eg.db",       # Mouse gene annotation (Ensembl → symbol)
+  "org.Hs.eg.db",       # Human gene annotation (Ensembl → symbol)
   "clusterProfiler",    # GO/KEGG pathway enrichment
   "EnhancedVolcano",    # Publication-quality volcano plots
   "enrichplot",         # Visualization for enrichment results

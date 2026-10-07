@@ -143,9 +143,10 @@ if (any(startsWith(na.omit(res_df$gene)[seq_len(min(5, sum(!is.na(res_df$gene)))
 }
 
 # ── Write DEG table ───────────────────────────────────────────────────
-res_df <- res_df[order(res_df$FDR, na.last=TRUE), ]
+p_col_out <- intersect(c("FDR", "adj.P.Val", "padj"), colnames(res_df))[1]
+res_df <- res_df[order(res_df[[p_col_out]], na.last=TRUE), ]
 fwrite(res_df, opt$out_degs, sep="\t", na="NA")
-n_sig <- sum(!is.na(res_df$FDR) & res_df$FDR < opt$alpha, na.rm=TRUE)
+n_sig <- sum(!is.na(res_df[[p_col_out]]) & res_df[[p_col_out]] < opt$alpha, na.rm=TRUE)
 message("Significant DEGs (FDR < ", opt$alpha, "): ", n_sig)
 
 # ── PCA plot ──────────────────────────────────────────────────────────

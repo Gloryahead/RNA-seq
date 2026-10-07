@@ -357,10 +357,10 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
     </p>
     <p style="line-height:1.8;color:var(--muted);margin-top:10px">
       <strong>Differential expression:</strong> Genes with fewer than 10 CPM in at
-      least 2 samples were removed before testing. DESeq2 (Wald test) was used;
-      raw p-values were adjusted with the Benjamini&ndash;Hochberg (BH) method.
-      Log2 fold-changes were shrunk with the apeglm estimator. Significance was
-      defined as FDR &lt; 0.05. For volcano plot colouring and heatmap gene selection
+      least 2 samples were removed before testing. limma-voom (TMM normalisation,
+      empirical Bayes variance shrinkage) was used; raw p-values were adjusted with
+      the Benjamini&ndash;Hochberg (BH) method. Significance was defined as
+      FDR &lt; 0.05. For volcano plot colouring and heatmap gene selection
       an additional |log2FC| &gt; 1 filter was applied.
     </p>
     <p style="line-height:1.8;color:var(--muted);margin-top:10px">
@@ -396,10 +396,9 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
   <div class="subsec">
     <h3>Overview</h3>
     <p style="color:var(--muted);line-height:1.7">
-      DESeq2 was used with a Wald test. Log2-fold-change was shrunk with the
-      <code>apeglm</code> estimator. Genes with mean count &lt; 10 across all
-      samples were pre-filtered. Significance threshold: FDR &lt; 0.05,
-      |log2FC| &gt; 1.
+      limma-voom was used with TMM normalisation and empirical Bayes variance
+      shrinkage. Genes with fewer than 10 CPM in at least 2 samples were
+      pre-filtered. Significance threshold: FDR &lt; 0.05, |log2FC| &gt; 1.
     </p>
   </div>
 </section>
@@ -548,25 +547,21 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
       they had &ge;10 CPM in at least 2 samples (matching <code>--min_count 10 --min_samples 2</code>).
     </p>
     <p style="line-height:1.8;color:var(--muted);margin-top:8px">
-      Differential expression was performed with <strong>DESeq2</strong> using a Wald test
-      against a design <code>~ group</code>.
-      The null hypothesis for the Wald test was H&#8320;: log2FC = 0
-      (i.e., <code>lfcThreshold</code> was not set, so no fold-change prior was incorporated
-      into the statistical test itself).
+      Differential expression was performed with <strong>limma-voom</strong>.
+      Read counts were normalised with <strong>TMM</strong> (trimmed mean of M-values)
+      via edgeR, then precision weights were estimated with <code>voom()</code> to
+      model the mean–variance relationship of log-CPM data.
+      A linear model was fitted with <code>lmFit()</code> against a design
+      <code>~ group</code>, and empirical Bayes variance shrinkage was applied
+      with <code>eBayes()</code> to moderate the per-gene standard errors.
       Raw p-values were adjusted with the <strong>Benjamini&ndash;Hochberg (BH)</strong> method;
       significance threshold: <strong>FDR &lt; 0.05</strong>.
-    </p>
-    <p style="line-height:1.8;color:var(--muted);margin-top:8px">
-      Log2 fold-changes were shrunk using the <strong>apeglm</strong> estimator
-      (<code>lfcShrink(type = "apeglm")</code>), which applies a Cauchy prior to shrink
-      noisy LFC estimates for low-count genes while preserving large, well-supported
-      fold-changes. Shrunk LFCs are used for all downstream visualisations.
       For volcano plot colouring and heatmap gene selection, an additional
       <strong>|log2FC| &gt; 1</strong> filter was applied on top of FDR &lt; 0.05.
     </p>
     <p style="line-height:1.8;color:var(--muted);margin-top:8px">
-      Variance-stabilising transformation (VST, <code>blind = FALSE</code>) was applied
-      to normalised counts for PCA and sample-distance visualisation.
+      log-CPM values from the voom precision-weighted matrix were used for
+      PCA and sample-distance visualisation.
     </p>
   </div>
 

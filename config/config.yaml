@@ -64,7 +64,8 @@ deg:
   method: "DESeq2"        # DESeq2 | edgeR | limma-voom
   min_count: 10           # CPM filter threshold
   min_samples: 2          # genes must pass in at least N samples
-  lfc_threshold: 0        # log2FC threshold passed to DESeq2::results()
+  lfc_threshold: 0        # log2FC threshold for DESeq2::results() Wald test (keep 0; filter for plotting separately)
+  lfc_for_plots: 1        # |log2FC| cutoff used only for volcano colouring and heatmap selection
   alpha: 0.05             # FDR cutoff
 
 # ── Pathway enrichment (Parts 5, 14, 20) ──────────────────────────────

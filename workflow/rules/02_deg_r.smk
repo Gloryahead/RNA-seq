@@ -76,7 +76,7 @@ rule publication_figures:
     params:
         activate  = mamba_activate("rnaseq_r_env"),
         alpha     = config["deg"]["alpha"],
-        lfc       = config["deg"]["lfc_threshold"],
+        lfc       = config["deg"].get("lfc_for_plots", 1),
         organism  = config["organism"],
         treatment = lambda wc: wc.comp.split("_vs_")[0],
         control   = lambda wc: wc.comp.split("_vs_")[1],

@@ -85,9 +85,9 @@ if (opt$method == "DESeq2") {
   )
   dds    <- DESeq(dds, quiet=TRUE)
   res    <- results(dds, contrast=c("group", opt$treatment, opt$control),
-                    alpha=opt$alpha, lfcThreshold=opt$lfc)
-  res    <- lfcShrink(dds, contrast=c("group", opt$treatment, opt$control),
-                      type="normal", res=res, quiet=TRUE)
+                    alpha=opt$alpha)
+  coef_name <- resultsNames(dds)[grep(opt$treatment, resultsNames(dds))[1]]
+  res    <- lfcShrink(dds, coef=coef_name, type="apeglm", quiet=TRUE)
   res_df <- as.data.frame(res)
   res_df <- data.frame(gene=rownames(res_df), res_df, stringsAsFactors=FALSE)
   setnames_map <- c(log2FoldChange="log2FC", pvalue="pvalue", padj="FDR")

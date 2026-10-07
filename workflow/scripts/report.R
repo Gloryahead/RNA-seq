@@ -343,13 +343,32 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
   </div>
   <div class="subsec">
     <h3>Pipeline Overview</h3>
-    <p style="line-height:1.7;color:var(--muted)">
+    <p style="line-height:1.8;color:var(--muted)">
       This report summarises the NGS101 RNA-seq pipeline run for the comparison
-      <strong>', V(opt$treatment), ' vs ', V(opt$control), '</strong>.
-      Reads were trimmed with Trim Galore, aligned to the reference genome with STAR,
-      and counts were quantified with featureCounts.
-      Differential expression was performed with DESeq2 (Wald test, BH-adjusted FDR).
-      Pathway enrichment used clusterProfiler (GO ORA, KEGG ORA, and GSEA on GO BP terms).
+      <strong>', V(opt$treatment), ' vs ', V(opt$control), '</strong>
+      (mouse, GRCm38/mm10, Ensembl release 102).
+    </p>
+    <p style="line-height:1.8;color:var(--muted);margin-top:10px">
+      <strong>Pre-processing:</strong> Raw reads were quality-trimmed with Trim Galore
+      (quality threshold Q20, minimum length 20 bp; adapters auto-detected by Cutadapt).
+      Trimmed reads were aligned to the reference genome with STAR in two-pass mode
+      (150 bp read length). Gene-level counts were produced with featureCounts
+      (exon features, gene_id attribute, unstranded paired-end mode).
+    </p>
+    <p style="line-height:1.8;color:var(--muted);margin-top:10px">
+      <strong>Differential expression:</strong> Genes with fewer than 10 CPM in at
+      least 2 samples were removed before testing. DESeq2 (Wald test) was used;
+      raw p-values were adjusted with the Benjamini&ndash;Hochberg (BH) method.
+      Log2 fold-changes were shrunk with the apeglm estimator. Significance was
+      defined as FDR &lt; 0.05. For volcano plot colouring and heatmap gene selection
+      an additional |log2FC| &gt; 1 filter was applied.
+    </p>
+    <p style="line-height:1.8;color:var(--muted);margin-top:10px">
+      <strong>Pathway enrichment:</strong> Over-representation analysis (ORA) was run
+      on GO Biological Process, Cellular Component, and Molecular Function terms, and
+      on KEGG pathways, using clusterProfiler. Gene Set Enrichment Analysis (GSEA) was
+      performed on all expressed genes ranked by shrunk log2FC against GO BP gene sets.
+      BH-adjusted p-value cutoff 0.05; GSEA q-value cutoff 0.2.
     </p>
   </div>
 </section>
@@ -478,19 +497,117 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
 <!-- METHODS -->
 <section id="methods-section">
   <h2>&#128196; Methods</h2>
+
   <div class="subsec">
-    <h3>Analysis Pipeline</h3>
+    <h3>1. Quality Control</h3>
     <p style="line-height:1.8;color:var(--muted)">
-      <strong>Quality control:</strong> FastQC v0.12 + MultiQC v1.22.<br/>
-      <strong>Trimming:</strong> Trim Galore v0.6 (Cutadapt backend).<br/>
-      <strong>Alignment:</strong> STAR v2.7 (two-pass mode) against the reference genome.<br/>
-      <strong>Quantification:</strong> featureCounts (Subread v2.0) on gene-level annotation.<br/>
-      <strong>Differential expression:</strong> DESeq2 v1.42 (Wald test; apeglm LFC shrinkage).<br/>
-      <strong>Gene annotation:</strong> Bioconductor org.Mm.eg.db / org.Hs.eg.db.<br/>
-      <strong>Pathway enrichment:</strong> clusterProfiler v4 — GO ORA (BP/CC/MF), KEGG ORA, and GSEA on ranked log2FC.<br/>
-      <strong>Visualisation:</strong> ggplot2, EnhancedVolcano, pheatmap, enrichplot, D3.js v7.
+      Per-sample read quality was assessed with <strong>FastQC</strong>.
+      Aggregate QC metrics across all samples were compiled with <strong>MultiQC</strong>.
     </p>
   </div>
+
+  <div class="subsec">
+    <h3>2. Adapter Trimming</h3>
+    <p style="line-height:1.8;color:var(--muted)">
+      Reads were trimmed with <strong>Trim Galore</strong> (Cutadapt backend).
+      Key parameters: quality threshold <code>--quality 20</code> (Phred Q20),
+      minimum post-trimming read length <code>--length 20</code>,
+      adapter sequences auto-detected by Cutadapt.
+      Paired-end mode was used throughout.
+    </p>
+  </div>
+
+  <div class="subsec">
+    <h3>3. Alignment</h3>
+    <p style="line-height:1.8;color:var(--muted)">
+      Trimmed reads were aligned to the GRCm38/mm10 mouse reference genome
+      (Ensembl release 102) using <strong>STAR</strong> in two-pass mode,
+      which first discovers novel splice junctions in a discovery pass and
+      then re-aligns all reads with those junctions included.
+      Read length: 150 bp (<code>--sjdbOverhang 149</code>).
+      Alignment used 20 threads.
+    </p>
+  </div>
+
+  <div class="subsec">
+    <h3>4. Gene-Level Quantification</h3>
+    <p style="line-height:1.8;color:var(--muted)">
+      Read counts per gene were produced with <strong>featureCounts</strong> (Subread package).
+      Key parameters: feature type <code>-t exon</code>, grouped by <code>-g gene_id</code>
+      (Ensembl gene IDs from the GTF); strandedness <code>-s 0</code> (unstranded);
+      paired-end mode <code>-p</code>; 8 threads.
+      Ensembl gene IDs were mapped to gene symbols using the Bioconductor
+      <strong>org.Mm.eg.db</strong> annotation package.
+    </p>
+  </div>
+
+  <div class="subsec">
+    <h3>5. Differential Expression Analysis</h3>
+    <p style="line-height:1.8;color:var(--muted)">
+      Low-count genes were removed prior to testing: genes were retained only if
+      they had &ge;10 CPM in at least 2 samples (matching <code>--min_count 10 --min_samples 2</code>).
+    </p>
+    <p style="line-height:1.8;color:var(--muted);margin-top:8px">
+      Differential expression was performed with <strong>DESeq2</strong> using a Wald test
+      against a design <code>~ group</code>.
+      The null hypothesis for the Wald test was H&#8320;: log2FC = 0
+      (i.e., <code>lfcThreshold</code> was not set, so no fold-change prior was incorporated
+      into the statistical test itself).
+      Raw p-values were adjusted with the <strong>Benjamini&ndash;Hochberg (BH)</strong> method;
+      significance threshold: <strong>FDR &lt; 0.05</strong>.
+    </p>
+    <p style="line-height:1.8;color:var(--muted);margin-top:8px">
+      Log2 fold-changes were shrunk using the <strong>apeglm</strong> estimator
+      (<code>lfcShrink(type = "apeglm")</code>), which applies a Cauchy prior to shrink
+      noisy LFC estimates for low-count genes while preserving large, well-supported
+      fold-changes. Shrunk LFCs are used for all downstream visualisations.
+      For volcano plot colouring and heatmap gene selection, an additional
+      <strong>|log2FC| &gt; 1</strong> filter was applied on top of FDR &lt; 0.05.
+    </p>
+    <p style="line-height:1.8;color:var(--muted);margin-top:8px">
+      Variance-stabilising transformation (VST, <code>blind = FALSE</code>) was applied
+      to normalised counts for PCA and sample-distance visualisation.
+    </p>
+  </div>
+
+  <div class="subsec">
+    <h3>6. Pathway Enrichment</h3>
+    <p style="line-height:1.8;color:var(--muted)">
+      Pathway analyses were performed with <strong>clusterProfiler</strong>.
+    </p>
+    <ul style="line-height:1.8;color:var(--muted);padding-left:20px;margin-top:8px">
+      <li><strong>GO Over-Representation Analysis (ORA):</strong> run separately for
+        Biological Process (BP), Cellular Component (CC), and Molecular Function (MF) ontologies,
+        as well as combined for all three. Significant DEGs (FDR &lt; 0.05) were used as the
+        input gene list; all expressed genes (post-CPM filter) formed the background.
+        BH-adjusted p-value cutoff: 0.05; q-value cutoff: 0.2.</li>
+      <li><strong>KEGG ORA:</strong> same input gene list and background as GO ORA,
+        queried against the KEGG pathway database via clusterProfiler.</li>
+      <li><strong>GSEA:</strong> all expressed genes ranked by shrunk log2FC (most positive
+        to most negative) were tested against GO Biological Process gene sets.
+        p-value cutoff: 0.05; q-value cutoff: 0.2; 1000 permutations.</li>
+    </ul>
+    <p style="line-height:1.8;color:var(--muted);margin-top:8px">
+      Enrichment plots (dot plots, bar plots, network plots, and enrichment maps) were
+      produced with <strong>enrichplot</strong>.
+    </p>
+  </div>
+
+  <div class="subsec">
+    <h3>7. Visualisation</h3>
+    <p style="line-height:1.8;color:var(--muted)">
+      PCA and MA plots: <strong>ggplot2</strong> with <strong>ggrepel</strong> for sample labels.<br/>
+      Volcano plot: <strong>EnhancedVolcano</strong>; dashed vertical lines and colour threshold
+      at |log2FC| = 1; horizontal threshold at FDR = 0.05.<br/>
+      Heatmaps: <strong>pheatmap</strong> with z-score row-scaling, Euclidean clustering, and
+      BuPu colour palette; DEG heatmaps show the top 50 / top 100 / all significant genes
+      ranked by FDR then |log2FC|.<br/>
+      Interactive volcano: <strong>D3.js</strong> (v7) via plotly/custom HTML.<br/>
+      This report was generated with <strong>base R</strong> and the <strong>magick</strong>
+      package (PDF-to-PNG conversion for embedded figures).
+    </p>
+  </div>
+
 </section>
 
 </div><!-- /main -->

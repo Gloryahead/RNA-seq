@@ -186,7 +186,7 @@ dev.off()
 # ── Sample-distance heatmap ───────────────────────────────────────────
 dist_mat <- as.matrix(dist(t(norm_counts)))
 ann      <- data.frame(Group=meta$group, row.names=meta$sample)
-pdf(opt$out_heatmap, width=6, height=5)
+pdf(opt$out_heatmap, width=8, height=5)
 pheatmap(dist_mat,
          annotation_col=ann,
          clustering_distance_rows="euclidean",

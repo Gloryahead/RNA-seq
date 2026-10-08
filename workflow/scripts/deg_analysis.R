@@ -172,10 +172,11 @@ ma_df <- res_df
 ma_col <- ifelse(opt$method == "DESeq2", "baseMean",
           ifelse(opt$method == "edgeR",  "logCPM", "AveExpr"))
 if (!ma_col %in% colnames(ma_df)) ma_col <- colnames(ma_df)[2]
-ma_df$sig <- !is.na(ma_df$FDR) & ma_df$FDR < opt$alpha
+ma_df$sig <- !is.na(ma_df[[p_col_out]]) & ma_df[[p_col_out]] < opt$alpha
+lfc_col   <- intersect(c("log2FC", "logFC"), colnames(ma_df))[1]
 
 pdf(opt$out_ma, width=7, height=5)
-plot(log2(ma_df[[ma_col]]+1), ma_df$log2FC,
+plot(log2(ma_df[[ma_col]]+1), ma_df[[lfc_col]],
      pch=20, cex=.4, col=ifelse(ma_df$sig, "firebrick", "grey60"),
      xlab="log2(Mean expression)", ylab="log2 Fold Change",
      main=paste("MA plot:", opt$treatment, "vs", opt$control))

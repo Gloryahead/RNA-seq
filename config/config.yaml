@@ -62,7 +62,7 @@ salmon:
 # ── DEG analysis ──────────────────────────────────────────────────────
 deg:
   method: "limma-voom"    # DESeq2 | edgeR | limma-voom
-  min_count: 10           # CPM filter threshold
+  min_count: 1            # CPM filter threshold
   min_samples: 2          # genes must pass in at least N samples
   lfc_threshold: 0        # log2FC threshold for DESeq2::results() Wald test (keep 0; filter for plotting separately)
   lfc_for_plots: 1        # |log2FC| cutoff used only for volcano colouring and heatmap selection

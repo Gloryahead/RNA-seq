@@ -63,26 +63,19 @@ keyvals <- ifelse(
   degs[[lfc_col]] < -opt$lfc & degs[[p_col]] < opt$alpha, "blue",
   ifelse(degs[[lfc_col]] >  opt$lfc & degs[[p_col]] < opt$alpha, "red", "grey30")
 )
-lfc_label <- if (opt$lfc > 0) paste0(", |log₂FC| ≥ ", opt$lfc) else ""
-names(keyvals)[keyvals == "blue"]   <- paste0("Downregulated (n=", n_down, lfc_label, ")")
-names(keyvals)[keyvals == "red"]    <- paste0("Upregulated (n=", n_up,   lfc_label, ")")
-names(keyvals)[keyvals == "grey30"] <- "Non-significant"
-
-# Select top 20 most significant DEGs (10 up + 10 down) for labeling
-sig_up   <- degs[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$alpha & degs[[lfc_col]] >  opt$lfc, ]
-sig_down <- degs[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$alpha & degs[[lfc_col]] < -opt$lfc, ]
-sig_up   <- sig_up[order(sig_up[[p_col]]), ][seq_len(min(10, nrow(sig_up))), ]
-sig_down <- sig_down[order(sig_down[[p_col]]), ][seq_len(min(10, nrow(sig_down))), ]
-selected_labs <- c(sig_up[[label_col]], sig_down[[label_col]])
+names(keyvals)[keyvals == "blue"]   <- paste0("Dn (n=", n_down, ")")
+names(keyvals)[keyvals == "red"]    <- paste0("Up (n=", n_up, ")")
+names(keyvals)[keyvals == "grey30"] <- "Non-sig"
 
 pdf(opt$out_volcano, width=22/2.54, height=18/2.54)
 print(EnhancedVolcano(degs,
-  lab              = degs[[label_col]],
-  selectLab        = selected_labs,
+  lab              = rep("", nrow(degs)),
+  selectLab        = character(0),
   x                = lfc_col,
   y                = p_col,
   title            = "",
   subtitle         = "",
+  caption          = paste0("total = ", nrow(degs), " variables"),
   pCutoff          = opt$alpha,
   FCcutoff         = opt$lfc,
   gridlines.major  = FALSE,
@@ -90,16 +83,14 @@ print(EnhancedVolcano(degs,
   ylim             = c(0, max(-log10(degs[[p_col]]), na.rm=TRUE) + 0.5),
   colCustom        = keyvals,
   axisLabSize      = 20,
-  labSize          = 3,
+  labSize          = 0,
   legendLabSize    = 12,
   legendIconSize   = 5,
-  captionLabSize   = 14,
+  captionLabSize   = 12,
+  legendPosition   = "top",
   colAlpha         = 1,
   pointSize        = 0.3,
-  drawConnectors   = TRUE,
-  widthConnectors  = 0.4,
-  colConnectors    = "grey40",
-  maxoverlapsConnectors = 40
+  drawConnectors   = FALSE
 ))
 dev.off()
 

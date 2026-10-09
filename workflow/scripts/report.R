@@ -115,7 +115,9 @@ if (nzchar(opt$pathways_dir) && dir.exists(opt$pathways_dir)) {
     go_mf_dot = "GO-ALL/output-MolecularFunction-dotplot.pdf",
     go_mf_bar = "GO-ALL/output-MolecularFunction-barplot.pdf",
     go_up_dot = "GO-UP/output-GO-dotplot.pdf",
+    go_up_bar = "GO-UP/output-GO-barplot.pdf",
     go_dn_dot = "GO-DOWN/output-GO-dotplot.pdf",
+    go_dn_bar = "GO-DOWN/output-GO-barplot.pdf",
     kegg_dot  = "GO-ALL/output-kegg-dotplot.pdf",
     gsea_dot  = paste0(opt$label, "_GSEA_dotplot.pdf"),
     gsea_rdg  = paste0(opt$label, "_GSEA_ridge.pdf")
@@ -299,9 +301,8 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
     <a href="#volcano-section">&#127776; Volcano Plot</a>
     <a href="#heatmap-section">&#127863; Heatmaps</a>
     <div class="nav-grp">Pathway Enrichment</div>
-    <a href="#go-bp-section">&#127758; GO Biological Process</a>
+    <a href="#go-section">&#127758; GO — ALL / UP / DOWN</a>
     <a href="#go-cc-mf-section">&#128084; GO CC / MF</a>
-    <a href="#go-dir-section">&#8593;&#8595; Up/Down Pathways</a>
     <a href="#kegg-section">&#128202; KEGG</a>
     <a href="#gsea-section">&#128288; GSEA</a>
     <div class="nav-grp">Data</div>
@@ -397,8 +398,8 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
     <h3>Overview</h3>
     <p style="color:var(--muted);line-height:1.7">
       limma-voom was used with TMM normalisation and empirical Bayes variance
-      shrinkage. Genes with fewer than 10 CPM in at least 2 samples were
-      pre-filtered. Significance threshold: FDR &lt; 0.05, |log2FC| &gt; 1.
+      shrinkage. Genes were pre-filtered with <code>filterByExpr()</code>.
+      Significance threshold: FDR &lt; 0.05, |log2FC| &gt; 1.
     </p>
   </div>
 </section>
@@ -434,16 +435,55 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
   </div>
 </section>
 
-<!-- GO BP -->
-<section id="go-bp-section">
-  <h2>&#127758; GO Biological Process</h2>
-  <div class="fig-grid">
-    <div class="fig-cell">', img_tag(pw_plots[["go_dot"]], "GO BP dotplot"), '<p class="cap">Dotplot</p></div>
-    <div class="fig-cell">', img_tag(pw_plots[["go_bar"]], "GO BP barplot"), '<p class="cap">Barplot</p></div>
+<!-- GO ALL / UP / DOWN -->
+<section id="go-section">
+  <h2>&#127758; GO Enrichment — ALL / UP / DOWN</h2>
+
+  <!-- Dotplot comparison row -->
+  <div class="subsec">
+    <h3>Dotplot comparison (FDR &lt; 0.05)</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start;">
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:var(--sidebar-bg)">GO ALL</p>
+        ', img_tag(pw_plots[["go_dot"]], "GO ALL dotplot"), '
+      </div>
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:#c0392b">GO UP</p>
+        ', img_tag(pw_plots[["go_up_dot"]], "GO UP dotplot"), '
+      </div>
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:#2980b9">GO DOWN</p>
+        ', img_tag(pw_plots[["go_dn_dot"]], "GO DOWN dotplot"), '
+      </div>
+    </div>
   </div>
-  <div class="fig-grid">
-    <div class="fig-cell">', img_tag(pw_plots[["go_cnet"]], "GO BP cnetplot"), '<p class="cap">Network plot (cnetplot)</p></div>
-    <div class="fig-cell">', img_tag(pw_plots[["go_emap"]], "GO BP emapplot"), '<p class="cap">Enrichment map (emapplot)</p></div>
+
+  <!-- Barplot comparison row -->
+  <div class="subsec">
+    <h3>Barplot comparison (gene count)</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start;">
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:var(--sidebar-bg)">GO ALL</p>
+        ', img_tag(pw_plots[["go_bar"]], "GO ALL barplot"), '
+      </div>
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:#c0392b">GO UP</p>
+        ', img_tag(pw_plots[["go_up_bar"]], "GO UP barplot"), '
+      </div>
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:#2980b9">GO DOWN</p>
+        ', img_tag(pw_plots[["go_dn_bar"]], "GO DOWN barplot"), '
+      </div>
+    </div>
+  </div>
+
+  <!-- GO ALL network plots -->
+  <div class="subsec">
+    <h3>GO ALL — Network &amp; Enrichment Map</h3>
+    <div class="fig-grid">
+      <div class="fig-cell">', img_tag(pw_plots[["go_cnet"]], "GO cnetplot"), '<p class="cap">Network plot (cnetplot)</p></div>
+      <div class="fig-cell">', img_tag(pw_plots[["go_emap"]], "GO emapplot"), '<p class="cap">Enrichment map (emapplot)</p></div>
+    </div>
   </div>
 </section>
 
@@ -457,15 +497,6 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
   <div class="fig-grid">
     <div class="fig-cell">', img_tag(pw_plots[["go_mf_dot"]], "GO MF dotplot"), '<p class="cap">MF Dotplot</p></div>
     <div class="fig-cell">', img_tag(pw_plots[["go_mf_bar"]], "GO MF barplot"), '<p class="cap">MF Barplot</p></div>
-  </div>
-</section>
-
-<!-- UP / DOWN -->
-<section id="go-dir-section">
-  <h2>&#8593;&#8595; Directional GO Analysis</h2>
-  <div class="fig-grid">
-    <div class="fig-cell">', img_tag(pw_plots[["go_up_dot"]], "Upregulated GO dotplot"), '<p class="cap">Upregulated genes — GO BP dotplot</p></div>
-    <div class="fig-cell">', img_tag(pw_plots[["go_dn_dot"]], "Downregulated GO dotplot"), '<p class="cap">Downregulated genes — GO BP dotplot</p></div>
   </div>
 </section>
 
@@ -533,7 +564,8 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
     <p style="line-height:1.8;color:var(--muted)">
       Read counts per gene were produced with <strong>featureCounts</strong> (Subread package).
       Key parameters: feature type <code>-t exon</code>, grouped by <code>-g gene_id</code>
-      (Ensembl gene IDs from the GTF); strandedness <code>-s 0</code> (unstranded);
+      (Ensembl gene IDs from the GTF); strandedness auto-detected via RSeQC
+      <code>infer_experiment.py</code> (this dataset: reverse-stranded, <code>-s 2</code>);
       paired-end mode <code>-p</code>; 8 threads.
       Ensembl gene IDs were mapped to gene symbols using the Bioconductor
       <strong>org.Mm.eg.db</strong> annotation package.
@@ -543,8 +575,9 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
   <div class="subsec">
     <h3>5. Differential Expression Analysis</h3>
     <p style="line-height:1.8;color:var(--muted)">
-      Low-count genes were removed prior to testing: genes were retained only if
-      they had &ge;10 CPM in at least 2 samples (matching <code>--min_count 10 --min_samples 2</code>).
+      Low-count genes were removed prior to testing using edgeR&rsquo;s
+      <code>filterByExpr()</code>, which applies a minimum count threshold scaled to
+      library depth and group size (equivalent to &ge;10 raw counts in the smallest group).
     </p>
     <p style="line-height:1.8;color:var(--muted);margin-top:8px">
       Differential expression was performed with <strong>limma-voom</strong>.

@@ -44,8 +44,10 @@ kegg_organism <- switch(opt$organism, human="hsa", mouse="mmu", rat="rno")
 
 # ── Load DEG table ────────────────────────────────────────────────────
 degs <- fread(opt$degs, data.table=FALSE)
-stopifnot("gene" %in% colnames(degs), "FDR" %in% colnames(degs))
+p_col   <- intersect(c("FDR","adj.P.Val","padj"), colnames(degs))[1]
 lfc_col <- intersect(c("log2FC","log2FoldChange","logFC"), colnames(degs))[1]
+stopifnot("gene" %in% colnames(degs), !is.na(p_col), !is.na(lfc_col))
+message("Using columns: p_col=", p_col, "  lfc_col=", lfc_col)
 
 gene_symbols <- degs$gene
 from_type <- if (any(startsWith(na.omit(gene_symbols)[seq_len(min(5, sum(!is.na(gene_symbols))))], "ENS")))
@@ -56,9 +58,9 @@ entrez_map <- suppressMessages(
 )
 degs <- merge(degs, entrez_map, by.x="gene", by.y=from_type, all.x=FALSE)
 
-sig_all  <- degs$ENTREZID[!is.na(degs$FDR) & degs$FDR < opt$pval]
-sig_up   <- degs$ENTREZID[!is.na(degs$FDR) & degs$FDR < opt$pval & degs[[lfc_col]] > 0]
-sig_down <- degs$ENTREZID[!is.na(degs$FDR) & degs$FDR < opt$pval & degs[[lfc_col]] < 0]
+sig_all  <- degs$ENTREZID[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$pval]
+sig_up   <- degs$ENTREZID[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$pval & degs[[lfc_col]] > 0]
+sig_down <- degs$ENTREZID[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$pval & degs[[lfc_col]] < 0]
 universe <- degs$ENTREZID
 fc_vec   <- setNames(degs[[lfc_col]], degs$ENTREZID)
 

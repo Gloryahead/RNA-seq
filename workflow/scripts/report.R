@@ -140,6 +140,44 @@ if (nzchar(opt$pathways_dir) && dir.exists(opt$pathways_dir)) {
   }
 }
 
+# Pre-compute GSEA section body (avoids quote-escaping issues inside the HTML template)
+gsea_section_body <- if (!is.null(pw_plots[["gsea_dot"]]) || !is.null(pw_plots[["gsea_rdg"]])) {
+  paste0(
+    '<div class="subsec">',
+    '<h3>GSEA Dotplot — Activated (positive NES) vs Suppressed (negative NES)</h3>',
+    img_tag(pw_plots[["gsea_dot"]], "GSEA dotplot split by direction"),
+    '<p style="font-size:0.78rem;color:var(--muted);margin-top:8px">',
+    'Faceted by direction. Dot size = gene set size; colour = adjusted p-value.',
+    '</p></div>',
+    '<div class="subsec">',
+    '<h3>GSEA Ridgeplot — Enrichment score distributions</h3>',
+    img_tag(pw_plots[["gsea_rdg"]], "GSEA ridgeplot"),
+    '<p style="font-size:0.78rem;color:var(--muted);margin-top:8px">',
+    'Each ridge shows the fold-change distribution of genes in a significant gene set. ',
+    'Right-shifted = upregulated; left-shifted = downregulated.',
+    '</p></div>'
+  )
+} else {
+  paste0(
+    '<div class="subsec" style="border-left:4px solid #e67e22;">',
+    '<h3 style="color:#e67e22;">&#9888; GSEA not significant at this sample size</h3>',
+    '<p style="line-height:1.8;color:var(--muted)">',
+    'No gene sets reached significance (adjusted p-value &lt; 0.2) in the GSEA run for this ',
+    'comparison. This is expected with <strong>n = 2 replicates per group</strong>: limma-voom ',
+    'logFC values are stabilised by eBayes shrinkage, which introduces many tied ranks in the ',
+    'gene list. Tied ranks degrade fgsea&rsquo;s permutation test, preventing reliable ',
+    'enrichment scores even when ORA (which does not rely on ranking) finds significant terms.',
+    '</p>',
+    '<p style="line-height:1.8;color:var(--muted);margin-top:8px">',
+    '<strong>The GO and KEGG ORA results above remain valid</strong> &mdash; they test whether ',
+    'significant DEGs (FDR &lt; 0.05) overlap gene sets more than expected by chance, and ',
+    'are not affected by ranking ties. GSEA would require &ge;3 replicates per group to ',
+    'produce a well-resolved ranked list.',
+    '</p>',
+    '</div>'
+  )
+}
+
 # ── DEG summary stats ─────────────────────────────────────────────────────
 degs <- tryCatch(fread(opt$degs, data.table=FALSE), error=function(e) NULL)
 lfc_col <- if (!is.null(degs)) intersect(c("log2FC","log2FoldChange","logFC"), colnames(degs))[1] else NULL
@@ -641,40 +679,7 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
     analysis via the NES sign.
   </p>
 
-  ', if (!is.null(pw_plots[["gsea_dot"]]) || !is.null(pw_plots[["gsea_rdg"]])) {
-    paste0(
-      \'<div class="subsec">
-        <h3>GSEA Dotplot — Activated (positive NES) vs Suppressed (negative NES)</h3>\',
-      img_tag(pw_plots[["gsea_dot"]], "GSEA dotplot split by direction"),
-      \'<p style="font-size:0.78rem;color:var(--muted);margin-top:8px">
-        Faceted by direction. Dot size = gene set size; colour = adjusted p-value.
-      </p></div>
-      <div class="subsec">
-        <h3>GSEA Ridgeplot — Enrichment score distributions</h3>\',
-      img_tag(pw_plots[["gsea_rdg"]], "GSEA ridgeplot"),
-      \'<p style="font-size:0.78rem;color:var(--muted);margin-top:8px">
-        Each ridge shows the fold-change distribution of genes in a significant gene set.
-        Right-shifted = upregulated; left-shifted = downregulated.
-      </p></div>\'
-    )
-  } else {
-    \'<div class="subsec" style="border-left:4px solid #e67e22;">
-      <h3 style="color:#e67e22;">&#9888; GSEA not significant at this sample size</h3>
-      <p style="line-height:1.8;color:var(--muted)">
-        No gene sets reached significance (adjusted p-value &lt; 0.2) in the GSEA run for this
-        comparison. This is expected with <strong>n = 2 replicates per group</strong>: limma-voom
-        logFC values are stabilised by eBayes shrinkage, which introduces many tied ranks in the
-        gene list. Tied ranks degrade fgsea&rsquo;s permutation test, preventing reliable
-        enrichment scores even when ORA (which does not rely on ranking) finds significant terms.
-      </p>
-      <p style="line-height:1.8;color:var(--muted);margin-top:8px">
-        <strong>The GO and KEGG ORA results above remain valid</strong> — they test whether
-        significant DEGs (FDR &lt; 0.05) overlap gene sets more than expected by chance, and
-        are not affected by ranking ties. GSEA would require &ge;3 replicates per group to
-        produce a well-resolved ranked list.
-      </p>
-    </div>\'
-  }, '
+  ', gsea_section_body, '
 </section>
 
 <!-- DEG TABLE -->

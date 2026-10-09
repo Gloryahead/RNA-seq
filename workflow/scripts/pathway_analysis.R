@@ -230,6 +230,10 @@ if (isTRUE(opt$run_gsea)) {
                  facet_grid(.~.sign) + theme_classic(base_size=10)
         save_plot(p_dot, file.path(opt$outdir, paste0(opt$label, "_GSEA_dotplot.pdf")), w=10, h=7)
       }, error=function(e) message("GSEA dotplot failed: ", conditionMessage(e)))
+      tryCatch({
+        p_rdg <- ridgeplot(gsea_res, showCategory=20) + theme_classic(base_size=9)
+        save_plot(p_rdg, file.path(opt$outdir, paste0(opt$label, "_GSEA_ridge.pdf")), w=10, h=8)
+      }, error=function(e) message("GSEA ridgeplot failed: ", conditionMessage(e)))
     }
   }
 }

@@ -114,10 +114,12 @@ if (nzchar(opt$pathways_dir) && dir.exists(opt$pathways_dir)) {
     go_cc_bar = "GO-ALL/output-CellularComponent-barplot.pdf",
     go_mf_dot = "GO-ALL/output-MolecularFunction-dotplot.pdf",
     go_mf_bar = "GO-ALL/output-MolecularFunction-barplot.pdf",
-    go_up_dot = "GO-UP/output-GO-dotplot.pdf",
-    go_up_bar = "GO-UP/output-GO-barplot.pdf",
-    go_dn_dot = "GO-DOWN/output-GO-dotplot.pdf",
-    go_dn_bar = "GO-DOWN/output-GO-barplot.pdf",
+    go_up_dot  = "GO-UP/output-GO-dotplot.pdf",
+    go_up_bar  = "GO-UP/output-GO-barplot.pdf",
+    go_up_cnet = "GO-UP/output-GO-cnetplot.pdf",
+    go_dn_dot  = "GO-DOWN/output-GO-dotplot.pdf",
+    go_dn_bar  = "GO-DOWN/output-GO-barplot.pdf",
+    go_dn_cnet = "GO-DOWN/output-GO-cnetplot.pdf",
     kegg_dot  = "GO-ALL/output-kegg-dotplot.pdf",
     gsea_dot  = paste0(opt$label, "_GSEA_dotplot.pdf"),
     gsea_rdg  = paste0(opt$label, "_GSEA_ridge.pdf")
@@ -477,13 +479,29 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
     </div>
   </div>
 
-  <!-- GO ALL network plots -->
+  <!-- Cnetplot comparison row -->
   <div class="subsec">
-    <h3>GO ALL — Network &amp; Enrichment Map</h3>
-    <div class="fig-grid">
-      <div class="fig-cell">', img_tag(pw_plots[["go_cnet"]], "GO cnetplot"), '<p class="cap">Network plot (cnetplot)</p></div>
-      <div class="fig-cell">', img_tag(pw_plots[["go_emap"]], "GO emapplot"), '<p class="cap">Enrichment map (emapplot)</p></div>
+    <h3>Network plot comparison (cnetplot)</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start;">
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:var(--sidebar-bg)">GO ALL</p>
+        ', img_tag(pw_plots[["go_cnet"]], "GO ALL cnetplot"), '
+      </div>
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:#c0392b">GO UP</p>
+        ', img_tag(pw_plots[["go_up_cnet"]], "GO UP cnetplot"), '
+      </div>
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:#2980b9">GO DOWN</p>
+        ', img_tag(pw_plots[["go_dn_cnet"]], "GO DOWN cnetplot"), '
+      </div>
     </div>
+  </div>
+
+  <!-- Enrichment map (GO ALL only — too sparse for directional subsets) -->
+  <div class="subsec">
+    <h3>GO ALL — Enrichment Map (emapplot)</h3>
+    ', img_tag(pw_plots[["go_emap"]], "GO emapplot"), '
   </div>
 </section>
 

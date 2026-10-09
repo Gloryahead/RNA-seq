@@ -26,7 +26,10 @@ opt_list <- list(
   make_option("--out_heatmap",      type="character"),
   make_option("--out_heatmap_top100",  type="character", default=NULL),
   make_option("--out_heatmap_top50",   type="character", default=NULL),
-  make_option("--out_volcano_html",    type="character", default=NULL)
+  make_option("--out_volcano_html",     type="character", default=NULL),
+  make_option("--out_volcano_labeled", type="character", default=NULL),
+  make_option("--n_label",             type="integer",   default=20,
+              help="Top N up + N down DEGs to label [default %default]")
 )
 opt <- parse_args(OptionParser(option_list=opt_list))
 
@@ -93,6 +96,46 @@ print(EnhancedVolcano(degs,
   drawConnectors   = FALSE
 ))
 dev.off()
+
+# ── Labeled volcano (top N up + N down annotated) ─────────────────────
+if (!is.null(opt$out_volcano_labeled)) {
+  top_up <- degs[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$alpha &
+                   degs[[lfc_col]] >  opt$lfc, ]
+  top_dn <- degs[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$alpha &
+                   degs[[lfc_col]] < -opt$lfc, ]
+  top_up <- top_up[order(top_up[[p_col]]), ][seq_len(min(opt$n_label, nrow(top_up))), ]
+  top_dn <- top_dn[order(top_dn[[p_col]]), ][seq_len(min(opt$n_label, nrow(top_dn))), ]
+  select_genes <- c(top_up[[label_col]], top_dn[[label_col]])
+
+  pdf(opt$out_volcano_labeled, width=22/2.54, height=18/2.54)
+  print(EnhancedVolcano(degs,
+    lab              = degs[[label_col]],
+    selectLab        = select_genes,
+    x                = lfc_col,
+    y                = p_col,
+    title            = "",
+    subtitle         = "",
+    caption          = paste0("total = ", nrow(degs), " variables"),
+    pCutoff          = opt$alpha,
+    FCcutoff         = opt$lfc,
+    gridlines.major  = FALSE,
+    gridlines.minor  = FALSE,
+    ylim             = c(0, max(-log10(degs[[p_col]]), na.rm=TRUE) + 0.5),
+    colCustom        = keyvals,
+    axisLabSize      = 20,
+    labSize          = 3,
+    legendLabSize    = 12,
+    legendIconSize   = 5,
+    captionLabSize   = 12,
+    legendPosition   = "top",
+    colAlpha         = 1,
+    pointSize        = 0.3,
+    drawConnectors   = TRUE,
+    max.overlaps     = Inf
+  ))
+  dev.off()
+  message("Labeled volcano written: ", opt$out_volcano_labeled)
+}
 
 # ── Heatmap (NGS101 style) ────────────────────────────────────────────
 obj <- readRDS(opt$rds)

@@ -65,11 +65,12 @@ rule publication_figures:
         degs = f"{OUTDIR}/deg/{{comp}}_DEG_results.tsv",
         rds  = f"{OUTDIR}/deg/{{comp}}_dge_object.rds",
     output:
-        volcano        = f"{OUTDIR}/figures/{{comp}}_volcano.pdf",
-        volcano_html   = f"{OUTDIR}/figures/{{comp}}_volcano_interactive.html",
-        heatmap        = f"{OUTDIR}/figures/{{comp}}_heatmap_all.pdf",
-        heatmap_top100 = f"{OUTDIR}/figures/{{comp}}_heatmap_top100.pdf",
-        heatmap_top50  = f"{OUTDIR}/figures/{{comp}}_heatmap_top50.pdf",
+        volcano         = f"{OUTDIR}/figures/{{comp}}_volcano.pdf",
+        volcano_labeled = f"{OUTDIR}/figures/{{comp}}_volcano_labeled.pdf",
+        volcano_html    = f"{OUTDIR}/figures/{{comp}}_volcano_interactive.html",
+        heatmap         = f"{OUTDIR}/figures/{{comp}}_heatmap_all.pdf",
+        heatmap_top100  = f"{OUTDIR}/figures/{{comp}}_heatmap_top100.pdf",
+        heatmap_top50   = f"{OUTDIR}/figures/{{comp}}_heatmap_top50.pdf",
     log:   f"{LOGDIR}/figures/{{comp}}.log"
     threads: 1
     resources: mem_mb=8000, runtime=30
@@ -92,9 +93,10 @@ rule publication_figures:
             --organism          {params.organism} \
             --alpha             {params.alpha} \
             --lfc               {params.lfc} \
-            --out_volcano        {output.volcano} \
-            --out_volcano_html   {output.volcano_html} \
-            --out_heatmap        {output.heatmap} \
+            --out_volcano         {output.volcano} \
+            --out_volcano_labeled {output.volcano_labeled} \
+            --out_volcano_html    {output.volcano_html} \
+            --out_heatmap         {output.heatmap} \
             --out_heatmap_top100 {output.heatmap_top100} \
             --out_heatmap_top50  {output.heatmap_top50} \
             2>{log}

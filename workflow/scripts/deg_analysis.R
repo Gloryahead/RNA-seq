@@ -68,12 +68,16 @@ counts <- counts[, meta$sample]
 message("Samples: ", paste(colnames(counts), collapse=", "))
 message("Dimensions before filter: ", nrow(counts), " genes x ", ncol(counts), " samples")
 
-# ── CPM filter ────────────────────────────────────────────────────────
+# ── Gene filter ───────────────────────────────────────────────────────
 suppressPackageStartupMessages(library(edgeR))
 dge_raw <- DGEList(counts=counts, group=meta$group)
-keep     <- rowSums(cpm(dge_raw) >= opt$min_count) >= opt$min_samples
+if (opt$method %in% c("limma-voom", "edgeR")) {
+  keep <- filterByExpr(dge_raw, group=meta$group)
+} else {
+  keep <- rowSums(cpm(dge_raw) >= opt$min_count) >= opt$min_samples
+}
 counts_f <- counts[keep, ]
-message("After CPM filter: ", nrow(counts_f), " genes retained")
+message("After filter: ", nrow(counts_f), " genes retained")
 
 # ── Run chosen DEG method ─────────────────────────────────────────────
 if (opt$method == "DESeq2") {

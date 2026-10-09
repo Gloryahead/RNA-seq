@@ -43,9 +43,9 @@ pdf_to_b64_png <- function(path, dpi=150) {
   }, error=function(e) { message("Could not convert ", path, ": ", e$message); NULL })
 }
 
-img_tag <- function(b64, alt="", extra_style="max-width:100%;border-radius:6px;") {
+img_tag <- function(b64, alt="", extra_style="max-width:100%;border-radius:6px;cursor:pointer;") {
   if (is.null(b64)) return('<p style="color:#888;font-style:italic">Plot not available</p>')
-  sprintf('<img src="%s" alt="%s" style="%s"/>', b64, alt, extra_style)
+  sprintf('<img src="%s" alt="%s" style="%s" onclick="openLb(this.src)" title="Click to enlarge"/>', b64, alt, extra_style)
 }
 
 read_tsv_html <- function(path, n=20) {
@@ -120,6 +120,16 @@ if (nzchar(opt$pathways_dir) && dir.exists(opt$pathways_dir)) {
     go_dn_dot  = "GO-DOWN/output-GO-dotplot.pdf",
     go_dn_bar  = "GO-DOWN/output-GO-barplot.pdf",
     go_dn_cnet = "GO-DOWN/output-GO-cnetplot.pdf",
+    go_up_emap   = "GO-UP/output-GO-emapplot.pdf",
+    go_dn_emap   = "GO-DOWN/output-GO-emapplot.pdf",
+    go_up_cc_dot = "GO-UP/output-CellularComponent-dotplot.pdf",
+    go_up_cc_bar = "GO-UP/output-CellularComponent-barplot.pdf",
+    go_up_mf_dot = "GO-UP/output-MolecularFunction-dotplot.pdf",
+    go_up_mf_bar = "GO-UP/output-MolecularFunction-barplot.pdf",
+    go_dn_cc_dot = "GO-DOWN/output-CellularComponent-dotplot.pdf",
+    go_dn_cc_bar = "GO-DOWN/output-CellularComponent-barplot.pdf",
+    go_dn_mf_dot = "GO-DOWN/output-MolecularFunction-dotplot.pdf",
+    go_dn_mf_bar = "GO-DOWN/output-MolecularFunction-barplot.pdf",
     kegg_dot  = "GO-ALL/output-kegg-dotplot.pdf",
     gsea_dot  = paste0(opt$label, "_GSEA_dotplot.pdf"),
     gsea_rdg  = paste0(opt$label, "_GSEA_ridge.pdf")
@@ -284,9 +294,25 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
   #sidebar { display: none; }
   #main { margin-left: 0; }
 }
+
+/* Lightbox */
+.lb-overlay { display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+              background:rgba(0,0,0,0.88);z-index:9999;cursor:zoom-out;
+              align-items:center;justify-content:center; }
+.lb-overlay.active { display:flex; }
+.lb-overlay img { max-width:90vw;max-height:90vh;border-radius:6px;cursor:default;
+                  box-shadow:0 8px 48px rgba(0,0,0,0.7); }
+.lb-close { position:absolute;top:18px;right:26px;color:#fff;font-size:2.4rem;
+            cursor:pointer;line-height:1;opacity:0.8;user-select:none; }
+.lb-close:hover { opacity:1; }
 </style>
 </head>
 <body>
+
+<div class="lb-overlay" id="lb" onclick="closeLb()">
+  <span class="lb-close" onclick="event.stopPropagation();closeLb()">&times;</span>
+  <img id="lb-img" src="" alt="Enlarged figure" onclick="event.stopPropagation()"/>
+</div>
 
 <nav id="sidebar">
   <div class="logo">
@@ -498,23 +524,104 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
     </div>
   </div>
 
-  <!-- Enrichment map (GO ALL only — too sparse for directional subsets) -->
+  <!-- Enrichment map (ALL / UP / DOWN) -->
   <div class="subsec">
-    <h3>GO ALL — Enrichment Map (emapplot)</h3>
-    ', img_tag(pw_plots[["go_emap"]], "GO emapplot"), '
+    <h3>Enrichment Map (emapplot)</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start;">
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:var(--sidebar-bg)">GO ALL</p>
+        ', img_tag(pw_plots[["go_emap"]], "GO ALL emapplot"), '
+      </div>
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:#c0392b">GO UP</p>
+        ', img_tag(pw_plots[["go_up_emap"]], "GO UP emapplot"), '
+      </div>
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:#2980b9">GO DOWN</p>
+        ', img_tag(pw_plots[["go_dn_emap"]], "GO DOWN emapplot"), '
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- GO CC / MF -->
 <section id="go-cc-mf-section">
   <h2>&#128084; GO Cellular Component &amp; Molecular Function</h2>
-  <div class="fig-grid">
-    <div class="fig-cell">', img_tag(pw_plots[["go_cc_dot"]], "GO CC dotplot"), '<p class="cap">CC Dotplot</p></div>
-    <div class="fig-cell">', img_tag(pw_plots[["go_cc_bar"]], "GO CC barplot"), '<p class="cap">CC Barplot</p></div>
+
+  <!-- CC Dotplot ALL / UP / DOWN -->
+  <div class="subsec">
+    <h3>Cellular Component — Dotplot</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start;">
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:var(--sidebar-bg)">GO ALL</p>
+        ', img_tag(pw_plots[["go_cc_dot"]], "CC ALL dotplot"), '
+      </div>
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:#c0392b">GO UP</p>
+        ', img_tag(pw_plots[["go_up_cc_dot"]], "CC UP dotplot"), '
+      </div>
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:#2980b9">GO DOWN</p>
+        ', img_tag(pw_plots[["go_dn_cc_dot"]], "CC DOWN dotplot"), '
+      </div>
+    </div>
   </div>
-  <div class="fig-grid">
-    <div class="fig-cell">', img_tag(pw_plots[["go_mf_dot"]], "GO MF dotplot"), '<p class="cap">MF Dotplot</p></div>
-    <div class="fig-cell">', img_tag(pw_plots[["go_mf_bar"]], "GO MF barplot"), '<p class="cap">MF Barplot</p></div>
+
+  <!-- CC Barplot ALL / UP / DOWN -->
+  <div class="subsec">
+    <h3>Cellular Component — Barplot</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start;">
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:var(--sidebar-bg)">GO ALL</p>
+        ', img_tag(pw_plots[["go_cc_bar"]], "CC ALL barplot"), '
+      </div>
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:#c0392b">GO UP</p>
+        ', img_tag(pw_plots[["go_up_cc_bar"]], "CC UP barplot"), '
+      </div>
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:#2980b9">GO DOWN</p>
+        ', img_tag(pw_plots[["go_dn_cc_bar"]], "CC DOWN barplot"), '
+      </div>
+    </div>
+  </div>
+
+  <!-- MF Dotplot ALL / UP / DOWN -->
+  <div class="subsec">
+    <h3>Molecular Function — Dotplot</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start;">
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:var(--sidebar-bg)">GO ALL</p>
+        ', img_tag(pw_plots[["go_mf_dot"]], "MF ALL dotplot"), '
+      </div>
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:#c0392b">GO UP</p>
+        ', img_tag(pw_plots[["go_up_mf_dot"]], "MF UP dotplot"), '
+      </div>
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:#2980b9">GO DOWN</p>
+        ', img_tag(pw_plots[["go_dn_mf_dot"]], "MF DOWN dotplot"), '
+      </div>
+    </div>
+  </div>
+
+  <!-- MF Barplot ALL / UP / DOWN -->
+  <div class="subsec">
+    <h3>Molecular Function — Barplot</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start;">
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:var(--sidebar-bg)">GO ALL</p>
+        ', img_tag(pw_plots[["go_mf_bar"]], "MF ALL barplot"), '
+      </div>
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:#c0392b">GO UP</p>
+        ', img_tag(pw_plots[["go_up_mf_bar"]], "MF UP barplot"), '
+      </div>
+      <div>
+        <p style="text-align:center;font-weight:700;margin-bottom:8px;color:#2980b9">GO DOWN</p>
+        ', img_tag(pw_plots[["go_dn_mf_bar"]], "MF DOWN barplot"), '
+      </div>
+    </div>
   </div>
 </section>
 
@@ -527,9 +634,30 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
 <!-- GSEA -->
 <section id="gsea-section">
   <h2>&#128288; Gene Set Enrichment Analysis (GSEA)</h2>
-  <div class="fig-grid">
-    <div class="fig-cell">', img_tag(pw_plots[["gsea_dot"]], "GSEA dotplot"), '<p class="cap">GSEA dotplot (split by direction)</p></div>
-    <div class="fig-cell">', img_tag(pw_plots[["gsea_rdg"]], "GSEA ridgeplot"), '<p class="cap">GSEA ridgeplot</p></div>
+  <p style="color:var(--muted);font-size:0.88rem;margin-bottom:16px;line-height:1.6">
+    GSEA ranks <strong>all expressed genes</strong> by log2FC and tests gene sets for coordinated
+    shifts toward the top (activated, positive NES) or bottom (suppressed, negative NES) of the
+    ranking. Unlike ORA, there is no separate UP/DOWN run — direction is captured within a single
+    analysis via the NES sign.
+  </p>
+
+  <!-- Dotplot: activated vs suppressed side-by-side via facet -->
+  <div class="subsec">
+    <h3>GSEA Dotplot — Activated (positive NES) vs Suppressed (negative NES)</h3>
+    ', img_tag(pw_plots[["gsea_dot"]], "GSEA dotplot split by direction"), '
+    <p style="font-size:0.78rem;color:var(--muted);margin-top:8px">
+      Faceted by direction. Dot size = gene set size; colour = adjusted p-value.
+    </p>
+  </div>
+
+  <!-- Ridgeplot -->
+  <div class="subsec">
+    <h3>GSEA Ridgeplot — Enrichment score distributions</h3>
+    ', img_tag(pw_plots[["gsea_rdg"]], "GSEA ridgeplot"), '
+    <p style="font-size:0.78rem;color:var(--muted);margin-top:8px">
+      Each ridge shows the fold-change distribution of genes in a significant gene set.
+      Right-shifted = upregulated; left-shifted = downregulated.
+    </p>
   </div>
 </section>
 
@@ -671,6 +799,18 @@ const observer = new IntersectionObserver(entries => {
   });
 }, { threshold: 0.2 });
 sections.forEach(s => observer.observe(s));
+
+// Lightbox
+function openLb(src) {
+  document.getElementById("lb-img").src = src;
+  document.getElementById("lb").classList.add("active");
+  document.body.style.overflow = "hidden";
+}
+function closeLb() {
+  document.getElementById("lb").classList.remove("active");
+  document.body.style.overflow = "";
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeLb(); });
 </script>
 </body>
 </html>'

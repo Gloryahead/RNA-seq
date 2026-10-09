@@ -219,7 +219,7 @@ if (isTRUE(opt$run_gsea)) {
     gsea_res <- tryCatch(
       gseGO(geneList=ranked_list, OrgDb=org_db, ont="BP",
             minGSSize=10, maxGSSize=500,
-            pvalueCutoff=opt$pval, pAdjustMethod="BH", verbose=FALSE),
+            pvalueCutoff=0.2, pAdjustMethod="BH", eps=0, verbose=FALSE),
       error=function(e) { message("GSEA error: ", conditionMessage(e)); NULL }
     )
     if (!is.null(gsea_res) && nrow(gsea_res) > 0) {

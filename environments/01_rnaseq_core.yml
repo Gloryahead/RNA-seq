@@ -21,6 +21,7 @@ dependencies:
   # ── Post-alignment ───────────────────────────────────────────────────────────
   - samtools>=1.18
   - subread>=2.0
+  - rseqc>=5.0
   # ── Transcript quantification ────────────────────────────────────────────────
   - salmon>=1.10
   - gffread>=0.12

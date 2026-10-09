@@ -140,12 +140,54 @@ rule samtools_index:
         """
 
 
+# ── GTF → BED12 (needed by RSeQC infer_experiment.py) ────────────────
+rule gtf_to_bed12:
+    input:  gtf = config["genome"]["gtf"]
+    output: bed = f"{OUTDIR}/ref/annotation.bed"
+    log:    f"{LOGDIR}/strandedness/gtf_to_bed12.log"
+    threads: 1
+    resources: mem_mb=4000, runtime=30
+    params: activate = mamba_activate("rnaseq_env")
+    shell:
+        """
+        set -eo pipefail
+        {params.activate}
+        python workflow/scripts/gtf_to_bed12.py {input.gtf} > {output.bed} 2>{log}
+        """
+
+
+# ── Auto-detect library strandedness from one BAM ─────────────────────
+rule infer_strandedness:
+    input:
+        bam = f"{OUTDIR}/bam/{SAMPLES[0]}_Aligned.sortedByCoord.out.bam",
+        bai = f"{OUTDIR}/bam/{SAMPLES[0]}_Aligned.sortedByCoord.out.bam.bai",
+        bed = f"{OUTDIR}/ref/annotation.bed",
+    output:
+        raw  = f"{OUTDIR}/qc/strandedness_raw.txt",
+        code = f"{OUTDIR}/qc/strandedness.txt",
+    log:    f"{LOGDIR}/strandedness/infer_experiment.log"
+    threads: 1
+    resources: mem_mb=4000, runtime=20
+    params: activate = mamba_activate("rnaseq_env")
+    shell:
+        """
+        set -eo pipefail
+        {params.activate}
+        infer_experiment.py -r {input.bed} -i {input.bam} -s 200000 \
+            > {output.raw} 2>{log}
+        python workflow/scripts/parse_strandedness.py {output.raw} \
+            > {output.code} 2>>{log}
+        echo "Detected strandedness=$(cat {output.code})" >> {log}
+        """
+
+
 # ── featureCounts (gene-level count matrix) ───────────────────────────
 rule featurecounts:
     input:
-        bams = expand(f"{OUTDIR}/bam/{{sample}}_Aligned.sortedByCoord.out.bam",
-                      sample=SAMPLES),
-        gtf  = config["genome"]["gtf"],
+        bams       = expand(f"{OUTDIR}/bam/{{sample}}_Aligned.sortedByCoord.out.bam",
+                            sample=SAMPLES),
+        gtf        = config["genome"]["gtf"],
+        strand_file = f"{OUTDIR}/qc/strandedness.txt",
     output:
         counts  = f"{OUTDIR}/counts/counts_raw.tsv",
         summary = f"{OUTDIR}/counts/counts_raw.tsv.summary",
@@ -157,7 +199,7 @@ rule featurecounts:
         slurm_partition = "standard",
     params:
         activate    = mamba_activate("rnaseq_env"),
-        strand      = config["library"]["strandedness"],
+        strand      = lambda wildcards, input: open(input.strand_file).read().strip(),
         feature     = config["featurecounts"]["feature_type"],
         attr        = config["featurecounts"]["attribute"],
         paired_flag = "-p" if config["library"]["paired"] else "",
@@ -165,6 +207,7 @@ rule featurecounts:
         """
         set -eo pipefail
         {params.activate}
+        echo "Using strandedness: {params.strand}" >> {log}
         featureCounts \
             -T {threads} \
             -t {params.feature} \
@@ -174,7 +217,7 @@ rule featurecounts:
             -a {input.gtf} \
             -o {output.counts} \
             {input.bams} \
-            2>{log}
+            2>>{log}
         """
 
 

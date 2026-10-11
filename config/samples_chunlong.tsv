@@ -1,0 +1,9 @@
+# Chunlong Ma RNA-seq — 9040-0001 (human, n=1 per group — no replicates)
+# AdmeraID → CustomerID → group mapping
+# S9040-0001-0001 = C3-4sU  → Control
+# S9040-0001-0002 = 014-4sU → Disease
+# S9040-0001-0003 = 003-4sU → Remedy
+sample	group	fastq_r1	fastq_r2	batch
+Control	Control	/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/9040-0001-fastq/S9040-0001-0001_S4_L004_R1_001.fastq.gz	/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/9040-0001-fastq/S9040-0001-0001_S4_L004_R2_001.fastq.gz	1
+Disease	Disease	/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/9040-0001-fastq/S9040-0001-0002_S5_L004_R1_001.fastq.gz	/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/9040-0001-fastq/S9040-0001-0002_S5_L004_R2_001.fastq.gz	1
+Remedy	Remedy	/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/9040-0001-fastq/S9040-0001-0003_S6_L004_R1_001.fastq.gz	/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/9040-0001-fastq/S9040-0001-0003_S6_L004_R2_001.fastq.gz	1

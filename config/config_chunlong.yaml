@@ -1,0 +1,153 @@
+# ══════════════════════════════════════════════════════════════════════
+# Chunlong Ma RNA-seq — 9040-0001 — Master Configuration
+# Human hg38 (GRCh38 Ensembl release 110)
+# 3 samples, n=1 per group — treat DEG results with caution
+# Build refs first: bash scripts/00_download_refs.sh human
+#                   bash scripts/01_build_indices.sh hg38
+# ══════════════════════════════════════════════════════════════════════
+
+# ── Reference genome & annotation ─────────────────────────────────────
+genome:
+  assembly: "hg38"
+  star_index: "/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/ref/star_index"
+  fasta:      "/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/ref/genome.fa"
+  gtf:        "/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/ref/annotation.gtf"
+  salmon_index: "/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/ref/salmon_index"
+
+# ── Organism for R annotation packages ────────────────────────────────
+organism: "human"   # human | mouse | rat
+
+# ── Samples & comparisons ─────────────────────────────────────────────
+samples: "config/samples_chunlong.tsv"
+
+comparisons:
+  - ["Disease", "Control"]
+  - ["Remedy", "Control"]
+  - ["Remedy", "Disease"]
+
+# ── Read library ──────────────────────────────────────────────────────
+library:
+  paired: true
+  strandedness: 0   # 0=unstranded — verify with infer_experiment.py after alignment
+  read_length: 150
+
+# ── Adapter trimming ──────────────────────────────────────────────────
+trimming:
+  min_length: 20
+  quality: 20
+  cores: 8
+
+# ── STAR alignment ────────────────────────────────────────────────────
+star:
+  threads: 20
+  extra: ""
+
+# ── featureCounts ─────────────────────────────────────────────────────
+featurecounts:
+  threads: 8
+  feature_type: "exon"
+  attribute: "gene_id"
+
+# ── Salmon (isoform quantification) ───────────────────────────────────
+salmon:
+  threads: 12
+  lib_type: "A"
+
+# ── DEG analysis ──────────────────────────────────────────────────────
+# WARNING: n=1 per group — no replicates. Variance cannot be estimated.
+# limma-voom will borrow strength across genes but p-values will be
+# unreliable. Use results for hypothesis generation only.
+deg:
+  method: "limma-voom"
+  min_count: 1
+  min_samples: 1          # lowered from 2: only 1 sample per group
+  lfc_threshold: 0
+  lfc_for_plots: 1
+  alpha: 0.05
+
+# ── Pathway enrichment ────────────────────────────────────────────────
+pathways:
+  pvalue_cutoff: 0.05
+  qvalue_cutoff: 0.2
+  msigdb_gmt: ""
+  run_gsea: false         # GSEA unreliable at n=1; disable
+  run_go: true
+  run_kegg: true
+
+# ── UMI handling ──────────────────────────────────────────────────────
+umi:
+  enabled: false
+  pattern: "NNNNNN"
+
+# ── Alternative splicing ──────────────────────────────────────────────
+splicing:
+  run_spladder: false
+  run_suppa2: false
+  suppa2_dir: "/opt/SUPPA"
+
+transcript_splicing:
+  run_stringtie: false
+  run_rmats: false
+
+# ── circRNA ───────────────────────────────────────────────────────────
+circrna:
+  run_circexplorer2: false
+  run_ciri3: false
+  ciri3_jar: "/opt/ciri3/CIRI3.jar"
+  annotation_refseq: "/ref/hg38/refseq.txt"
+
+# ── miRNA ─────────────────────────────────────────────────────────────
+mirna:
+  run: false
+  mirbase_mature:  "/ref/mirna/mature.fa"
+  mirbase_hairpin: "/ref/mirna/hairpin.fa"
+  adapter: "TGGAATTCTCGGGTGCCAAGG"
+  min_length: 18
+  max_length: 30
+
+# ── Fusion genes ──────────────────────────────────────────────────────
+fusion:
+  run_starfusion: false
+  run_fusioncatcher: false
+  ctat_lib: "/ref/CTAT_lib_GRCh38/"
+  fusioncatcher_db: "/ref/fusioncatcher_Index_human/"
+
+# ── Viral detection ───────────────────────────────────────────────────
+viral:
+  run_esviritu: false
+  run_virtus2: false
+  esviritu_db: "/ref/esviritu_db/"
+  virtus2_dir: "/opt/VIRTUS2/"
+
+# ── CRISPR screen ─────────────────────────────────────────────────────
+crispr:
+  run: false
+  library: ""
+  pam: "TTTN"
+  sgrna_length: 20
+  normalization: "median"
+  control_sgrna: ""
+
+# ── Network analysis ──────────────────────────────────────────────────
+networks:
+  run_wgcna: false
+  run_genie3: false
+  run_master_regulator: false
+  wgcna_threads: 8
+
+# ── Cancer subtype ────────────────────────────────────────────────────
+cancer_subtype:
+  run: false
+  run_pam50: false
+  run_gsva: false
+  run_cibersortx_prep: false
+  geo_accession: ""
+
+# ── Container strategy ────────────────────────────────────────────────
+use_singularity: false
+use_conda: true
+singularity_args: "--bind /ref,/data"
+
+# ── Output directories ────────────────────────────────────────────────
+outdir: "/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/results"
+logdir: "/xdisk/haining/maarowosegbe/Chunlong_Ma_RNA_seq/logs"

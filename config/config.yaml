@@ -158,6 +158,21 @@ use_conda: true          # default: use conda YAMLs
 
 singularity_args: "--bind /ref,/data"   # bind-mount cluster paths into containers
 
+# ── RNA editing (A-to-I via JACUSA2) ──────────────────────────────────
+rna_editing:
+  run: false
+  min_coverage: 10        # min read depth at site (both conditions)
+  min_frequency: 0.05     # min editing frequency (5 %)
+  min_edited_reads: 3     # min edited-read count
+  known_snps: ""          # optional: path to dbSNP VCF to subtract known SNPs
+
+# ── Isoform / DTU analysis (tximport + DRIMSeq) ───────────────────────
+isoform:
+  run: false
+  min_feature_expr: 10    # DRIMSeq: min transcript count filter
+  min_gene_expr: 10       # DRIMSeq: min gene count filter
+  min_feature_prop: 0.1   # DRIMSeq: min transcript proportion
+
 # ── Output directories ────────────────────────────────────────────────
 outdir: "/xdisk/haining/maarowosegbe/RNA-seq/results"
 logdir: "/xdisk/haining/maarowosegbe/RNA-seq/logs"

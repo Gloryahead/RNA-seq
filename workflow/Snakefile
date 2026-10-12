@@ -112,6 +112,12 @@ if config["cancer_subtype"]["run"]:
 if config["transcript_splicing"]["run_stringtie"] or config["transcript_splicing"]["run_rmats"]:
     include: "rules/13_transcript_splicing.smk"
 
+if config["rna_editing"]["run"]:
+    include: "rules/14_rna_editing.smk"
+
+if config["isoform"]["run"]:
+    include: "rules/15_isoform.smk"
+
 # ── Master target rule ────────────────────────────────────────────────
 rule all:
     input:
@@ -153,3 +159,7 @@ rule all:
                out=config["outdir"], sample=SAMPLES) if config["transcript_splicing"]["run_stringtie"] else [],
         expand("{out}/rmats/{comp}/SE.MATS.JC.txt",
                out=config["outdir"], comp=COMPARISONS) if config["transcript_splicing"]["run_rmats"] else [],
+        expand("{out}/rna_editing/{comp}_editing_summary.tsv",
+               out=config["outdir"], comp=COMPARISONS) if config["rna_editing"]["run"] else [],
+        expand("{out}/isoform/{comp}_dtu_results.tsv",
+               out=config["outdir"], comp=COMPARISONS) if config["isoform"]["run"] else [],

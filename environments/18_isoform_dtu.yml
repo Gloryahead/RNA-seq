@@ -1,0 +1,17 @@
+name: isoform_env
+# Isoform-level quantification (tximport) + Differential Transcript Usage (DRIMSeq)
+# Bioconductor packages (tximport, DRIMSeq, GenomicFeatures, BiocParallel,
+# AnnotationDbi) are NOT in conda channels — install them after environment
+# creation with:
+#   micromamba activate isoform_env
+#   Rscript environments/r_scripts/install_isoform_r.R
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - r-base
+  - r-optparse
+  - r-data.table
+  - r-ggplot2
+  - r-dplyr
+  - r-biocmanager

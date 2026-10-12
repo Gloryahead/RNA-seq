@@ -155,18 +155,22 @@ if (n_trt < 2 || n_ctl < 2) {
 }
 
 # ── Annotate gene symbols (Ensembl → symbol) ─────────────────────────
-if (any(startsWith(na.omit(res_df$gene)[seq_len(min(5, sum(!is.na(res_df$gene))))], "ENS"))) {
-  org_db <- switch(opt$organism,
-    human = { suppressPackageStartupMessages(library(org.Hs.eg.db)); org.Hs.eg.db },
-    mouse = { suppressPackageStartupMessages(library(org.Mm.eg.db)); org.Mm.eg.db },
-    rat   = { suppressPackageStartupMessages(library(org.Rn.eg.db)); org.Rn.eg.db },
-    NULL)
-  if (!is.null(org_db)) {
-    syms <- mapIds(org_db, keys=res_df$gene, column="SYMBOL",
-                   keytype="ENSEMBL", multiVals="first")
-    res_df$gene_symbol <- ifelse(is.na(syms), res_df$gene, syms)
+tryCatch({
+  if (any(startsWith(na.omit(res_df$gene)[seq_len(min(5, sum(!is.na(res_df$gene))))], "ENS"))) {
+    org_db <- switch(opt$organism,
+      human = { suppressPackageStartupMessages(library(org.Hs.eg.db)); org.Hs.eg.db },
+      mouse = { suppressPackageStartupMessages(library(org.Mm.eg.db)); org.Mm.eg.db },
+      rat   = { suppressPackageStartupMessages(library(org.Rn.eg.db)); org.Rn.eg.db },
+      NULL)
+    if (!is.null(org_db)) {
+      syms <- mapIds(org_db, keys=res_df$gene, column="SYMBOL",
+                     keytype="ENSEMBL", multiVals="first")
+      res_df$gene_symbol <- ifelse(is.na(syms), res_df$gene, syms)
+    }
   }
-}
+}, error = function(e) {
+  message("Gene symbol annotation skipped (package not available): ", conditionMessage(e))
+})
 
 # ── Write DEG table ───────────────────────────────────────────────────
 p_col_out <- intersect(c("FDR", "adj.P.Val", "padj"), colnames(res_df))[1]

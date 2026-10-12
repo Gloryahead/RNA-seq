@@ -80,7 +80,29 @@ counts_f <- counts[keep, ]
 message("After filter: ", nrow(counts_f), " genes retained")
 
 # ── Run chosen DEG method ─────────────────────────────────────────────
-if (opt$method == "DESeq2") {
+n_trt <- sum(meta$group == opt$treatment)
+n_ctl <- sum(meta$group == opt$control)
+
+if (n_trt < 2 || n_ctl < 2) {
+  message("WARNING: n=", n_trt, " (", opt$treatment, ") vs n=", n_ctl, " (", opt$control,
+          ") -- no residual df for statistical testing. Reporting log2FC only (p-values = NA).")
+  dge_nr  <- DGEList(counts=counts_f, group=meta$group)
+  dge_nr  <- calcNormFactors(dge_nr, method="TMM")
+  cpm_log <- cpm(dge_nr, log=TRUE)
+  trt_s   <- meta$sample[meta$group == opt$treatment]
+  ctl_s   <- meta$sample[meta$group == opt$control]
+  res_df  <- data.frame(
+    gene      = rownames(cpm_log),
+    logFC     = rowMeans(cpm_log[, trt_s, drop=FALSE]) - rowMeans(cpm_log[, ctl_s, drop=FALSE]),
+    AveExpr   = rowMeans(cpm_log),
+    pvalue    = NA_real_,
+    adj.P.Val = NA_real_,
+    stringsAsFactors = FALSE
+  )
+  norm_counts <- cpm_log
+  saveRDS(list(dge=dge_nr, norm_counts=norm_counts, res=res_df), opt$out_rds)
+
+} else if (opt$method == "DESeq2") {
   suppressPackageStartupMessages(library(DESeq2))
   dds <- DESeqDataSetFromMatrix(
     countData = counts_f,
@@ -154,22 +176,29 @@ n_sig <- sum(!is.na(res_df[[p_col_out]]) & res_df[[p_col_out]] < opt$alpha, na.r
 message("Significant DEGs (FDR < ", opt$alpha, "): ", n_sig)
 
 # ── PCA plot ──────────────────────────────────────────────────────────
-pca     <- prcomp(t(norm_counts), scale.=FALSE)
-pca_df  <- as.data.frame(pca$x[, 1:2])
-pca_df$sample <- rownames(pca_df)
-pca_df$group  <- meta$group[match(pca_df$sample, meta$sample)]
-var_pct <- round(100 * summary(pca)$importance[2, 1:2], 1)
-
-p_pca <- ggplot(pca_df, aes(PC1, PC2, color=group, label=sample)) +
-  geom_point(size=4, alpha=.9) +
-  ggrepel::geom_text_repel(size=3, max.overlaps=20) +
-  labs(x=paste0("PC1 (", var_pct[1], "%)"),
-       y=paste0("PC2 (", var_pct[2], "%)"),
-       title=paste(opt$method, "PCA:", opt$treatment, "vs", opt$control),
-       color="Group") +
-  theme_classic(base_size=12) +
-  theme(legend.position="right")
-ggsave(opt$out_pca, p_pca, width=7, height=5)
+pca <- prcomp(t(norm_counts), scale.=FALSE)
+if (ncol(pca$x) < 2) {
+  message("Only 1 PC available (n=2 samples) -- saving placeholder PCA.")
+  pdf(opt$out_pca, width=7, height=5)
+  plot.new()
+  title(paste("PCA not available (n=2 samples)\n", opt$treatment, "vs", opt$control))
+  dev.off()
+} else {
+  pca_df  <- as.data.frame(pca$x[, 1:2])
+  pca_df$sample <- rownames(pca_df)
+  pca_df$group  <- meta$group[match(pca_df$sample, meta$sample)]
+  var_pct <- round(100 * summary(pca)$importance[2, 1:2], 1)
+  p_pca <- ggplot(pca_df, aes(PC1, PC2, color=group, label=sample)) +
+    geom_point(size=4, alpha=.9) +
+    ggrepel::geom_text_repel(size=3, max.overlaps=20) +
+    labs(x=paste0("PC1 (", var_pct[1], "%)"),
+         y=paste0("PC2 (", var_pct[2], "%)"),
+         title=paste(opt$method, "PCA:", opt$treatment, "vs", opt$control),
+         color="Group") +
+    theme_classic(base_size=12) +
+    theme(legend.position="right")
+  ggsave(opt$out_pca, p_pca, width=7, height=5)
+}
 
 # ── MA plot ───────────────────────────────────────────────────────────
 ma_df <- res_df

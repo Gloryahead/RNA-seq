@@ -21,6 +21,8 @@
 #SBATCH --mem-per-cpu=5120    # 32 × 5 GB = 160 GB; STAR genomeGenerate needs ~35 GB for hg38
 #SBATCH --time=06:00:00
 
+set -euo pipefail
+
 echo "========== Build refs started at: $(date) =========="
 echo "  Node    : $(hostname)"
 echo "  Job ID  : ${SLURM_JOB_ID}"

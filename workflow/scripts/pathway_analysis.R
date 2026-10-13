@@ -24,6 +24,8 @@ opt_list <- list(
   make_option("--organism",   type="character", default="mouse"),
   make_option("--pval",       type="double",    default=0.05),
   make_option("--qval",       type="double",    default=0.2),
+  make_option("--lfc",        type="double",    default=1.0,
+              help="LFC threshold used for gene sets when p-values are NA [default %default]"),
   make_option("--msigdb_gmt", type="character", default=""),
   make_option("--run_go",     type="logical",   default=TRUE),
   make_option("--run_kegg",   type="logical",   default=TRUE),
@@ -50,6 +52,10 @@ stopifnot("gene" %in% colnames(degs), !is.na(p_col), !is.na(lfc_col))
 message("Using columns: p_col=", p_col, "  lfc_col=", lfc_col)
 
 gene_symbols <- degs$gene
+# fread reads all-NA columns as character; coerce back to numeric
+degs[[p_col]]   <- suppressWarnings(as.numeric(degs[[p_col]]))
+degs[[lfc_col]] <- suppressWarnings(as.numeric(degs[[lfc_col]]))
+
 from_type <- if (any(startsWith(na.omit(gene_symbols)[seq_len(min(5, sum(!is.na(gene_symbols))))], "ENS")))
   "ENSEMBL" else "SYMBOL"
 message("Detected gene ID type: ", from_type)
@@ -58,9 +64,19 @@ entrez_map <- suppressMessages(
 )
 degs <- merge(degs, entrez_map, by.x="gene", by.y=from_type, all.x=FALSE)
 
-sig_all  <- degs$ENTREZID[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$pval]
-sig_up   <- degs$ENTREZID[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$pval & degs[[lfc_col]] > 0]
-sig_down <- degs$ENTREZID[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$pval & degs[[lfc_col]] < 0]
+all_na_pval <- all(is.na(degs[[p_col]]))
+
+if (all_na_pval) {
+  message("All p-values are NA (n=1 per group) — using |LFC| > ", opt$lfc,
+          " as gene set for ORA; GSEA uses full ranked LFC list.")
+  sig_all  <- degs$ENTREZID[!is.na(degs[[lfc_col]]) & abs(degs[[lfc_col]]) > opt$lfc]
+  sig_up   <- degs$ENTREZID[!is.na(degs[[lfc_col]]) & degs[[lfc_col]] >  opt$lfc]
+  sig_down <- degs$ENTREZID[!is.na(degs[[lfc_col]]) & degs[[lfc_col]] < -opt$lfc]
+} else {
+  sig_all  <- degs$ENTREZID[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$pval]
+  sig_up   <- degs$ENTREZID[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$pval & degs[[lfc_col]] > 0]
+  sig_down <- degs$ENTREZID[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$pval & degs[[lfc_col]] < 0]
+}
 universe <- degs$ENTREZID
 fc_vec   <- setNames(degs[[lfc_col]], degs$ENTREZID)
 

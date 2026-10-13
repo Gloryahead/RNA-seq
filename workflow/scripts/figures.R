@@ -8,6 +8,7 @@ suppressPackageStartupMessages({
   library(optparse)
   library(data.table)
   library(ggplot2)
+  library(ggrepel)
   library(pheatmap)
   library(RColorBrewer)
   library(EnhancedVolcano)
@@ -68,17 +69,52 @@ n_down <- sum(degs[[lfc_col]] < -opt$lfc & degs[[p_col]] < opt$alpha, na.rm=TRUE
 all_na_pval <- all(is.na(degs[[p_col]]))
 
 if (all_na_pval) {
-  message("All p-values are NA (n=1 per group) — writing placeholder volcano plots.")
-  placeholder_volcano <- function(path) {
+  # n=1 per group: no p-values — produce a fold-change rank plot instead
+  message("n=1 per group — generating fold-change rank plots (p-values not available).")
+
+  make_fc_plot <- function(n_label=0, path=NULL) {
     if (is.null(path)) return(invisible(NULL))
+    d <- degs[order(-degs[[lfc_col]]), ]
+    d$rank <- seq_len(nrow(d))
+    d$dir  <- ifelse(d[[lfc_col]] >  opt$lfc, "Up",
+               ifelse(d[[lfc_col]] < -opt$lfc, "Down", "NS"))
+    n_up <- sum(d$dir == "Up")
+    n_dn <- sum(d$dir == "Down")
+    p <- ggplot(d, aes(rank, .data[[lfc_col]], color=dir)) +
+      geom_point(size=0.5, alpha=0.75) +
+      scale_color_manual(
+        values = c(Up="firebrick", Down="steelblue", NS="grey60"),
+        labels = c(Up   = paste0("Up |LFC|>", opt$lfc, " (n=", n_up, ")"),
+                   Down = paste0("Down |LFC|>", opt$lfc, " (n=", n_dn, ")"),
+                   NS   = "NS")) +
+      geom_hline(yintercept=c(opt$lfc, -opt$lfc), linetype=2,
+                 color="grey40", linewidth=0.4) +
+      labs(x   = "Gene rank (ordered by log₂FC)",
+           y   = paste0("log₂FC (", opt$treatment, " / ", opt$control, ")"),
+           title    = paste("Fold Change:", opt$treatment, "vs", opt$control),
+           subtitle = paste0("n=1 per group — p-values not available | ",
+                             "Up: ", n_up, "  Down: ", n_dn),
+           color = NULL) +
+      theme_classic(base_size=12) +
+      theme(legend.position="top",
+            plot.subtitle=element_text(size=9, color="grey50"))
+    if (n_label > 0) {
+      top_genes <- d[d$dir != "NS", ]
+      top_genes <- top_genes[order(-abs(top_genes[[lfc_col]])),
+                             ][seq_len(min(n_label * 2, nrow(top_genes))), ]
+      if (nrow(top_genes) > 0)
+        p <- p + geom_text_repel(data=top_genes, aes(label=.data[[label_col]]),
+                                 size=2.5, max.overlaps=20, color="grey20")
+    }
     pdf(path, width=22/2.54, height=18/2.54)
-    plot.new()
-    title(paste0("Volcano not available (n=1 per group)\n",
-                 opt$treatment, " vs ", opt$control))
+    print(p)
     dev.off()
+    message("Fold-change plot written: ", path)
   }
-  placeholder_volcano(opt$out_volcano)
-  placeholder_volcano(opt$out_volcano_labeled)
+
+  make_fc_plot(n_label=0,         path=opt$out_volcano)
+  make_fc_plot(n_label=opt$n_label, path=opt$out_volcano_labeled)
+
 } else {
   keyvals <- ifelse(
     degs[[lfc_col]] < -opt$lfc & degs[[p_col]] < opt$alpha, "blue",
@@ -176,11 +212,17 @@ if (inherits(obj, "list") && "vsd" %in% names(obj)) {
   col_group <- obj$v$targets$group
 }
 
-# All significant DEGs ordered by FDR then |LFC|
+# Significant DEGs ordered by FDR then |LFC|; fall back to top |LFC| when none pass
 sig_degs <- degs[!is.na(degs[[p_col]]) &
                   degs[[p_col]] < opt$alpha &
                   abs(degs[[lfc_col]]) >= opt$lfc, ]
 sig_degs <- sig_degs[order(sig_degs[[p_col]], -abs(sig_degs[[lfc_col]])), ]
+
+if (nrow(sig_degs) == 0) {
+  message("No significant DEGs — using top ", min(200, nrow(degs)),
+          " genes by |LFC| for heatmaps.")
+  sig_degs <- degs[order(-abs(degs[[lfc_col]])), ][seq_len(min(200, nrow(degs))), ]
+}
 sig_genes_all <- sig_degs$gene
 
 full_mat <- norm_mat[rownames(norm_mat) %in% sig_genes_all, , drop=FALSE]
@@ -246,23 +288,38 @@ if (!is.null(opt$out_heatmap_top50)) {
 # ── Interactive HTML volcano ──────────────────────────────────────────
 if (!is.null(opt$out_volcano_html)) {
   tryCatch({
-    plot_df <- degs[!is.na(degs[[lfc_col]]) & !is.na(degs[[p_col]]), ]
-    plot_df$sym       <- plot_df[[label_col]]
-    plot_df$lfc_val   <- round(plot_df[[lfc_col]], 4)
-    plot_df$fdr_val   <- plot_df[[p_col]]
-    plot_df$nlp       <- round(-log10(pmax(plot_df[[p_col]], 1e-300)), 4)
-    plot_df$status    <- ifelse(
-      plot_df[[lfc_col]] >  opt$lfc & plot_df[[p_col]] < opt$alpha, "up",
-      ifelse(plot_df[[lfc_col]] < -opt$lfc & plot_df[[p_col]] < opt$alpha, "down", "ns"))
+    # Build plot_df — for n=1 (no p-values) use LFC direction only; y = |LFC|
+    if (all_na_pval) {
+      plot_df <- degs[!is.na(degs[[lfc_col]]), ]
+      plot_df$sym     <- plot_df[[label_col]]
+      plot_df$lfc_val <- round(plot_df[[lfc_col]], 4)
+      plot_df$fdr_val <- NA_real_
+      plot_df$nlp     <- round(abs(plot_df[[lfc_col]]), 4)  # |LFC| as y-axis
+      plot_df$status  <- ifelse(plot_df[[lfc_col]] >  opt$lfc, "up",
+                          ifelse(plot_df[[lfc_col]] < -opt$lfc, "down", "ns"))
+      y_label   <- "|log₂FC|"
+      has_fdr   <- "false"
+    } else {
+      plot_df <- degs[!is.na(degs[[lfc_col]]) & !is.na(degs[[p_col]]), ]
+      plot_df$sym     <- plot_df[[label_col]]
+      plot_df$lfc_val <- round(plot_df[[lfc_col]], 4)
+      plot_df$fdr_val <- plot_df[[p_col]]
+      plot_df$nlp     <- round(-log10(pmax(plot_df[[p_col]], 1e-300)), 4)
+      plot_df$status  <- ifelse(
+        plot_df[[lfc_col]] >  opt$lfc & plot_df[[p_col]] < opt$alpha, "up",
+        ifelse(plot_df[[lfc_col]] < -opt$lfc & plot_df[[p_col]] < opt$alpha, "down", "ns"))
+      y_label   <- "-log₁₀(FDR)"
+      has_fdr   <- "true"
+    }
 
-    # Escape for JSON embedding
     esc <- function(x) gsub('"', '\\\\"', gsub("\\\\", "\\\\\\\\", as.character(x)))
     rows <- paste(apply(plot_df[, c("sym","lfc_val","nlp","fdr_val","status")], 1, function(r) {
+      p_str <- if (is.na(r[4])) "null" else r[4]
       sprintf('{"g":"%s","x":%s,"y":%s,"p":%s,"s":"%s"}',
-              esc(r[1]), r[2], r[3], r[4], r[5])
+              esc(r[1]), r[2], r[3], p_str, r[5])
     }), collapse=",")
 
-    fdr_line <- round(-log10(opt$alpha), 4)
+    fdr_line  <- round(-log10(opt$alpha), 4)
     title_str <- paste0(opt$treatment, " vs ", opt$control)
 
     html <- sprintf('<!DOCTYPE html>
@@ -307,7 +364,8 @@ svg text{font-family:system-ui,sans-serif}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script>
 const RAW = [%s];
-const FDR_CUT = %s, LFC_CUT = %s;
+const FDR_CUT = %s, LFC_CUT = %s, HAS_FDR = %s;
+const Y_LABEL = "%s";
 
 const W = Math.min(window.innerWidth - 40, 900),
       H = Math.round(W * 0.72),
@@ -333,7 +391,7 @@ const gy = g.append("g").attr("class","axis").call(yAxis);
 g.append("text").attr("x",IW/2).attr("y",IH+40).attr("text-anchor","middle")
   .attr("font-size","13px").text("log₂ Fold Change");
 g.append("text").attr("transform","rotate(-90)").attr("x",-IH/2).attr("y",-44)
-  .attr("text-anchor","middle").attr("font-size","13px").text("-log₁₀(FDR)");
+  .attr("text-anchor","middle").attr("font-size","13px").text(Y_LABEL);
 
 const refLine = plot.append("g").attr("class","refs");
 const drawRefs = (cx,cy) => {
@@ -341,7 +399,7 @@ const drawRefs = (cx,cy) => {
   [LFC_CUT,-LFC_CUT].forEach(v => refLine.append("line")
     .attr("x1",cx(v)).attr("x2",cx(v)).attr("y1",0).attr("y2",IH)
     .attr("stroke","#aaa").attr("stroke-dasharray","4,3").attr("stroke-width",1));
-  refLine.append("line")
+  if (HAS_FDR) refLine.append("line")
     .attr("x1",0).attr("x2",IW).attr("y1",cy(FDR_CUT)).attr("y2",cy(FDR_CUT))
     .attr("stroke","#aaa").attr("stroke-dasharray","4,3").attr("stroke-width",1);
 };
@@ -357,9 +415,10 @@ const circles = plot.selectAll("circle").data(RAW).join("circle")
   .attr("fill", fill).attr("fill-opacity", op)
   .attr("stroke","none");
 
-// Top 10 up + 10 down labels
-const topUp = RAW.filter(d=>d.s==="up").sort((a,b)=>a.p-b.p).slice(0,10);
-const topDn = RAW.filter(d=>d.s==="down").sort((a,b)=>a.p-b.p).slice(0,10);
+// Top 10 up + 10 down labels — sort by p-value if available, else by |LFC|
+const sortFn = HAS_FDR ? (a,b)=>a.p-b.p : (a,b)=>Math.abs(b.x)-Math.abs(a.x);
+const topUp = RAW.filter(d=>d.s==="up").sort(sortFn).slice(0,10);
+const topDn = RAW.filter(d=>d.s==="down").sort(sortFn).slice(0,10);
 const labeled = [...topUp, ...topDn];
 const labels = plot.selectAll("text.gene").data(labeled).join("text")
   .attr("class","gene")
@@ -376,8 +435,11 @@ document.getElementById("leg-dn").textContent = `Downregulated (n=${nDn})`;
 // Tooltip
 const tip = d3.select("#tooltip");
 circles.on("mouseover", (e,d) => {
+  const pStr = HAS_FDR && d.p !== null
+    ? `<br>FDR: ${d.p < 0.001 ? d.p.toExponential(2) : d.p.toFixed(4)}`
+    : "";
   tip.style("display","block")
-    .html(`<b>${d.g}</b><br>LFC: ${d.x}<br>FDR: ${d.p < 0.001 ? d.p.toExponential(2) : d.p.toFixed(4)}<br>-log10(FDR): ${d.y}`);
+    .html(`<b>${d.g}</b><br>LFC: ${d.x}<br>${Y_LABEL}: ${d.y}${pStr}`);
 }).on("mousemove", e => {
   tip.style("left",(e.clientX+14)+"px").style("top",(e.clientY-30)+"px");
 }).on("mouseout", () => tip.style("display","none"));
@@ -413,11 +475,11 @@ function highlight(q) {
 }
 </script>
 </body>
-</html>', title_str, title_str, rows, fdr_line, opt$lfc)
+</html>', title_str, title_str, rows, fdr_line, opt$lfc, has_fdr, y_label)
 
     writeLines(html, opt$out_volcano_html)
-    message("Interactive volcano written: ", opt$out_volcano_html)
-  }, error=function(e) message("Interactive volcano skipped: ", conditionMessage(e)))
+    message("Interactive plot written: ", opt$out_volcano_html)
+  }, error=function(e) message("Interactive plot skipped: ", conditionMessage(e)))
 }
 
 message("Figures written.")

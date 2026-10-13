@@ -36,6 +36,9 @@ opt <- parse_args(OptionParser(option_list=opt_list))
 degs    <- fread(opt$degs, data.table=FALSE)
 lfc_col <- intersect(c("log2FC","log2FoldChange","logFC"), colnames(degs))[1]
 p_col   <- intersect(c("FDR","adj.P.Val","padj"), colnames(degs))[1]
+# fread reads all-NA columns as character; coerce back to numeric
+degs[[p_col]]   <- suppressWarnings(as.numeric(degs[[p_col]]))
+degs[[lfc_col]] <- suppressWarnings(as.numeric(degs[[lfc_col]]))
 
 # ── Add gene symbols if missing (Ensembl IDs detected) ────────────────
 if (!"gene_symbol" %in% colnames(degs) &&
@@ -62,55 +65,33 @@ label_col <- if ("gene_symbol" %in% colnames(degs)) "gene_symbol" else "gene"
 n_up   <- sum(degs[[lfc_col]] >  opt$lfc & degs[[p_col]] < opt$alpha, na.rm=TRUE)
 n_down <- sum(degs[[lfc_col]] < -opt$lfc & degs[[p_col]] < opt$alpha, na.rm=TRUE)
 
-keyvals <- ifelse(
-  degs[[lfc_col]] < -opt$lfc & degs[[p_col]] < opt$alpha, "blue",
-  ifelse(degs[[lfc_col]] >  opt$lfc & degs[[p_col]] < opt$alpha, "red", "grey30")
-)
-names(keyvals)[keyvals == "blue"]   <- paste0("Dn (n=", n_down, ")")
-names(keyvals)[keyvals == "red"]    <- paste0("Up (n=", n_up, ")")
-names(keyvals)[keyvals == "grey30"] <- "Non-sig"
+all_na_pval <- all(is.na(degs[[p_col]]))
 
-pdf(opt$out_volcano, width=22/2.54, height=18/2.54)
-print(EnhancedVolcano(degs,
-  lab              = rep("", nrow(degs)),
-  selectLab        = character(0),
-  x                = lfc_col,
-  y                = p_col,
-  title            = "",
-  subtitle         = "",
-  caption          = paste0("total = ", nrow(degs), " variables"),
-  pCutoff          = opt$alpha,
-  FCcutoff         = opt$lfc,
-  gridlines.major  = FALSE,
-  gridlines.minor  = FALSE,
-  ylim             = c(0, max(-log10(degs[[p_col]]), na.rm=TRUE) + 0.5),
-  colCustom        = keyvals,
-  axisLabSize      = 20,
-  labSize          = 0,
-  legendLabSize    = 12,
-  legendIconSize   = 5,
-  captionLabSize   = 12,
-  legendPosition   = "top",
-  colAlpha         = 1,
-  pointSize        = 0.3,
-  drawConnectors   = FALSE
-))
-dev.off()
+if (all_na_pval) {
+  message("All p-values are NA (n=1 per group) — writing placeholder volcano plots.")
+  placeholder_volcano <- function(path) {
+    if (is.null(path)) return(invisible(NULL))
+    pdf(path, width=22/2.54, height=18/2.54)
+    plot.new()
+    title(paste0("Volcano not available (n=1 per group)\n",
+                 opt$treatment, " vs ", opt$control))
+    dev.off()
+  }
+  placeholder_volcano(opt$out_volcano)
+  placeholder_volcano(opt$out_volcano_labeled)
+} else {
+  keyvals <- ifelse(
+    degs[[lfc_col]] < -opt$lfc & degs[[p_col]] < opt$alpha, "blue",
+    ifelse(degs[[lfc_col]] >  opt$lfc & degs[[p_col]] < opt$alpha, "red", "grey30")
+  )
+  names(keyvals)[keyvals == "blue"]   <- paste0("Dn (n=", n_down, ")")
+  names(keyvals)[keyvals == "red"]    <- paste0("Up (n=", n_up, ")")
+  names(keyvals)[keyvals == "grey30"] <- "Non-sig"
 
-# ── Labeled volcano (top N up + N down annotated) ─────────────────────
-if (!is.null(opt$out_volcano_labeled)) {
-  top_up <- degs[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$alpha &
-                   degs[[lfc_col]] >  opt$lfc, ]
-  top_dn <- degs[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$alpha &
-                   degs[[lfc_col]] < -opt$lfc, ]
-  top_up <- top_up[order(top_up[[p_col]]), ][seq_len(min(opt$n_label, nrow(top_up))), ]
-  top_dn <- top_dn[order(top_dn[[p_col]]), ][seq_len(min(opt$n_label, nrow(top_dn))), ]
-  select_genes <- c(top_up[[label_col]], top_dn[[label_col]])
-
-  pdf(opt$out_volcano_labeled, width=22/2.54, height=18/2.54)
+  pdf(opt$out_volcano, width=22/2.54, height=18/2.54)
   print(EnhancedVolcano(degs,
-    lab              = degs[[label_col]],
-    selectLab        = select_genes,
+    lab              = rep("", nrow(degs)),
+    selectLab        = character(0),
     x                = lfc_col,
     y                = p_col,
     title            = "",
@@ -123,18 +104,56 @@ if (!is.null(opt$out_volcano_labeled)) {
     ylim             = c(0, max(-log10(degs[[p_col]]), na.rm=TRUE) + 0.5),
     colCustom        = keyvals,
     axisLabSize      = 20,
-    labSize          = 3,
+    labSize          = 0,
     legendLabSize    = 12,
     legendIconSize   = 5,
     captionLabSize   = 12,
     legendPosition   = "top",
     colAlpha         = 1,
     pointSize        = 0.3,
-    drawConnectors   = TRUE,
-    max.overlaps     = Inf
+    drawConnectors   = FALSE
   ))
   dev.off()
-  message("Labeled volcano written: ", opt$out_volcano_labeled)
+
+  # ── Labeled volcano (top N up + N down annotated) ─────────────────────
+  if (!is.null(opt$out_volcano_labeled)) {
+    top_up <- degs[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$alpha &
+                     degs[[lfc_col]] >  opt$lfc, ]
+    top_dn <- degs[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$alpha &
+                     degs[[lfc_col]] < -opt$lfc, ]
+    top_up <- top_up[order(top_up[[p_col]]), ][seq_len(min(opt$n_label, nrow(top_up))), ]
+    top_dn <- top_dn[order(top_dn[[p_col]]), ][seq_len(min(opt$n_label, nrow(top_dn))), ]
+    select_genes <- c(top_up[[label_col]], top_dn[[label_col]])
+
+    pdf(opt$out_volcano_labeled, width=22/2.54, height=18/2.54)
+    print(EnhancedVolcano(degs,
+      lab              = degs[[label_col]],
+      selectLab        = select_genes,
+      x                = lfc_col,
+      y                = p_col,
+      title            = "",
+      subtitle         = "",
+      caption          = paste0("total = ", nrow(degs), " variables"),
+      pCutoff          = opt$alpha,
+      FCcutoff         = opt$lfc,
+      gridlines.major  = FALSE,
+      gridlines.minor  = FALSE,
+      ylim             = c(0, max(-log10(degs[[p_col]]), na.rm=TRUE) + 0.5),
+      colCustom        = keyvals,
+      axisLabSize      = 20,
+      labSize          = 3,
+      legendLabSize    = 12,
+      legendIconSize   = 5,
+      captionLabSize   = 12,
+      legendPosition   = "top",
+      colAlpha         = 1,
+      pointSize        = 0.3,
+      drawConnectors   = TRUE,
+      max.overlaps     = Inf
+    ))
+    dev.off()
+    message("Labeled volcano written: ", opt$out_volcano_labeled)
+  }
 }
 
 # ── Heatmap (NGS101 style) ────────────────────────────────────────────
@@ -142,6 +161,10 @@ obj <- readRDS(opt$rds)
 if (inherits(obj, "list") && "vsd" %in% names(obj)) {
   norm_mat  <- assay(obj$vsd)
   col_group <- obj$dds$group
+} else if (inherits(obj, "list") && "norm_counts" %in% names(obj)) {
+  # n=1 fallback: list(dge, norm_counts, res)
+  norm_mat  <- obj$norm_counts
+  col_group <- obj$dge$samples$group
 } else if (inherits(obj, "DESeqDataSet")) {
   norm_mat  <- assay(obj)
   col_group <- obj$group

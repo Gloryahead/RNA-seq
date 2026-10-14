@@ -272,10 +272,10 @@ if (all_na_pval) {
 } else {
   tile_lbl_total <- "Total DE genes<br/>(FDR &lt; 0.05)"
   n1_banner      <- ""
-  volcano_h3     <- "Static Volcano (EnhancedVolcano)"
+  volcano_h3     <- "Volcano Plot"
   volcano_cap    <- paste0(
-    "Top 10 most significant upregulated and downregulated genes are labelled. ",
-    "Red: |log2FC| &gt; 1 &amp; FDR &lt; 0.05. Blue: FDR &lt; 0.05 only. Grey: not significant."
+    "Top significant upregulated (red) and downregulated (blue) genes are labelled. ",
+    "Dashed lines: |log2FC| = 1 and FDR = 0.05."
   )
   deg_ovw_text   <- paste0(
     'limma-voom was used with TMM normalisation and empirical Bayes variance shrinkage. ',
@@ -291,8 +291,9 @@ if (all_na_pval) {
     'BH-adjusted p-value cutoff: 0.05; q-value cutoff: 0.2.'
   )
   methods_volcano_text <- paste0(
-    'Volcano plot: <strong>EnhancedVolcano</strong>; dashed vertical lines and colour threshold ',
-    'at |log2FC| = 1; horizontal threshold at FDR = 0.05.<br/>'
+    'Volcano plot: <strong>ggplot2</strong>; dashed vertical lines at |log2FC|&nbsp;=&nbsp;1; ',
+    'horizontal dashed line at FDR&nbsp;=&nbsp;0.05. ',
+    'Red: up, Blue: down, Black: not significant.<br/>'
   )
 }
 

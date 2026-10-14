@@ -212,14 +212,17 @@ if (!ma_col %in% colnames(ma_df)) ma_col <- colnames(ma_df)[2]
 ma_df$sig <- !is.na(ma_df[[p_col_out]]) & ma_df[[p_col_out]] < opt$alpha
 lfc_col   <- intersect(c("log2FC", "logFC"), colnames(ma_df))[1]
 
+# baseMean (DESeq2) is raw counts → log-transform; AveExpr/logCPM are already log2
+ma_x <- if (opt$method == "DESeq2") log2(ma_df[[ma_col]] + 1) else ma_df[[ma_col]]
+
 pdf(opt$out_ma, width=7, height=5)
-plot(log2(ma_df[[ma_col]]+1), ma_df[[lfc_col]],
-     pch=20, cex=.4, col=ifelse(ma_df$sig, "firebrick", "grey60"),
-     xlab="log2(Mean expression)", ylab="log2 Fold Change",
-     main=paste("MA plot:", opt$treatment, "vs", opt$control))
-abline(h=0, lty=2, col="navy")
+plot(ma_x, ma_df[[lfc_col]],
+     pch=20, cex=.4, col=ifelse(ma_df$sig, "red", "black"),
+     xlab="log2 mean of normalized counts", ylab="log2 fold change",
+     main="MAplot")
+abline(h=0, lty=2, col="grey50")
 legend("topright", legend=c(paste0("FDR < ", opt$alpha), "n.s."),
-       col=c("firebrick","grey60"), pch=20)
+       col=c("red","black"), pch=20, cex=0.8)
 dev.off()
 
 # ── Sample-distance heatmap ───────────────────────────────────────────

@@ -183,18 +183,34 @@ degs <- tryCatch(fread(opt$degs, data.table=FALSE), error=function(e) NULL)
 lfc_col <- if (!is.null(degs)) intersect(c("log2FC","log2FoldChange","logFC"), colnames(degs))[1] else NULL
 p_col   <- if (!is.null(degs)) intersect(c("FDR","adj.P.Val","padj"), colnames(degs))[1] else NULL
 
+if (!is.null(degs) && !is.null(p_col))
+  degs[[p_col]]   <- suppressWarnings(as.numeric(degs[[p_col]]))
+if (!is.null(degs) && !is.null(lfc_col))
+  degs[[lfc_col]] <- suppressWarnings(as.numeric(degs[[lfc_col]]))
+
+all_na_pval <- !is.null(degs) && !is.null(p_col) && all(is.na(degs[[p_col]]))
+lfc_thresh  <- 1.0
+
 deg_stats <- list(total=0, up=0, down=0)
 deg_table_html <- '<p style="color:#888">DEG table not available</p>'
-if (!is.null(degs) && !is.null(p_col) && !is.null(lfc_col)) {
-  sig <- degs[!is.na(degs[[p_col]]) & degs[[p_col]] < 0.05, ]
-  deg_stats$total <- nrow(sig)
-  deg_stats$up    <- sum(sig[[lfc_col]] > 1, na.rm=TRUE)
-  deg_stats$down  <- sum(sig[[lfc_col]] < -1, na.rm=TRUE)
-
+if (!is.null(degs) && !is.null(lfc_col)) {
   sym_col <- if ("gene_symbol" %in% colnames(degs)) "gene_symbol" else "gene"
-  show_cols <- intersect(c(sym_col, lfc_col, p_col, "baseMean","lfcSE","stat","pvalue"),
-                          colnames(degs))
-  top_degs <- sig[order(sig[[p_col]]), show_cols, drop=FALSE][seq_len(min(20, nrow(sig))), ]
+
+  if (all_na_pval) {
+    deg_stats$total <- sum(!is.na(degs[[lfc_col]]) & abs(degs[[lfc_col]]) > lfc_thresh)
+    deg_stats$up    <- sum(!is.na(degs[[lfc_col]]) & degs[[lfc_col]] >  lfc_thresh)
+    deg_stats$down  <- sum(!is.na(degs[[lfc_col]]) & degs[[lfc_col]] < -lfc_thresh)
+    show_cols <- intersect(c(sym_col, lfc_col, "baseMean","lfcSE","stat","pvalue"), colnames(degs))
+    top_degs  <- degs[order(-abs(degs[[lfc_col]])), show_cols, drop=FALSE][seq_len(min(20, nrow(degs))), ]
+  } else {
+    sig <- degs[!is.na(degs[[p_col]]) & degs[[p_col]] < 0.05, ]
+    deg_stats$total <- nrow(sig)
+    deg_stats$up    <- sum(sig[[lfc_col]] > 1, na.rm=TRUE)
+    deg_stats$down  <- sum(sig[[lfc_col]] < -1, na.rm=TRUE)
+    show_cols <- intersect(c(sym_col, lfc_col, p_col, "baseMean","lfcSE","stat","pvalue"), colnames(degs))
+    top_degs  <- sig[order(sig[[p_col]]), show_cols, drop=FALSE][seq_len(min(20, nrow(sig))), ]
+  }
+
   nums <- sapply(top_degs, is.numeric)
   top_degs[, nums] <- lapply(top_degs[, nums, drop=FALSE], function(x) signif(x, 4))
   rows_html <- apply(top_degs, 1, function(r) paste0("<tr><td>", paste(r, collapse="</td><td>"), "</td></tr>"))
@@ -216,6 +232,68 @@ if (nzchar(opt$volcano_html) && file.exists(opt$volcano_html)) {
       '<iframe src="data:text/html;base64,', vb64,
       '" style="width:100%;height:600px;border:none;border-radius:8px;" title="Interactive Volcano Plot"></iframe>')
   }
+}
+
+# ── n=1-aware text snippets ───────────────────────────────────────────────
+if (all_na_pval) {
+  tile_lbl_total <- "Genes |LFC| &gt; 1<br/>(n=1: no p-values)"
+  n1_banner <- paste0(
+    '<div style="margin:16px 0;padding:14px 20px;background:#fff3cd;',
+    'border:1px solid #ffc107;border-left:4px solid #e67e22;border-radius:8px;line-height:1.7">',
+    '<strong>&#9888; n&nbsp;=&nbsp;1 per group &mdash; statistical testing not applicable.</strong><br/>',
+    'p-values and FDR cannot be computed with a single replicate per condition. ',
+    'Genes are ranked and summarised by |log2FC| only. GO / KEGG ORA was run using ',
+    'genes with |LFC|&nbsp;&gt;&nbsp;1 as the query set.',
+    '</div>'
+  )
+  volcano_h3   <- "Fold-Change Rank Plot"
+  volcano_cap  <- paste0(
+    "Genes ordered by log₂FC rank (largest positive to most negative). ",
+    "Red: LFC &gt; 1 (Up). Blue: LFC &lt; -1 (Down). Grey: |LFC| &le; 1. ",
+    "p-values not available."
+  )
+  deg_ovw_text <- paste0(
+    'limma-voom was used with TMM normalisation. ',
+    '<strong>n&nbsp;=&nbsp;1 per group: statistical testing is not applicable</strong> &mdash; ',
+    'all p-values are NA. Genes are ranked by |log2FC| only; no FDR filter was applied.'
+  )
+  deg_table_h3 <- "Top 20 genes by |log2FC| (p-values not available)"
+  go_dot_h3    <- "Dotplot comparison (|LFC| &gt; 1 gene set)"
+  go_bar_h3    <- "Barplot comparison (|LFC| &gt; 1 gene set)"
+  pathway_elig <- paste0(
+    'Genes with |log2FC|&nbsp;&gt;&nbsp;1 were used as the ORA input gene set ',
+    '(FDR-based filtering was not possible; n&nbsp;=&nbsp;1 per group). ',
+    'All expressed genes formed the background. BH-adjusted p-value cutoff: 0.05; q-value cutoff: 0.2.'
+  )
+  methods_volcano_text <- paste0(
+    'Volcano plot: <strong>Fold-change rank plot</strong> (n&nbsp;=&nbsp;1 &mdash; no p-values); ',
+    'genes ordered by log2FC with direction colour-coding at |log2FC|&nbsp;=&nbsp;1.<br/>'
+  )
+} else {
+  tile_lbl_total <- "Total DE genes<br/>(FDR &lt; 0.05)"
+  n1_banner      <- ""
+  volcano_h3     <- "Static Volcano (EnhancedVolcano)"
+  volcano_cap    <- paste0(
+    "Top 10 most significant upregulated and downregulated genes are labelled. ",
+    "Red: |log2FC| &gt; 1 &amp; FDR &lt; 0.05. Blue: FDR &lt; 0.05 only. Grey: not significant."
+  )
+  deg_ovw_text   <- paste0(
+    'limma-voom was used with TMM normalisation and empirical Bayes variance shrinkage. ',
+    'Genes were pre-filtered with <code>filterByExpr()</code>. ',
+    'Significance threshold: FDR &lt; 0.05, |log2FC| &gt; 1.'
+  )
+  deg_table_h3   <- "Top 20 significant genes (sorted by FDR)"
+  go_dot_h3      <- "Dotplot comparison (FDR &lt; 0.05)"
+  go_bar_h3      <- "Barplot comparison (gene count)"
+  pathway_elig   <- paste0(
+    'Significant DEGs (FDR &lt; 0.05) were used as the input gene list; ',
+    'all expressed genes (post-CPM filter) formed the background. ',
+    'BH-adjusted p-value cutoff: 0.05; q-value cutoff: 0.2.'
+  )
+  methods_volcano_text <- paste0(
+    'Volcano plot: <strong>EnhancedVolcano</strong>; dashed vertical lines and colour threshold ',
+    'at |log2FC| = 1; horizontal threshold at FDR = 0.05.<br/>'
+  )
 }
 
 # ── Build HTML ────────────────────────────────────────────────────────────
@@ -397,7 +475,7 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
   <div class="stat-row">
     <div class="stat-tile">
       <div class="num">', V(deg_stats$total), '</div>
-      <div class="lbl">Total DE genes<br/>(FDR &lt; 0.05)</div>
+      <div class="lbl">', V(tile_lbl_total), '</div>
     </div>
     <div class="stat-tile">
       <div class="num up">', V(deg_stats$up), '</div>
@@ -408,6 +486,7 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
       <div class="lbl">Downregulated<br/>(log2FC &lt; -1)</div>
     </div>
   </div>
+  ', n1_banner, '
   <div class="subsec">
     <h3>Pipeline Overview</h3>
     <p style="line-height:1.8;color:var(--muted)">
@@ -427,8 +506,8 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
       least 2 samples were removed before testing. limma-voom (TMM normalisation,
       empirical Bayes variance shrinkage) was used; raw p-values were adjusted with
       the Benjamini&ndash;Hochberg (BH) method. Significance was defined as
-      FDR &lt; 0.05. For volcano plot colouring and heatmap gene selection
-      an additional |log2FC| &gt; 1 filter was applied.
+      FDR &lt; 0.05 where applicable. For volcano plot colouring and heatmap gene
+      selection an additional |log2FC| &gt; 1 filter was applied.
     </p>
     <p style="line-height:1.8;color:var(--muted);margin-top:10px">
       <strong>Pathway enrichment:</strong> Over-representation analysis (ORA) was run
@@ -463,9 +542,7 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
   <div class="subsec">
     <h3>Overview</h3>
     <p style="color:var(--muted);line-height:1.7">
-      limma-voom was used with TMM normalisation and empirical Bayes variance
-      shrinkage. Genes were pre-filtered with <code>filterByExpr()</code>.
-      Significance threshold: FDR &lt; 0.05, |log2FC| &gt; 1.
+      ', deg_ovw_text, '
     </p>
   </div>
 </section>
@@ -474,11 +551,10 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
 <section id="volcano-section">
   <h2>&#127776; Volcano Plot</h2>
   <div class="subsec">
-    <h3>Static Volcano (EnhancedVolcano)</h3>
+    <h3>', volcano_h3, '</h3>
     ', img_tag(b64$volcano, "Volcano"), '
     <p class="cap" style="font-size:0.8rem;color:var(--muted);margin-top:8px">
-      Top 10 most significant upregulated and downregulated genes are labelled.
-      Red: |log2FC| &gt; 1 &amp; FDR &lt; 0.05. Blue: FDR &lt; 0.05 only. Grey: not significant.
+      ', volcano_cap, '
     </p>
   </div>
   ', volcano_section, '
@@ -507,7 +583,7 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
 
   <!-- Dotplot comparison row -->
   <div class="subsec">
-    <h3>Dotplot comparison (FDR &lt; 0.05)</h3>
+    <h3>', go_dot_h3, '</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start;">
       <div>
         <p style="text-align:center;font-weight:700;margin-bottom:8px;color:var(--sidebar-bg)">GO ALL</p>
@@ -526,7 +602,7 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
 
   <!-- Barplot comparison row -->
   <div class="subsec">
-    <h3>Barplot comparison (gene count)</h3>
+    <h3>', go_bar_h3, '</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start;">
       <div>
         <p style="text-align:center;font-weight:700;margin-bottom:8px;color:var(--sidebar-bg)">GO ALL</p>
@@ -686,7 +762,7 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
 <section id="deg-table-section">
   <h2>&#128203; Top DE Genes</h2>
   <div class="subsec">
-    <h3>Top 20 significant genes (sorted by FDR)</h3>
+    <h3>', deg_table_h3, '</h3>
     ', deg_table_html, '
   </div>
 </section>
@@ -773,9 +849,7 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
     <ul style="line-height:1.8;color:var(--muted);padding-left:20px;margin-top:8px">
       <li><strong>GO Over-Representation Analysis (ORA):</strong> run separately for
         Biological Process (BP), Cellular Component (CC), and Molecular Function (MF) ontologies,
-        as well as combined for all three. Significant DEGs (FDR &lt; 0.05) were used as the
-        input gene list; all expressed genes (post-CPM filter) formed the background.
-        BH-adjusted p-value cutoff: 0.05; q-value cutoff: 0.2.</li>
+        as well as combined for all three. ', pathway_elig, '</li>
       <li><strong>KEGG ORA:</strong> same input gene list and background as GO ORA,
         queried against the KEGG pathway database via clusterProfiler.</li>
       <li><strong>GSEA:</strong> all expressed genes ranked by shrunk log2FC (most positive
@@ -792,8 +866,7 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
     <h3>7. Visualisation</h3>
     <p style="line-height:1.8;color:var(--muted)">
       PCA and MA plots: <strong>ggplot2</strong> with <strong>ggrepel</strong> for sample labels.<br/>
-      Volcano plot: <strong>EnhancedVolcano</strong>; dashed vertical lines and colour threshold
-      at |log2FC| = 1; horizontal threshold at FDR = 0.05.<br/>
+      ', methods_volcano_text, '
       Heatmaps: <strong>pheatmap</strong> with z-score row-scaling, Euclidean clustering, and
       BuPu colour palette; DEG heatmaps show the top 50 / top 100 / all significant genes
       ranked by FDR then |log2FC|.<br/>

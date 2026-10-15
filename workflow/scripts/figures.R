@@ -223,11 +223,13 @@ make_heatmap <- function(mat, path, title="Differential Expression Heatmap") {
     pdf(path); plot.new(); dev.off()
     return(invisible(NULL))
   }
+  # z-score row scaling is meaningless with only 1 sample per group (all rows get ±0.707)
+  hm_scale <- if (all_na_pval) "none" else "row"
   # Scale height: ~0.12 inch per row, min 4 inches, max 20 inches
   h <- max(4, min(20, nrow(mat) * 0.12 + 2))
   pdf(path, width=6, height=h)
   pheatmap(mat,
-           scale          = "row",
+           scale          = hm_scale,
            cluster_rows   = TRUE,
            cluster_cols   = FALSE,
            show_rownames  = nrow(mat) <= 80,

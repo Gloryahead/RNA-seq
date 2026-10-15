@@ -209,8 +209,17 @@ ma_df <- res_df
 ma_col <- ifelse(opt$method == "DESeq2", "baseMean",
           ifelse(opt$method == "edgeR",  "logCPM", "AveExpr"))
 if (!ma_col %in% colnames(ma_df)) ma_col <- colnames(ma_df)[2]
-ma_df$sig <- !is.na(ma_df[[p_col_out]]) & ma_df[[p_col_out]] < opt$alpha
-lfc_col   <- intersect(c("log2FC", "logFC"), colnames(ma_df))[1]
+lfc_col     <- intersect(c("log2FC", "logFC"), colnames(ma_df))[1]
+all_na_pval <- all(is.na(ma_df[[p_col_out]]))
+
+# For n=1: no p-values → color by |LFC|; otherwise color by FDR significance
+if (all_na_pval) {
+  ma_df$sig    <- !is.na(ma_df[[lfc_col]]) & abs(ma_df[[lfc_col]]) > opt$lfc
+  ma_leg_label <- c(paste0("|LFC| > ", opt$lfc), paste0("|LFC| ≤ ", opt$lfc))
+} else {
+  ma_df$sig    <- !is.na(ma_df[[p_col_out]]) & ma_df[[p_col_out]] < opt$alpha
+  ma_leg_label <- c(paste0("FDR < ", opt$alpha), "n.s.")
+}
 
 # baseMean (DESeq2) is raw counts → log-transform; AveExpr/logCPM are already log2
 ma_x <- if (opt$method == "DESeq2") log2(ma_df[[ma_col]] + 1) else ma_df[[ma_col]]
@@ -221,7 +230,7 @@ plot(ma_x, ma_df[[lfc_col]],
      xlab="log2 mean of normalized counts", ylab="log2 fold change",
      main="MAplot")
 abline(h=0, lty=2, col="grey50")
-legend("topright", legend=c(paste0("FDR < ", opt$alpha), "n.s."),
+legend("topright", legend=ma_leg_label,
        col=c("red","black"), pch=20, cex=0.8)
 dev.off()
 

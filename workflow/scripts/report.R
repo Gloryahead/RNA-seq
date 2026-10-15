@@ -24,6 +24,8 @@ opt_list <- list(
   make_option("--heatmap",        type="character", default=""),
   make_option("--heatmap_top100", type="character", default=""),
   make_option("--heatmap_top50",  type="character", default=""),
+  make_option("--heatmap_up",     type="character", default=""),
+  make_option("--heatmap_down",   type="character", default=""),
   make_option("--pathways_dir",   type="character", default=""),
   make_option("--output",         type="character")
 )
@@ -99,7 +101,9 @@ b64 <- list(
   volcano     = pdf_to_b64_png(opt$volcano),
   heatmap     = pdf_to_b64_png(opt$heatmap),
   hm100       = pdf_to_b64_png(opt$heatmap_top100),
-  hm50        = pdf_to_b64_png(opt$heatmap_top50)
+  hm50        = pdf_to_b64_png(opt$heatmap_top50),
+  hm_up       = pdf_to_b64_png(opt$heatmap_up),
+  hm_down     = pdf_to_b64_png(opt$heatmap_down)
 )
 
 # Pathway plots from pathways_dir
@@ -575,6 +579,14 @@ h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin-bottom: 12
   <div class="subsec">
     <h3>Top 50 DE Genes</h3>
     ', img_tag(b64$hm50, "Top 50 heatmap"), '
+  </div>
+  <div class="subsec">
+    <h3>Top 100 Up-regulated Genes (smallest p-value)</h3>
+    ', img_tag(b64$hm_up, "Top 100 upregulated heatmap"), '
+  </div>
+  <div class="subsec">
+    <h3>Top 100 Down-regulated Genes (smallest p-value)</h3>
+    ', img_tag(b64$hm_down, "Top 100 downregulated heatmap"), '
   </div>
 </section>
 

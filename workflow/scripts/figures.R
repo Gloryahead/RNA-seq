@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # figures.R — Publication-ready figures (Part 4)
-# Volcano (ggplot2, core-style), DEG heatmap
+# Volcano (EnhancedVolcano), DEG heatmaps (all, top100, top50, up, down)
 # Input:  DEG results TSV, DGE/DESeq2 RDS object
 # Usage:  Called by Snakemake rule publication_figures
 
@@ -11,6 +11,7 @@ suppressPackageStartupMessages({
   library(ggrepel)
   library(pheatmap)
   library(RColorBrewer)
+  library(EnhancedVolcano)
   library(SummarizedExperiment)
 })
 
@@ -26,6 +27,8 @@ opt_list <- list(
   make_option("--out_heatmap",      type="character"),
   make_option("--out_heatmap_top100",  type="character", default=NULL),
   make_option("--out_heatmap_top50",   type="character", default=NULL),
+  make_option("--out_heatmap_up",      type="character", default=NULL),
+  make_option("--out_heatmap_down",    type="character", default=NULL),
   make_option("--out_volcano_html",     type="character", default=NULL),
   make_option("--out_volcano_labeled", type="character", default=NULL),
   make_option("--n_label",             type="integer",   default=20,
@@ -115,53 +118,80 @@ if (all_na_pval) {
   make_fc_plot(n_label=opt$n_label, path=opt$out_volcano_labeled)
 
 } else {
-  # Clean ggplot2 volcano (core-style: red/black, minimal)
-  df_v <- degs
-  df_v$neglog10p <- -log10(pmax(df_v[[p_col]], 1e-300))
-  df_v$dir <- ifelse(!is.na(df_v[[p_col]]) & df_v[[p_col]] < opt$alpha &
-                       df_v[[lfc_col]] >  opt$lfc, "Up",
-               ifelse(!is.na(df_v[[p_col]]) & df_v[[p_col]] < opt$alpha &
-                       df_v[[lfc_col]] < -opt$lfc, "Down", "NS"))
+  keyvals <- ifelse(
+    degs[[lfc_col]] < -opt$lfc & degs[[p_col]] < opt$alpha, "blue",
+    ifelse(degs[[lfc_col]] >  opt$lfc & degs[[p_col]] < opt$alpha, "red", "grey30")
+  )
+  names(keyvals)[keyvals == "blue"]   <- paste0("Dn (n=", n_down, ")")
+  names(keyvals)[keyvals == "red"]    <- paste0("Up (n=", n_up, ")")
+  names(keyvals)[keyvals == "grey30"] <- "Non-sig"
 
-  make_volcano <- function(df, n_label=0, path=NULL) {
-    if (is.null(path)) return(invisible(NULL))
-    p <- ggplot(df, aes(.data[[lfc_col]], neglog10p, color=dir)) +
-      geom_point(size=0.3, alpha=0.8) +
-      scale_color_manual(
-        values = c(Up="red", Down="blue", NS="black"),
-        breaks = c("Up","Down","NS"),
-        labels = c(paste0("Up (n=",   sum(df$dir=="Up"),   ")"),
-                   paste0("Down (n=", sum(df$dir=="Down"), ")"),
-                   "NS")) +
-      geom_hline(yintercept=-log10(opt$alpha), linetype=2,
-                 color="grey50", linewidth=0.3) +
-      geom_vline(xintercept=c(-opt$lfc, opt$lfc), linetype=2,
-                 color="grey50", linewidth=0.3) +
-      labs(x     = "log2(fold change)",
-           y     = "-log10(p value)",
-           title = "VolcanoPlot",
-           color = NULL) +
-      theme_classic(base_size=12) +
-      theme(legend.position="top")
-    if (n_label > 0) {
-      top_up <- df[df$dir == "Up",  ]
-      top_dn <- df[df$dir == "Down",]
-      top_up <- top_up[order(top_up[[p_col]]), ][seq_len(min(n_label, nrow(top_up))), ]
-      top_dn <- top_dn[order(top_dn[[p_col]]), ][seq_len(min(n_label, nrow(top_dn))), ]
-      lab_df <- rbind(top_up, top_dn)
-      if (nrow(lab_df) > 0)
-        p <- p + geom_text_repel(data=lab_df,
-                                  aes(label=.data[[label_col]]),
-                                  size=2.5, max.overlaps=20, color="grey20")
-    }
-    pdf(path, width=22/2.54, height=18/2.54)
-    print(p)
+  pdf(opt$out_volcano, width=22/2.54, height=18/2.54)
+  print(EnhancedVolcano(degs,
+    lab              = rep("", nrow(degs)),
+    selectLab        = character(0),
+    x                = lfc_col,
+    y                = p_col,
+    title            = "",
+    subtitle         = "",
+    caption          = paste0("total = ", nrow(degs), " variables"),
+    pCutoff          = opt$alpha,
+    FCcutoff         = opt$lfc,
+    gridlines.major  = FALSE,
+    gridlines.minor  = FALSE,
+    ylim             = c(0, max(-log10(degs[[p_col]]), na.rm=TRUE) + 0.5),
+    colCustom        = keyvals,
+    axisLabSize      = 20,
+    labSize          = 0,
+    legendLabSize    = 12,
+    legendIconSize   = 5,
+    captionLabSize   = 12,
+    legendPosition   = "top",
+    colAlpha         = 1,
+    pointSize        = 0.3,
+    drawConnectors   = FALSE
+  ))
+  dev.off()
+
+  # ── Labeled volcano (top N up + N down annotated) ─────────────────────
+  if (!is.null(opt$out_volcano_labeled)) {
+    top_up <- degs[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$alpha &
+                     degs[[lfc_col]] >  opt$lfc, ]
+    top_dn <- degs[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$alpha &
+                     degs[[lfc_col]] < -opt$lfc, ]
+    top_up <- top_up[order(top_up[[p_col]]), ][seq_len(min(opt$n_label, nrow(top_up))), ]
+    top_dn <- top_dn[order(top_dn[[p_col]]), ][seq_len(min(opt$n_label, nrow(top_dn))), ]
+    select_genes <- c(top_up[[label_col]], top_dn[[label_col]])
+
+    pdf(opt$out_volcano_labeled, width=22/2.54, height=18/2.54)
+    print(EnhancedVolcano(degs,
+      lab              = degs[[label_col]],
+      selectLab        = select_genes,
+      x                = lfc_col,
+      y                = p_col,
+      title            = "",
+      subtitle         = "",
+      caption          = paste0("total = ", nrow(degs), " variables"),
+      pCutoff          = opt$alpha,
+      FCcutoff         = opt$lfc,
+      gridlines.major  = FALSE,
+      gridlines.minor  = FALSE,
+      ylim             = c(0, max(-log10(degs[[p_col]]), na.rm=TRUE) + 0.5),
+      colCustom        = keyvals,
+      axisLabSize      = 20,
+      labSize          = 3,
+      legendLabSize    = 12,
+      legendIconSize   = 5,
+      captionLabSize   = 12,
+      legendPosition   = "top",
+      colAlpha         = 1,
+      pointSize        = 0.3,
+      drawConnectors   = TRUE,
+      max.overlaps     = Inf
+    ))
     dev.off()
-    message("Volcano written: ", path)
+    message("Labeled volcano written: ", opt$out_volcano_labeled)
   }
-
-  make_volcano(df_v, n_label=0,           path=opt$out_volcano)
-  make_volcano(df_v, n_label=opt$n_label, path=opt$out_volcano_labeled)
 }
 
 # ── Heatmap (NGS101 style) ────────────────────────────────────────────
@@ -258,6 +288,46 @@ if (!is.null(opt$out_heatmap_top50)) {
   make_heatmap(top50_mat, opt$out_heatmap_top50,
                paste0("Top ", nrow(top50_mat), " DE Genes"))
 }
+
+# ── Separate up- and down-regulated heatmaps (top 100 by |LFC| or p-value) ──
+make_directional_heatmap <- function(direction, path) {
+  if (is.null(path)) return(invisible(NULL))
+  if (all_na_pval) {
+    # n=1: filter by LFC direction, sort by |LFC|
+    dir_degs <- if (direction == "up")
+      degs[!is.na(degs[[lfc_col]]) & degs[[lfc_col]] >  opt$lfc, ]
+    else
+      degs[!is.na(degs[[lfc_col]]) & degs[[lfc_col]] < -opt$lfc, ]
+    dir_degs <- dir_degs[order(-abs(dir_degs[[lfc_col]])), ]
+  } else {
+    # Normal: filter by FDR + LFC direction, sort by smallest p-value
+    dir_degs <- if (direction == "up")
+      degs[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$alpha &
+             degs[[lfc_col]] >  opt$lfc, ]
+    else
+      degs[!is.na(degs[[p_col]]) & degs[[p_col]] < opt$alpha &
+             degs[[lfc_col]] < -opt$lfc, ]
+    dir_degs <- dir_degs[order(dir_degs[[p_col]]), ]
+  }
+  dir_degs <- dir_degs[seq_len(min(100, nrow(dir_degs))), ]
+  dir_mat  <- norm_mat[rownames(norm_mat) %in% dir_degs$gene, , drop=FALSE]
+  if ("gene_symbol" %in% colnames(degs)) {
+    sym_map <- setNames(degs$gene_symbol, degs$gene)
+    rownames(dir_mat) <- ifelse(is.na(sym_map[rownames(dir_mat)]),
+                                rownames(dir_mat), sym_map[rownames(dir_mat)])
+  }
+  if (!is.null(col_group)) {
+    col_ord  <- order(col_group)
+    dir_mat  <- dir_mat[, col_ord, drop=FALSE]
+  }
+  dir_label <- if (direction == "up") "Up-regulated" else "Down-regulated"
+  make_heatmap(dir_mat, path,
+               paste0("Top ", nrow(dir_mat), " ", dir_label,
+                      " Genes (smallest p-value)"))
+}
+
+make_directional_heatmap("up",   opt$out_heatmap_up)
+make_directional_heatmap("down", opt$out_heatmap_down)
 
 # ── Interactive HTML volcano ──────────────────────────────────────────
 if (!is.null(opt$out_volcano_html)) {

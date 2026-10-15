@@ -71,6 +71,8 @@ rule publication_figures:
         heatmap         = f"{OUTDIR}/figures/{{comp}}_heatmap_all.pdf",
         heatmap_top100  = f"{OUTDIR}/figures/{{comp}}_heatmap_top100.pdf",
         heatmap_top50   = f"{OUTDIR}/figures/{{comp}}_heatmap_top50.pdf",
+        heatmap_up      = f"{OUTDIR}/figures/{{comp}}_heatmap_up.pdf",
+        heatmap_down    = f"{OUTDIR}/figures/{{comp}}_heatmap_down.pdf",
     log:   f"{LOGDIR}/figures/{{comp}}.log"
     threads: 1
     resources: mem_mb=8000, runtime=30
@@ -99,6 +101,8 @@ rule publication_figures:
             --out_heatmap         {output.heatmap} \
             --out_heatmap_top100 {output.heatmap_top100} \
             --out_heatmap_top50  {output.heatmap_top50} \
+            --out_heatmap_up     {output.heatmap_up} \
+            --out_heatmap_down   {output.heatmap_down} \
             2>{log}
         """
 
@@ -114,6 +118,8 @@ rule html_report:
         heatmap        = f"{OUTDIR}/figures/{{comp}}_heatmap_all.pdf",
         heatmap_top100 = f"{OUTDIR}/figures/{{comp}}_heatmap_top100.pdf",
         heatmap_top50  = f"{OUTDIR}/figures/{{comp}}_heatmap_top50.pdf",
+        heatmap_up     = f"{OUTDIR}/figures/{{comp}}_heatmap_up.pdf",
+        heatmap_down   = f"{OUTDIR}/figures/{{comp}}_heatmap_down.pdf",
         go_table       = f"{OUTDIR}/pathways/{{comp}}/GO-ALL/output-GO-Enrichment.txt",
     output:
         report = f"{OUTDIR}/reports/{{comp}}_report.html",
@@ -143,6 +149,8 @@ rule html_report:
             --heatmap        {input.heatmap} \
             --heatmap_top100 {input.heatmap_top100} \
             --heatmap_top50  {input.heatmap_top50} \
+            --heatmap_up     {input.heatmap_up} \
+            --heatmap_down   {input.heatmap_down} \
             --pathways_dir   {params.pathways_dir} \
             --output         {output.report} \
             2>{log}

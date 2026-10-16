@@ -275,18 +275,34 @@ make_heatmap <- function(mat, path, title="Differential Expression Heatmap") {
 make_heatmap(full_mat, opt$out_heatmap,
              paste0("All DE Genes (n=", nrow(full_mat), ")"))
 
-# Top 100
+# Top 100 by expression variance (matches core: no p-value filter applied)
 if (!is.null(opt$out_heatmap_top100)) {
-  top100_mat <- full_mat[seq_len(min(100, nrow(full_mat))), , drop=FALSE]
+  gene_vars  <- apply(norm_mat, 1, var)
+  top_idx    <- order(-gene_vars)[seq_len(min(100, nrow(norm_mat)))]
+  top100_mat <- norm_mat[top_idx, , drop=FALSE]
+  if ("gene_symbol" %in% colnames(degs)) {
+    sym_map <- setNames(degs$gene_symbol, degs$gene)
+    rownames(top100_mat) <- ifelse(is.na(sym_map[rownames(top100_mat)]),
+                                    rownames(top100_mat), sym_map[rownames(top100_mat)])
+  }
+  if (!is.null(col_group)) top100_mat <- top100_mat[, order(col_group), drop=FALSE]
   make_heatmap(top100_mat, opt$out_heatmap_top100,
-               paste0("Top ", nrow(top100_mat), " DE Genes"))
+               paste0("Top ", nrow(top100_mat), " Genes by Expression Variance"))
 }
 
-# Top 50
+# Top 50 by expression variance
 if (!is.null(opt$out_heatmap_top50)) {
-  top50_mat <- full_mat[seq_len(min(50, nrow(full_mat))), , drop=FALSE]
+  gene_vars  <- apply(norm_mat, 1, var)
+  top_idx    <- order(-gene_vars)[seq_len(min(50, nrow(norm_mat)))]
+  top50_mat  <- norm_mat[top_idx, , drop=FALSE]
+  if ("gene_symbol" %in% colnames(degs)) {
+    sym_map <- setNames(degs$gene_symbol, degs$gene)
+    rownames(top50_mat) <- ifelse(is.na(sym_map[rownames(top50_mat)]),
+                                   rownames(top50_mat), sym_map[rownames(top50_mat)])
+  }
+  if (!is.null(col_group)) top50_mat <- top50_mat[, order(col_group), drop=FALSE]
   make_heatmap(top50_mat, opt$out_heatmap_top50,
-               paste0("Top ", nrow(top50_mat), " DE Genes"))
+               paste0("Top ", nrow(top50_mat), " Genes by Expression Variance"))
 }
 
 # ── Separate up- and down-regulated heatmaps (top 100 by |LFC| or p-value) ──

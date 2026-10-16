@@ -84,23 +84,21 @@ n_trt <- sum(meta$group == opt$treatment)
 n_ctl <- sum(meta$group == opt$control)
 
 if (n_trt < 2 || n_ctl < 2) {
-  message("WARNING: n=", n_trt, " (", opt$treatment, ") vs n=", n_ctl, " (", opt$control,
-          ") -- no residual df for statistical testing. Reporting log2FC only (p-values = NA).")
-  dge_nr  <- DGEList(counts=counts_f, group=meta$group)
-  dge_nr  <- calcNormFactors(dge_nr, method="TMM")
-  cpm_log <- cpm(dge_nr, log=TRUE)
-  trt_s   <- meta$sample[meta$group == opt$treatment]
-  ctl_s   <- meta$sample[meta$group == opt$control]
-  res_df  <- data.frame(
-    gene      = rownames(cpm_log),
-    logFC     = rowMeans(cpm_log[, trt_s, drop=FALSE]) - rowMeans(cpm_log[, ctl_s, drop=FALSE]),
-    AveExpr   = rowMeans(cpm_log),
-    pvalue    = NA_real_,
-    adj.P.Val = NA_real_,
-    stringsAsFactors = FALSE
-  )
-  norm_counts <- cpm_log
-  saveRDS(list(dge=dge_nr, norm_counts=norm_counts, res=res_df), opt$out_rds)
+  message("WARNING: n=1 per group — using DESeq2 with mean dispersion (p-values are unreliable but non-NA).")
+  suppressPackageStartupMessages(library(DESeq2))
+  dds <- DESeqDataSetFromMatrix(countData=counts_f, colData=meta, design=~group)
+  dds <- estimateSizeFactors(dds)
+  dds <- estimateDispersions(dds, fitType="mean")
+  dds <- nbinomWaldTest(dds)
+  res <- results(dds, contrast=c("group", opt$treatment, opt$control), alpha=opt$alpha)
+  res_df <- as.data.frame(res)
+  res_df <- data.frame(gene=rownames(res_df), res_df, stringsAsFactors=FALSE)
+  colnames(res_df)[colnames(res_df) == "log2FoldChange"] <- "log2FC"
+  colnames(res_df)[colnames(res_df) == "padj"]           <- "FDR"
+  vsd <- vst(dds, blind=FALSE)
+  norm_counts <- assay(vsd)
+  saveRDS(list(dds=dds, vsd=vsd, res=res), opt$out_rds)
+  opt$method <- "DESeq2"
 
 } else if (opt$method == "DESeq2") {
   suppressPackageStartupMessages(library(DESeq2))

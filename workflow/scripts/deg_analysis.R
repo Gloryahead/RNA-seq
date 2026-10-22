@@ -85,6 +85,9 @@ n_ctl <- sum(meta$group == opt$control)
 
 if (n_trt < 2 || n_ctl < 2) {
   message("WARNING: n=1 per group — using DESeq2 with mean dispersion (p-values are unreliable but non-NA).")
+  # Use minimal filter for n=1: include all genes with any expression (matches core)
+  counts_f <- counts[rowSums(counts > 0) > 0, ]
+  message("After n=1 refilter: ", nrow(counts_f), " genes retained")
   suppressPackageStartupMessages(library(DESeq2))
   dds <- DESeqDataSetFromMatrix(countData=counts_f, colData=meta, design=~group)
   dds <- estimateSizeFactors(dds)

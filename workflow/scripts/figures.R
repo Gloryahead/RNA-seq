@@ -118,34 +118,16 @@ if (all_na_pval) {
   make_fc_plot(n_label=opt$n_label, path=opt$out_volcano_labeled)
 
 } else {
-  keyvals <- ifelse(
-    degs[[lfc_col]] < -opt$lfc & degs[[p_col]] < opt$alpha, "blue",
-    ifelse(degs[[lfc_col]] >  opt$lfc & degs[[p_col]] < opt$alpha, "red", "grey30")
-  )
-  names(keyvals)[keyvals == "blue"]   <- paste0("Dn (n=", n_down, ")")
-  names(keyvals)[keyvals == "red"]    <- paste0("Up (n=", n_up, ")")
-  names(keyvals)[keyvals == "grey30"] <- "Non-sig"
-
   pdf(opt$out_volcano, width=22/2.54, height=18/2.54)
   print(EnhancedVolcano(degs,
     lab              = rep("", nrow(degs)),
-    selectLab        = character(0),
     x                = lfc_col,
     y                = p_col,
-    title            = "",
-    subtitle         = "",
+    title            = "Volcano plot",
+    subtitle         = "EnhancedVolcano",
     caption          = paste0("total = ", nrow(degs), " variables"),
     pCutoff          = opt$alpha,
     FCcutoff         = opt$lfc,
-    gridlines.major  = FALSE,
-    gridlines.minor  = FALSE,
-    ylim             = c(0, max(-log10(degs[[p_col]]), na.rm=TRUE) + 0.5),
-    colCustom        = keyvals,
-    axisLabSize      = 20,
-    labSize          = 0,
-    legendLabSize    = 12,
-    legendIconSize   = 5,
-    captionLabSize   = 12,
     legendPosition   = "top",
     colAlpha         = 1,
     pointSize        = 0.3,
@@ -169,20 +151,12 @@ if (all_na_pval) {
       selectLab        = select_genes,
       x                = lfc_col,
       y                = p_col,
-      title            = "",
-      subtitle         = "",
+      title            = "Volcano plot",
+      subtitle         = "EnhancedVolcano",
       caption          = paste0("total = ", nrow(degs), " variables"),
       pCutoff          = opt$alpha,
       FCcutoff         = opt$lfc,
-      gridlines.major  = FALSE,
-      gridlines.minor  = FALSE,
-      ylim             = c(0, max(-log10(degs[[p_col]]), na.rm=TRUE) + 0.5),
-      colCustom        = keyvals,
-      axisLabSize      = 20,
       labSize          = 3,
-      legendLabSize    = 12,
-      legendIconSize   = 5,
-      captionLabSize   = 12,
       legendPosition   = "top",
       colAlpha         = 1,
       pointSize        = 0.3,

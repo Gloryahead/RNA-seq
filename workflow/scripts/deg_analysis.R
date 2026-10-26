@@ -84,27 +84,26 @@ n_trt <- sum(meta$group == opt$treatment)
 n_ctl <- sum(meta$group == opt$control)
 
 if (n_trt < 2 || n_ctl < 2) {
-  message("WARNING: n=1 per group — using DESeq2 with fixed BCV dispersion (p-values are unreliable but non-NA).")
+  message("WARNING: n=1 per group — using edgeR with common dispersion (p-values are unreliable but non-NA).")
   # Use minimal filter for n=1: include all genes with any expression (matches core)
   counts_f <- counts[rowSums(counts > 0) > 0, ]
   message("After n=1 refilter: ", nrow(counts_f), " genes retained")
-  suppressPackageStartupMessages(library(DESeq2))
-  dds <- DESeqDataSetFromMatrix(countData=counts_f, colData=meta, design=~group)
-  dds <- estimateSizeFactors(dds)
-  # DESeq2 >=1.22 blocks estimateDispersions() for saturated designs (n_samples == n_coef).
-  # Bypass by setting a fixed BCV-based dispersion: BCV=0.4 is standard for human RNA-seq.
-  dispersions(dds) <- rep(0.4^2, nrow(dds))
-  dds <- nbinomWaldTest(dds)
-  res <- results(dds, contrast=c("group", opt$treatment, opt$control), alpha=opt$alpha)
-  res_df <- as.data.frame(res)
+  suppressPackageStartupMessages({library(edgeR); library(limma)})
+  dge    <- DGEList(counts=counts_f, group=meta$group)
+  dge    <- calcNormFactors(dge, method="TMM")
+  design <- model.matrix(~group, data=meta)
+  # estimateGLMCommonDisp pools all genes as pseudo-replicates to estimate dispersion —
+  # valid for n=1, produces calibrated p-values (still unreliable biologically).
+  dge    <- estimateGLMCommonDisp(dge, design)
+  fit    <- glmFit(dge, design)
+  lrt    <- glmLRT(fit, coef=ncol(design))
+  res_df <- topTags(lrt, n=Inf, adjust.method="BH", sort.by="none")$table
   res_df <- data.frame(gene=rownames(res_df), res_df, stringsAsFactors=FALSE)
-  colnames(res_df)[colnames(res_df) == "log2FoldChange"] <- "log2FC"
-  colnames(res_df)[colnames(res_df) == "padj"]           <- "FDR"
-  # blind=TRUE refits dispersions with ~1 design (1 df) so vst does not fail
-  vsd <- vst(dds, blind=TRUE)
-  norm_counts <- assay(vsd)
-  saveRDS(list(dds=dds, vsd=vsd, res=res), opt$out_rds)
-  opt$method <- "DESeq2"
+  colnames(res_df)[colnames(res_df) == "logFC"]  <- "log2FC"
+  colnames(res_df)[colnames(res_df) == "PValue"] <- "pvalue"
+  norm_counts <- cpm(dge, log=TRUE)
+  saveRDS(list(dge=dge, lrt=lrt, norm_counts=norm_counts), opt$out_rds)
+  opt$method <- "edgeR"
 
 } else if (opt$method == "DESeq2") {
   suppressPackageStartupMessages(library(DESeq2))

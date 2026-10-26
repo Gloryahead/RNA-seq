@@ -227,8 +227,10 @@ make_heatmap <- function(mat, path, title="Differential Expression Heatmap") {
     pdf(path); plot.new(); dev.off()
     return(invisible(NULL))
   }
-  # z-score row scaling is meaningless with only 1 sample per group (all rows get ±0.707)
-  hm_scale <- if (all_na_pval) "none" else "row"
+  # z-score row scaling with 2 samples forces all genes to exactly ±0.707 (constant).
+  # For 2 samples: mean-center rows instead so color reflects actual expression magnitude.
+  hm_scale <- if (all_na_pval || ncol(mat) <= 2) "none" else "row"
+  if (ncol(mat) <= 2) mat <- mat - rowMeans(mat)
   # Scale height: ~0.12 inch per row, min 4 inches, max 20 inches
   h <- max(4, min(20, nrow(mat) * 0.12 + 2))
   pdf(path, width=6, height=h)

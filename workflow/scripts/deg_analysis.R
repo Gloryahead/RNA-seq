@@ -84,25 +84,23 @@ n_trt <- sum(meta$group == opt$treatment)
 n_ctl <- sum(meta$group == opt$control)
 
 if (n_trt < 2 || n_ctl < 2) {
-  message("WARNING: n=1 per group — using edgeR with common dispersion (p-values are unreliable but non-NA).")
+  message("WARNING: n=1 per group — using edgeR exactTest with qCML common dispersion (p-values are unreliable but non-NA).")
   # Use minimal filter for n=1: include all genes with any expression (matches core)
   counts_f <- counts[rowSums(counts > 0) > 0, ]
   message("After n=1 refilter: ", nrow(counts_f), " genes retained")
   suppressPackageStartupMessages({library(edgeR); library(limma)})
-  dge    <- DGEList(counts=counts_f, group=meta$group)
-  dge    <- calcNormFactors(dge, method="TMM")
-  design <- model.matrix(~group, data=meta)
-  # estimateGLMCommonDisp pools all genes as pseudo-replicates to estimate dispersion —
-  # valid for n=1, produces calibrated p-values (still unreliable biologically).
-  dge    <- estimateGLMCommonDisp(dge, design)
-  fit    <- glmFit(dge, design)
-  lrt    <- glmLRT(fit, coef=ncol(design))
-  res_df <- topTags(lrt, n=Inf, adjust.method="BH", sort.by="none")$table
+  dge  <- DGEList(counts=counts_f, group=meta$group)
+  dge  <- calcNormFactors(dge, method="TMM")
+  # estimateCommonDisp uses qCML: conditions on total counts across all genes,
+  # no design matrix needed → works with 0 residual df (n=1 per group).
+  dge  <- estimateCommonDisp(dge)
+  et   <- exactTest(dge, pair=levels(meta$group))
+  res_df <- topTags(et, n=Inf, adjust.method="BH", sort.by="none")$table
   res_df <- data.frame(gene=rownames(res_df), res_df, stringsAsFactors=FALSE)
   colnames(res_df)[colnames(res_df) == "logFC"]  <- "log2FC"
   colnames(res_df)[colnames(res_df) == "PValue"] <- "pvalue"
   norm_counts <- cpm(dge, log=TRUE)
-  saveRDS(list(dge=dge, lrt=lrt, norm_counts=norm_counts), opt$out_rds)
+  saveRDS(list(dge=dge, et=et, norm_counts=norm_counts), opt$out_rds)
   opt$method <- "edgeR"
 
 } else if (opt$method == "DESeq2") {

@@ -118,6 +118,11 @@ if (all_na_pval) {
   make_fc_plot(n_label=opt$n_label, path=opt$out_volcano_labeled)
 
 } else {
+  # Cap y-axis at 5 to prevent extreme p-values (e.g. n=1 Y-chr genes)
+  # from collapsing the scale and obscuring the main distribution
+  nlp_max <- max(-log10(pmax(degs[[p_col]], 1e-300)), na.rm=TRUE)
+  vol_ylim <- if (nlp_max > 5) c(0, 5) else NULL
+
   pdf(opt$out_volcano, width=22/2.54, height=18/2.54)
   print(EnhancedVolcano(degs,
     lab              = rep("", nrow(degs)),
@@ -131,7 +136,8 @@ if (all_na_pval) {
     legendPosition   = "top",
     colAlpha         = 1,
     pointSize        = 0.3,
-    drawConnectors   = FALSE
+    drawConnectors   = FALSE,
+    ylim             = vol_ylim
   ))
   dev.off()
 
@@ -161,7 +167,8 @@ if (all_na_pval) {
       colAlpha         = 1,
       pointSize        = 0.3,
       drawConnectors   = TRUE,
-      max.overlaps     = Inf
+      max.overlaps     = Inf,
+      ylim             = vol_ylim
     ))
     dev.off()
     message("Labeled volcano written: ", opt$out_volcano_labeled)
@@ -231,6 +238,8 @@ make_heatmap <- function(mat, path, title="Differential Expression Heatmap") {
   # For 2 samples: mean-center rows instead so color reflects actual expression magnitude.
   hm_scale <- if (all_na_pval || ncol(mat) <= 2) "none" else "row"
   if (ncol(mat) <= 2) mat <- mat - rowMeans(mat)
+  # For n=2 mean-centered data, cap color scale at ±2 (matches core facility style)
+  hm_breaks <- if (ncol(mat) <= 2) seq(-2, 2, length.out=101) else NULL
   # Scale height: ~0.12 inch per row, min 4 inches, max 20 inches
   h <- max(4, min(20, nrow(mat) * 0.12 + 2))
   pdf(path, width=6, height=h)
@@ -241,6 +250,7 @@ make_heatmap <- function(mat, path, title="Differential Expression Heatmap") {
            show_rownames  = nrow(mat) <= 80,
            show_colnames  = TRUE,
            color          = colorRampPalette(c("navy","white","red"))(100),
+           breaks         = hm_breaks,
            annotation_col = col_annot,
            main           = title)
   dev.off()

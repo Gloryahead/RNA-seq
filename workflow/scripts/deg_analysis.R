@@ -84,17 +84,17 @@ n_trt <- sum(meta$group == opt$treatment)
 n_ctl <- sum(meta$group == opt$control)
 
 if (n_trt < 2 || n_ctl < 2) {
-  message("WARNING: n=1 per group — using edgeR exactTest with qCML common dispersion (p-values are unreliable but non-NA).")
+  message("WARNING: n=1 per group — using edgeR exactTest with fixed BCV=0.4 (p-values are unreliable but non-NA).")
   # Use minimal filter for n=1: include all genes with any expression (matches core)
   counts_f <- counts[rowSums(counts > 0) > 0, ]
   message("After n=1 refilter: ", nrow(counts_f), " genes retained")
   suppressPackageStartupMessages({library(edgeR); library(limma)})
   dge  <- DGEList(counts=counts_f, group=meta$group)
   dge  <- calcNormFactors(dge, method="TMM")
-  # estimateCommonDisp uses qCML: conditions on total counts across all genes,
-  # no design matrix needed → works with 0 residual df (n=1 per group).
-  dge  <- estimateCommonDisp(dge)
-  et   <- exactTest(dge, pair=levels(meta$group))
+  # n=1 per group: no dispersion can be estimated from the data.
+  # Pass BCV=0.4 (edgeR's standard prior for well-controlled experiments)
+  # directly to exactTest, which conditions on per-gene totals → calibrated p-values.
+  et   <- exactTest(dge, pair=levels(meta$group), dispersion=0.4^2)
   res_df <- topTags(et, n=Inf, adjust.method="BH", sort.by="none")$table
   res_df <- data.frame(gene=rownames(res_df), res_df, stringsAsFactors=FALSE)
   colnames(res_df)[colnames(res_df) == "logFC"]  <- "log2FC"
